@@ -40,8 +40,11 @@ function [fDVec,tVec] = ...
 % Author: Bonsuck Koo
 %+==============================================================================+
 
+rTrain      = zeros(N,2);
+rTrain(1,1) = x0;
+for i=1:
+rTrain = +vTrain*delt;
 
-
-vlos = dt(dObs-xobs)vs;
+vlos = vTrain;
 fr = fc/(1+vlos/vs);
 fDVec = fr- fc;
