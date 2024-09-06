@@ -66,11 +66,11 @@ for j = 1:length(tspan)
         i=i+1;
     end
     TOF(j) = x(end);
-    vlos = norm(rObs-(rTrain(j,:)-[TOF(j)*vTrain 0]))/delt;
+    vlos(j) = norm(rObs-(rTrain(j,:)-[TOF(j)*vTrain 0]))/delt;
 
+    
 
-
-    fr = fc/(1+vlos/vs);
+    fr = fc/(1+vlos(j)/vs);
     fDVec(j) = fr- fc;
 end
 
