@@ -15,7 +15,7 @@ function [fDVec,tVec] = ...
 %
 % xObs---- scalar along-track coordinate of observer, in meters
 %
-% dObs---- scalar cross-track coordinate of observer, in meters (i.e., 
+% dObs---- scalar cross-track coordinate of observer, in meters (i.e.,
 %          shortest distance of observer from tracks)
 %
 % delt---- measurement interval, in seconds
@@ -41,10 +41,37 @@ function [fDVec,tVec] = ...
 %+==============================================================================+
 
 
-for i = 1:N
 
+% [t,rTrain] = ode45(@(t,x) trainODE(t,x,vTrain),tspan,x0 );
+
+
+tspan = [t0:delt:t0+N*delt]';
+rObs=[xObs,dObs];
+fDVec=zeros(length(tspan),1);
+rTrain=zeros(length(tspan),2);
+
+
+j=1;
+
+for j = 1:length(tspan)
+    %Find TOF through iteration
+    error = 9999;
+    i=1;
+    x(1)=0;
+    rTrain(j,1) = x0 + vTrain*tspan(j);
+    while error > 0.01
+        %initial Guess of TOF65
+        x(i+1)=norm(rObs-(rTrain(j,:)-[x(i)*vTrain 0]))/vs;
+        error = abs((x(i+1)-x(i))/x(i+1)*100);
+        i=i+1;
+    end
+    TOF(j) = x(end);
+    vlos = norm(rObs-(rTrain(j,:)-[TOF(j)*vTrain 0]))/delt;
+
+
+
+    fr = fc/(1+vlos/vs);
+    fDVec(j) = fr- fc;
 end
-vlos = vTrain;
-fr = fc/(1+vlos/vs);
-fDVec(i) = fr- fc;
-tVec=
+
+tVec=tspan;

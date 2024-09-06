@@ -1,5 +1,5 @@
 function dydt = trainODE(t,x,v)
     
-    dydt = x+v*t;
+    dydt = v;
 
 end
