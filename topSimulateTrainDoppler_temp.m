@@ -12,7 +12,7 @@ x0 = 0;
 delt = 0.01;
 N = 1000;
 vs = 343;
-xObs = 100;
+xObs = 0;
 dObs = 0;
 
 %----- Simulate
@@ -41,7 +41,7 @@ end
 soundVec = sin(Phihist);
 
 % %----- Play the sound vector
-% sound(soundVec, fs);    
+sound(soundVec, fs);    
 
 %----- Write to audio file
 audiowrite('trainout.wav',soundVec,fs);

@@ -45,11 +45,12 @@ function [fDVec,tVec] = ...
 % [t,rTrain] = ode45(@(t,x) trainODE(t,x,vTrain),tspan,x0 );
 
 
-tspan = [t0:delt:t0+N*delt]';
+tspan = [t0:delt:t0+N*delt+delt]';
 rObs=[xObs,dObs];
-fDVec=zeros(length(tspan),1);
+fDVec=zeros(length(tspan)-1,1);
 rTrain=zeros(length(tspan),2);
-
+TOF = zeros(length(tspan),1);
+vlos = zeros(length(tspan),1);
 
 j=1;
 
@@ -59,19 +60,33 @@ for j = 1:length(tspan)
     i=1;
     x(1)=0;
     rTrain(j,1) = x0 + vTrain*tspan(j);
-    while error > 0.01
+    while error > 0.0001
         %initial Guess of TOF65
         x(i+1)=norm(rObs-(rTrain(j,:)-[x(i)*vTrain 0]))/vs;
         error = abs((x(i+1)-x(i))/x(i+1)*100);
         i=i+1;
     end
     TOF(j) = x(end);
-    vlos(j) = norm(rObs-(rTrain(j,:)-[TOF(j)*vTrain 0]))/delt;
+    % if j==176
+    %     break;
+    % end
 
-    
-
-    fr = fc/(1+vlos(j)/vs);
-    fDVec(j) = fr- fc;
 end
 
-tVec=tspan;
+for jj = 1:length(tspan)
+    if jj == length(tspan)
+        break;
+    else
+        nextRlos = norm(rObs-(rTrain(jj+1,:)-[TOF(jj+1)*vTrain 0]));
+        currentRlos = norm(rObs-(rTrain(jj,:)-[TOF(jj)*vTrain 0]));
+        vlos(jj)     = (nextRlos-currentRlos)/delt;
+        fr = fc/(1+vlos(jj)/vs);
+        fDVec(jj) = fr- fc;
+    end
+
+end
+
+
+
+
+tVec=[t0:delt:t0+N*delt]';
