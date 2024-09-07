@@ -12,8 +12,8 @@ x0 = 0;
 delt = 0.01;
 N = 1000;
 vs = 343;
-xObs = 0;
-dObs = 0;
+xObs = 56.5;
+dObs = 18.5;
 
 %----- Simulate
 [fDVec,tVec] = simulateTrainDoppler(fc,vTrain,t0,x0,xObs,dObs,delt,N,vs);
