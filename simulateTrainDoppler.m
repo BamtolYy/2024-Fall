@@ -45,7 +45,7 @@ function [fDVec,tVec] = ...
 % [t,rTrain] = ode45(@(t,x) trainODE(t,x,vTrain),tspan,x0 );
 
 
-tspan = [t0:delt:t0+N*delt+delt]';
+tspan = [t0:delt:t0+N*delt]';
 rObs=[xObs,dObs];
 fDVec=zeros(length(tspan)-1,1);
 rTrain=zeros(length(tspan),2);
@@ -74,19 +74,15 @@ for j = 1:length(tspan)
 end
 
 for jj = 1:length(tspan)
-    if jj == length(tspan)
-        break;
-    else
-        nextRlos = norm(rObs-(rTrain(jj+1,:)-[TOF(jj+1)*vTrain 0]));
-        currentRlos = norm(rObs-(rTrain(jj,:)-[TOF(jj)*vTrain 0]));
-        vlos(jj)     = (nextRlos-currentRlos)/delt;
-        fr = fc/(1+vlos(jj)/vs);
-        fDVec(jj) = fr- fc;
-    end
-
+    alpha = atan2((rTrain(jj,2)-TOF(jj)*vs)-dObs, rTrain(jj,1)-xObs);
+    vlos(jj) = cos(alpha)*vTrain;
+    fr = fc/(1+vlos(jj)/vs);
+    fDVec(jj) = fr- fc;
 end
 
 
 
 
-tVec=[t0:delt:t0+N*delt]';
+
+
+tVec=tspan;
