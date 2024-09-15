@@ -12,7 +12,7 @@ x0 = 0;
 delt = 0.01;
 N = 1000;
 vs = 343;
-xObs = 50;
+xObs = 48;
 dObs = -60;
 
 %----- Simulate
