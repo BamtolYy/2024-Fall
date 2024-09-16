@@ -12,19 +12,19 @@ x0 = 0;
 delt = 0.01;
 N = 1000;
 vs = 343;
-xObs = 48;
-dObs = -60;
+xObs = 48.9;
+dObs = -61;
 
 %----- Simulate
 [fDVec,tVec] = simulateTrainDoppler(fc,vTrain,t0,x0,xObs,dObs,delt,N,vs);
 fApparentVec = fDVec + fc;
 
-%----- Plot
-plot(tVec,fDVec + fc, 'r');
-xlabel('Time (seconds)');
-ylabel('Apparent horn frequency (Hz)');
-grid on;
-shg;
+% %----- Plot
+% plot(tVec,fDVec + fc, 'r');
+% xlabel('Time (seconds)');
+% ylabel('Apparent horn frequency (Hz)');
+% grid on;
+% shg;
 
 %----- Generate a sound vector
 T = delt*N;                    % simulation time (sec)
@@ -62,6 +62,7 @@ Z    = abs(fft(y));
 figure(1);
 plot(f(1:fs/2),Y(1:fs/2), f(1:fs/2),Z(1:fs/2)),
 legend('Guess','Original')
+ylim([0 4.5*10^4])
 
 
 % ----- Play the sound vector
