@@ -12,7 +12,7 @@ x0 = 0;
 delt = 0.01;
 N = 1000;
 vs = 343;
-xObs = 48.9;
+xObs = 56.5;
 dObs = -61;
 
 %----- Simulate
@@ -53,16 +53,17 @@ save trainData fApparentVec tVec
 
 %----- Frequency Domain
 
-f    = linspace(0,fs,fs);
-Y    = abs(fft(soundVec));
-Z    = abs(fft(y));
+OPhihist = asin(y);
+for ii=2:Ns
+  Ofii (ii)=(OPhihist(ii)-OPhihist(ii-1))/(2*pi*deltSamp);
+  original(ii) = abs(Ofii(ii));
+  
+end
 
-
-
-figure(1);
-plot(f(1:fs/2),Y(1:fs/2), f(1:fs/2),Z(1:fs/2)),
-legend('Guess','Original')
-ylim([0 4.5*10^4])
+OtVec = linspace(t0,tVec(end),length(y));
+plotoriginal = interp1(OtVec,original,tVec,'spline');
+figure(2)
+plot(tVec,plotoriginal,'o',tVec,fDVec + fc, 'r')
 
 
 % ----- Play the sound vector

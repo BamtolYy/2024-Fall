@@ -61,16 +61,11 @@ for j = 1:length(tspan)
     x(1)=0;
     rTrain(j,1) = x0 + vTrain*tspan(j);
     while error > 0.0001
-        %initial Guess of TOF65
         x(i+1)=norm(rObs-(rTrain(j,:)-[x(i)*vTrain 0]))/vs;
         error = abs((x(i+1)-x(i))/x(i+1)*100);
         i=i+1;
     end
     TOF(j) = x(end);
-    % if j==176
-    %     break;
-    % end
-
 end
 
 for jj = 1:length(tspan)
