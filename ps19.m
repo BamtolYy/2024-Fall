@@ -12,7 +12,7 @@ plot(z,rddot);
 
 %%
 
-fc = 10;
+fc = 10*10^9;
 vs = 3*10^6; %km/s
 
 for i = 1:length(z)
@@ -23,4 +23,4 @@ for i = 1:length(z)
 end
 
 figure(3)
-plot (z,fd*1000000);
+plot (z,fd/1000);
