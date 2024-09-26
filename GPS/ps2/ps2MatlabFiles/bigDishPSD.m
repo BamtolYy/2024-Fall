@@ -9,8 +9,8 @@ fs = 46.08e6;    % Sampling frequency (Hz)
 nfft = 2^10;     % Size of FFT used in power spectrum estimation
 
 %----- Load data
-load(['C:\Users\todd\Documents\research\datastore\StanfordDishData\'...
-      'prn31_22apr03_01hrs40min00sec_gmt_fl1_46_08mhz_250msec.mat']);
+load(['C:\Users\gsh04\Desktop\2024-Fall\GPS\ps2\ps2MatlabFiles\' ...
+    'prn31_22apr03_01hrs40min00sec_gmt_fl1_46_08mhz_250msec.mat']);
 
 %----- Compute power spectrum estimate
 [Syy,fVec] = pwelch(Y,hann(nfft),[],nfft,fs);
