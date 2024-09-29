@@ -113,6 +113,20 @@ ampratio= imagamplitude/realamplitude;
 % plot(t,imag(Y_window));
 % toitle('Imag Component');
 
+%% 7
+
+code=randi([-1, 1], [1 2^14]);
+code(~code)=-1;
+
+M = 10.9; % How many samples per chip I want to sample. i.e. if M =10.1 I want to have 10.1 samples in a single chip.
+delChip = 1/M;
+delOffset = 0;
+Np = length(code);
+Ns = round(M*Np); % round() is needed to make Ns an integer 
+
+codeOS=oversampleSpreadingCode(code,delChip,delOffset,Ns,Np);
+
+pwelch
 
 
 
