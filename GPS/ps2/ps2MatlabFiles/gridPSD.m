@@ -4,7 +4,7 @@
 
 clear; clc;
 %----- Setup
-Tfull = 0.01;         % Time interval of data to load
+Tfull = 0.001;         % Time interval of data to load
 fs = 40e6/7;         % Sampling frequency (Hz)
 N = fs*Tfull;        
 N = floor(N/16)*16;  % Number of data samples to load
@@ -32,8 +32,7 @@ grid on;
 shg;
 xlabel('Frequency (MHz)');
 ylabel('Power density (dB/Hz)');
-figset
-title('Power spectral density estimate of GPS L1 Signal');
+title('Power spectral density estimate of GPS L1 Signal Tfull 0.001');
 shg;
 
 

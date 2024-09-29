@@ -96,18 +96,14 @@ realstd=std(abs(realpks));
 T = (46.08e6)^-1; % Sampling Rate
 realCNRatio=10*log10(realamplitude^2/(4*realstd^2*T));
 
-% Imag (C/A for the range of data I chose)
+% Imag (P(Y) for the range of data I chose)
 % Find Average Peaks and Std of them
-[imagpks] = findpeaks(imag(Y_window));
-imagamplitude=mean(abs(imagpks));
-imagstd=std(abs(imagpks));
+[realpks] = findpeaks(real(Y_window));
+realamplitude=mean(abs(realpks));
+realstd=std(abs(realpks));
 % Find C/No Ratio using amp and std
 T = (46.08e6)^-1; % Sampling Rate
-imagCNRatio=10*log10(imagamplitude^2/(4*imagstd^2*T));
-
-
-% Compare the amplitude of C/A to P(Y)
-ampratio= imagamplitude/realamplitude;
+realCNRatio=10*log10(realamplitude^2/(4*realstd^2*T));
 
 % figure(3)
 % plot(t,imag(Y_window));
