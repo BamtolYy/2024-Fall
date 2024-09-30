@@ -115,21 +115,214 @@ ampratio= imagamplitude/realamplitude;
 
 %% 7
 
-code=randi([-1, 1], [1 2^14]);
-code(~code)=-1;
+% Generate binary sequence with ±1 values
+code = randi([-1, 1], [1, 2^14]);
+code(~code) = -1; % Ensure values are only ±1
 
-M = 10.9; % How many samples per chip I want to sample. i.e. if M =10.1 I want to have 10.1 samples in a single chip.
-delChip = 1/M;
-delOffset = 0;
-Np = length(code);
-Ns = round(M*Np); % round() is needed to make Ns an integer 
+% Oversampling setup
+M = 10.1; % Oversampling factor
+delChip = 1/M; % Oversampling interval
+delOffset = 0; % No offset
+Np = length(code); % Length of binary sequence
+Ns = round(M * Np); % Number of samples after oversampling
 
-codeOS=oversampleSpreadingCode(code,delChip,delOffset,Ns,Np);
+% Oversample the binary sequence
+codeOS = oversampleSpreadingCode(code, delChip, delOffset, Ns, Np);
 
-pwelch
+% Power spectrum estimation with pwelch
+[ospx, osf] = pwelch(codeOS, hann(2^10), [], 2^10, 1/delChip); % one-sided result
+% Convert power spectrum to dB scale
+ospxdb = 10*log10(ospx);
+% Plot onesided result first
+figure(1)
+plot(osf, ospxdb)
+xlabel('Frequency (Hz)')
+ylabel('Power/Frequency (dB/Hz)')
+title('Power Spectral Density of Oversampled Binary Sequence')
+% Zoom in on the main lobe and first few sidelobes
+xlim([0, 3]) % Adjust based on the main lobe location
+hold on,
+%Plot twosided result in the same figure
+[ospx, osf] = pwelch(codeOS, hann(2^10), [], 2^10, 1/delChip,"twosided"); % two-sided result
+ospxdb = 10*log10(ospx);
+plot(osf, ospxdb)
+legend('onesided', 'twosided')
 
 
 
 
 
+
+
+
+
+
+clear all
+close all
+% Change Code Length
+% Generate binary sequence with ±1 values
+code = randi([-1, 1], [1, 2^9]);
+code(~code) = -1; % Ensure values are only ±1
+% Oversampling setup
+M = 10.1; % Oversampling factor
+delChip = 1/M; % Oversampling interval
+delOffset = 0; % No offset
+Np = length(code); % Length of binary sequence
+Ns = round(M * Np); % Number of samples after oversampling
+% Oversample the binary sequence
+codeOS = oversampleSpreadingCode(code, delChip, delOffset, Ns, Np);
+% Power spectrum estimation with pwelch
+[ospx, osf] = pwelch(codeOS, hann(2^10), [], 2^10, 1/delChip); % one-sided result
+% Convert power spectrum to dB scale
+ospxdb = 10*log10(ospx);
+% Plot onesided result first
+figure(1)
+plot(osf, ospxdb)
+xlabel('Frequency (Hz)')
+ylabel('Power/Frequency (dB/Hz)')
+title('Power Spectral Density of Oversampled Binary Sequence with Different Code Length'),
+hold on,
+
+% Generate binary sequence with ±1 values
+code = randi([-1, 1], [1, 2^14]);
+code(~code) = -1; % Ensure values are only ±1
+% Oversampling setup
+M = 10.1; % Oversampling factor
+delChip = 1/M; % Oversampling interval
+delOffset = 0; % No offset
+Np = length(code); % Length of binary sequence
+Ns = round(M * Np); % Number of samples after oversampling
+% Oversample the binary sequence
+codeOS = oversampleSpreadingCode(code, delChip, delOffset, Ns, Np);
+% Power spectrum estimation with pwelch
+[ospx, osf] = pwelch(codeOS, hann(2^10), [], 2^10, 1/delChip); % one-sided result
+% Convert power spectrum to dB scale
+ospxdb = 10*log10(ospx);
+% Plot onesided result first
+plot(osf, ospxdb)
+hold on,
+
+% Generate binary sequence with ±1 values
+code = randi([-1, 1], [1, 2^20]);
+code(~code) = -1; % Ensure values are only ±1
+% Oversampling setup
+M = 10.1; % Oversampling factor
+delChip = 1/M; % Oversampling interval
+delOffset = 0; % No offset
+Np = length(code); % Length of binary sequence
+Ns = round(M * Np); % Number of samples after oversampling
+% Oversample the binary sequence
+codeOS = oversampleSpreadingCode(code, delChip, delOffset, Ns, Np);
+% Power spectrum estimation with pwelch
+[ospx, osf] = pwelch(codeOS, hann(2^10), [], 2^10, 1/delChip); % one-sided result
+% Convert power spectrum to dB scale
+ospxdb = 10*log10(ospx);
+% Plot onesided result first
+plot(osf, ospxdb);
+legend('2^9','2^{14}','2^{20}');
+
+
+
+
+
+clear all
+close all
+% Change the oversampling interval
+% Generate binary sequence with ±1 values
+code = randi([-1, 1], [1, 2^14]);
+code(~code) = -1; % Ensure values are only ±1
+% Oversampling setup
+M = 5.1; % Oversampling factor
+delChip = 1/M; % Oversampling interval
+delOffset = 0; % No offset
+Np = length(code); % Length of binary sequence
+Ns = round(M * Np); % Number of samples after oversampling
+% Oversample the binary sequence
+codeOS = oversampleSpreadingCode(code, delChip, delOffset, Ns, Np);
+% Power spectrum estimation with pwelch
+[ospx, osf] = pwelch(codeOS, hann(2^10), [], 2^10, 1/delChip); % one-sided result
+% Convert power spectrum to dB scale
+ospxdb = 10*log10(ospx);
+% Plot onesided result first
+figure(1)
+plot(osf, ospxdb)
+xlabel('Frequency (Hz)')
+ylabel('Power/Frequency (dB/Hz)')
+title('Power Spectral Density of Oversampled Binary Sequence with Different Oversampling Interval'),
+hold on,
+
+% Oversampling setup
+M = 10.1; % Oversampling factor
+delChip = 1/M; % Oversampling interval
+delOffset = 0; % No offset
+Np = length(code); % Length of binary sequence
+Ns = round(M * Np); % Number of samples after oversampling
+% Oversample the binary sequence
+codeOS = oversampleSpreadingCode(code, delChip, delOffset, Ns, Np);
+% Power spectrum estimation with pwelch
+[ospx, osf] = pwelch(codeOS, hann(2^10), [], 2^10, 1/delChip); % one-sided result
+% Convert power spectrum to dB scale
+ospxdb = 10*log10(ospx);
+plot(osf, ospxdb);
+hold on,
+
+% Oversampling setup
+M = 20.1; % Oversampling factor
+delChip = 1/M; % Oversampling interval
+delOffset = 0; % No offset
+Np = length(code); % Length of binary sequence
+Ns = round(M * Np); % Number of samples after oversampling
+% Oversample the binary sequence
+codeOS = oversampleSpreadingCode(code, delChip, delOffset, Ns, Np);
+% Power spectrum estimation with pwelch
+[ospx, osf] = pwelch(codeOS, hann(2^10), [], 2^10, 1/delChip); % one-sided result
+% Convert power spectrum to dB scale
+ospxdb = 10*log10(ospx);
+plot(osf, ospxdb);
+
+legend('5.1', '10.1', '20.1');
+
+
+
+
+
+
+
+clear all
+close all
+% Change the oversampling interval
+% Generate binary sequence with ±1 values
+code = randi([-1, 1], [1, 2^14]);
+code(~code) = -1; % Ensure values are only ±1
+% Oversampling setup
+M = 10.1; % Oversampling factor
+delChip = 1/M; % Oversampling interval
+delOffset = 0; % No offset
+Np = length(code); % Length of binary sequence
+Ns = round(M * Np); % Number of samples after oversampling
+% Oversample the binary sequence
+codeOS = oversampleSpreadingCode(code, delChip, delOffset, Ns, Np);
+% Power spectrum estimation with pwelch
+[ospx, osf] = pwelch(codeOS, hann(2^10), [], 2^5, 1/delChip); % one-sided result
+% Convert power spectrum to dB scale
+ospxdb = 10*log10(ospx);
+% Plot onesided result first
+figure(1)
+plot(osf, ospxdb)
+xlabel('Frequency (Hz)')
+ylabel('Power/Frequency (dB/Hz)')
+title('Power Spectral Density of Oversampled Binary Sequence with Different nfft'),
+hold on,
+
+[ospx, osf] = pwelch(codeOS, hann(2^10), [], 2^8, 1/delChip); % one-sided result
+% Convert power spectrum to dB scale
+ospxdb = 10*log10(ospx);
+plot(osf, ospxdb);
+hold on,
+
+[ospx, osf] = pwelch(codeOS, hann(2^10), [], 2^20, 1/delChip); % one-sided result
+% Convert power spectrum to dB scale
+ospxdb = 10*log10(ospx);
+plot(osf, ospxdb);
+legend('2^5','2^8','2^{20}')
 
