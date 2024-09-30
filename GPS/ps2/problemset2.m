@@ -326,3 +326,11 @@ ospxdb = 10*log10(ospx);
 plot(osf, ospxdb);
 legend('2^5','2^8','2^{20}')
 
+%% 8 Lfrs Sequence
+clear all;
+clc;
+n = 4;
+ciVec = [2,3]';
+a0Vec = [0,0,1]';
+[lfsrSeq] = generateLfsrSequence(n,ciVec,a0Vec);
+

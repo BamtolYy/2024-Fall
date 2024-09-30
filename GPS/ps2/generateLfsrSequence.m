@@ -1,4 +1,4 @@
-[lfsrSeq] = generateLfsrSequence(n,ciVec,a0Vec)
+function [lfsrSeq] = generateLfsrSequence(n,ciVec,a0Vec)
 %
 % Generate a 1/0-valued linear feedback shift register (LFSR) sequence.
 %
@@ -21,3 +21,12 @@
 % sequence is a maximal-length sequence, then there is no
 % repetition in the m sequence elements.
 %
+
+%% Current lfrs State
+lfrsState= a0Vec;
+m=2^n-1
+for i=1:2^n-1
+    lfsrSeq(i) = lfrsState(end);
+    a=mod(lfrsState(ciVec(1))+lfrsState(ciVec(2)),2);
+    lfrsState=[a;lfrsState(1:end-1)];
+end
