@@ -116,8 +116,8 @@ ampratio= imagamplitude/realamplitude;
 %% 7
 
 % Generate binary sequence with ±1 values
-code = randi([-1, 1], [1, 2^14]);
-code(~code) = -1; % Ensure values are only ±1
+code = randn([1, 2^14]);
+code(code<0)=-1; code(code>0)=1; % Ensure values are only ±1
 
 % Oversampling setup
 M = 10.1; % Oversampling factor
@@ -161,8 +161,9 @@ clear all
 close all
 % Change Code Length
 % Generate binary sequence with ±1 values
-code = randi([-1, 1], [1, 2^9]);
-code(~code) = -1; % Ensure values are only ±1
+code = randn([1, 2^9]);
+code(code<0)=-1; code(code>0)=1; % Ensure values are only ±1
+
 % Oversampling setup
 M = 10.1; % Oversampling factor
 delChip = 1/M; % Oversampling interval
@@ -184,8 +185,9 @@ title('Power Spectral Density of Oversampled Binary Sequence with Different Code
 hold on,
 
 % Generate binary sequence with ±1 values
-code = randi([-1, 1], [1, 2^14]);
-code(~code) = -1; % Ensure values are only ±1
+code = randn([1, 2^14]);
+code(code<0)=-1; code(code>0)=1; % Ensure values are only ±1
+
 % Oversampling setup
 M = 10.1; % Oversampling factor
 delChip = 1/M; % Oversampling interval
@@ -203,8 +205,9 @@ plot(osf, ospxdb)
 hold on,
 
 % Generate binary sequence with ±1 values
-code = randi([-1, 1], [1, 2^20]);
-code(~code) = -1; % Ensure values are only ±1
+code = randn([1, 2^20]);
+code(code<0)=-1; code(code>0)=1; % Ensure values are only ±1
+
 % Oversampling setup
 M = 10.1; % Oversampling factor
 delChip = 1/M; % Oversampling interval
@@ -229,8 +232,9 @@ clear all
 close all
 % Change the oversampling interval
 % Generate binary sequence with ±1 values
-code = randi([-1, 1], [1, 2^14]);
-code(~code) = -1; % Ensure values are only ±1
+code = randn([1, 2^14]);
+code(code<0)=-1; code(code>0)=1; % Ensure values are only ±1
+
 % Oversampling setup
 M = 5.1; % Oversampling factor
 delChip = 1/M; % Oversampling interval
@@ -292,8 +296,9 @@ clear all
 close all
 % Change the oversampling interval
 % Generate binary sequence with ±1 values
-code = randi([-1, 1], [1, 2^14]);
-code(~code) = -1; % Ensure values are only ±1
+code = randn([1, 2^14]);
+code(code<0)=-1; code(code>0)=1; % Ensure values are only ±1
+
 % Oversampling setup
 M = 10.1; % Oversampling factor
 delChip = 1/M; % Oversampling interval
