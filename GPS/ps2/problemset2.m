@@ -114,10 +114,11 @@ ampratio= imagamplitude/realamplitude;
 % toitle('Imag Component');
 
 %% 7
+close all;
+clear all;
 
 % Generate binary sequence with ±1 values
-code = randn([1, 2^14]);
-code(code<0)=-1; code(code>0)=1; % Ensure values are only ±1
+code = sign(randn([1, 2^14]));
 
 % Oversampling setup
 M = 10.1; % Oversampling factor
@@ -161,8 +162,8 @@ clear all
 close all
 % Change Code Length
 % Generate binary sequence with ±1 values
-code = randn([1, 2^9]);
-code(code<0)=-1; code(code>0)=1; % Ensure values are only ±1
+code = sign(randn([1, 2^9]));
+
 
 % Oversampling setup
 M = 10.1; % Oversampling factor
@@ -185,8 +186,8 @@ title('Power Spectral Density of Oversampled Binary Sequence with Different Code
 hold on,
 
 % Generate binary sequence with ±1 values
-code = randn([1, 2^14]);
-code(code<0)=-1; code(code>0)=1; % Ensure values are only ±1
+code = sign(randn([1, 2^14]));
+
 
 % Oversampling setup
 M = 10.1; % Oversampling factor
@@ -205,8 +206,7 @@ plot(osf, ospxdb)
 hold on,
 
 % Generate binary sequence with ±1 values
-code = randn([1, 2^20]);
-code(code<0)=-1; code(code>0)=1; % Ensure values are only ±1
+code = sign(randn([1, 2^20]));
 
 % Oversampling setup
 M = 10.1; % Oversampling factor
@@ -232,8 +232,8 @@ clear all
 close all
 % Change the oversampling interval
 % Generate binary sequence with ±1 values
-code = randn([1, 2^14]);
-code(code<0)=-1; code(code>0)=1; % Ensure values are only ±1
+code = sign(randn([1, 2^14]));
+
 
 % Oversampling setup
 M = 5.1; % Oversampling factor
@@ -294,10 +294,10 @@ legend('5.1', '10.1', '20.1');
 
 clear all
 close all
-% Change the oversampling interval
+% Change the nfft interval
 % Generate binary sequence with ±1 values
-code = randn([1, 2^14]);
-code(code<0)=-1; code(code>0)=1; % Ensure values are only ±1
+code = sign(randn([1, 2^14]));
+
 
 % Oversampling setup
 M = 10.1; % Oversampling factor
