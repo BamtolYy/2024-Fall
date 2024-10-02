@@ -83,20 +83,20 @@ S12 = S12*delf;
 
 period = round(Np/delChip);
 %----- Plot
-figure;clf;
-subplot(211)
-plot(iiVec,R1/Ns);
-grid on;
-ylabel('R_{X1}');
-title('X1 and X2 autocorrelation')
-xlim([-period/2,period/2])
-subplot(212)
-plot(iiVec,R2/Ns);
-grid on;
-ylabel('R_{X2}');
-xlabel('Lag (samples)');
-xlim([-period/2,period/2])
-hold off
+% figure;clf;
+% subplot(211)
+% plot(iiVec,R1/Ns);
+% grid on;
+% ylabel('R_{X1}');
+% title('X1 and X2 autocorrelation')
+% xlim([-period/2,period/2])
+% subplot(212)
+% plot(iiVec,R2/Ns);
+% grid on;
+% ylabel('R_{X2}');
+% xlabel('Lag (samples)');
+% xlim([-period/2,period/2])
+% hold off
 
 % figure;clf;
 % plot(iiVec,R12/Ns);
@@ -107,23 +107,23 @@ hold off
 % xlim([-period/2,period/2])
 % hold off
 
-% figure;clf;
-% subplot(211)
-% plot(fVec/1e3,10*log10(S1));
-% grid on;
-% xlim([0 30]);
-% ylim([-100,0]);
-% title('X1 and X2 power spectral densities')
-% ylabel('S_{X1}(f) (dBW/Hz)');
-% subplot(212)
-% plot(fVec/1e3,10*log10(S2));
-% grid on;
-% xlim([0 30]);
-% ylim([-100,0]);
-% ylabel('S_{X2}(f) (dBW/Hz)');
-% xlabel('Frequency (kHz)');
-% xlim([-period/2,period/2])
-% hold off
+figure;clf;
+subplot(211)
+plot(fVec/1e3,10*log10(S1));
+grid on;
+xlim([0 30]);
+ylim([-100,0]);
+title('X1 and X2 power spectral densities')
+ylabel('S_{X1}(f) (dBW/Hz)');
+subplot(212)
+plot(fVec/1e3,10*log10(S2));
+grid on;
+xlim([0 30]);
+ylim([-100,0]);
+ylabel('S_{X2}(f) (dBW/Hz)');
+xlabel('Frequency (kHz)');
+hold off
+
 
 % What is the ratio of max(Rx1) to max(Rx1x2)?
 % if(strcmp(codeType,'rand'))
@@ -163,3 +163,8 @@ elseif(strcmp(codeType,'mseq'))
 end
 
 end
+
+varof30power1=10*log10(var(S1(1:30)))
+varof30power2=10*log10(var(S2(1:30)))
+
+Nsep=fVec/delf
