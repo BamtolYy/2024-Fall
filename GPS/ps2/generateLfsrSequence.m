@@ -24,9 +24,12 @@ function [lfsrSeq] = generateLfsrSequence(n,ciVec,a0Vec)
 
 %% Current lfrs State
 lfrsState= a0Vec;
-m=2^n-1
+m=2^n-1;
 for i=1:2^n-1
     lfsrSeq(i) = lfrsState(end);
-    a=mod(lfrsState(ciVec(1))+lfrsState(ciVec(2)),2);
+    a=0;
+    for j = 1:length(ciVec)
+        a=mod(a+lfrsState(ciVec(j)),2);
+    end
     lfrsState=[a;lfrsState(1:end-1)];
 end
