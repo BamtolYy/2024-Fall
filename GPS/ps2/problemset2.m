@@ -3,6 +3,9 @@ clc
 %%% Problem set 2
 
 %% 1a
+clear all;
+close all;
+clc;
 
 syms f
 min = -2;
