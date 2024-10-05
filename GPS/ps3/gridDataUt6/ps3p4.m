@@ -65,3 +65,24 @@ title('Total Electron Content');
 xlabel('Time (seconds)');
 ylabel('TEC (TECU)');
 
+
+%% Help for Answering b)
+load("navsol.mat")
+N=navsol';
+format LongG
+posMovementfromStartToFinish=[N(1,4)-N(end,4),...
+    N(1,5)-N(end,5),N(1,6)-N(end,6)]/1000 % in km ECEF reference Frame
+% Plot receiver position from navsol 
+figure,
+title('Receiver Postion')
+plot3(N(:,4),N(:,5),N(:,6))
+grid on,
+hold on,
+
+% draw Earth on the figure
+[X,Y,Z]=sphere;
+Re= 6378137 ; %Earth Radius in meters
+surf(X*Re,Y*Re,Z*Re);
+axis equal
+
+% Draw Earth
