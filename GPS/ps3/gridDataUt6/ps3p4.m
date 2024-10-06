@@ -75,7 +75,7 @@ posMovementfromStartToFinish=[N(1,4)-N(end,4),...
 % Plot receiver position from navsol 
 figure,
 title('Receiver Postion')
-plot3(N(:,4),N(:,5),N(:,6))
+plot3(N(:,4),N(:,5),N(:,6),'LineWidth',3,'color','r')
 grid on,
 hold on,
 
@@ -84,5 +84,15 @@ hold on,
 Re= 6378137 ; %Earth Radius in meters
 surf(X*Re,Y*Re,Z*Re);
 axis equal
+xlabel('m');
+ylabel('m');
+zlabel('m');
+legend('Receiver Position','Earth')
 
-% Draw Earth
+figure,
+plot(N(:,2)-N(1,2),N(:,8),N(:,2)-N(1,2),N(:,9),N(:,2)-N(1,2),N(:,10));
+title('Velocity of Receiver')
+grid on
+xlabel('Seconds');
+ylabel('m/s');
+legend('V_x','V_y','V_z');
