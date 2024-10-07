@@ -1,9 +1,7 @@
 % topSimulateTrainDoppler.m
-%
 % Top-level script for train Doppler simulation
 
-
-%clear; clc; clf;
+clear; clc; clf;
 %----- Setup
 fc = 440;
 vTrain = 20;
@@ -19,12 +17,13 @@ dObs = -61;
 [fDVec,tVec] = simulateTrainDoppler(fc,vTrain,t0,x0,xObs,dObs,delt,N,vs);
 fApparentVec = fDVec + fc;
 
-% %----- Plot
-% plot(tVec,fDVec + fc, 'r');
-% xlabel('Time (seconds)');
-% ylabel('Apparent horn frequency (Hz)');
-% grid on;
-% shg;
+%----- Plot
+figure(1)
+plot(tVec,fDVec + fc, 'r');
+xlabel('Time (seconds)');
+ylabel('Apparent horn frequency (Hz)');
+grid on;
+shg;
 
 %----- Generate a sound vector
 T = delt*N;                    % simulation time (sec)
@@ -47,7 +46,7 @@ audiowrite('trainout.wav',soundVec,fs);
 %----- Write frequency time history to output file
 save trainData fApparentVec tVec
 
-
+%% Import Original File
 %----- Read provided audio file
 [y, fs] = audioread('H.wav');
 
@@ -64,6 +63,7 @@ OtVec = linspace(t0,tVec(end),length(y));
 plotoriginal = interp1(OtVec,original,tVec,'spline');
 figure(2)
 plot(tVec,plotoriginal,'o',tVec,fDVec + fc, 'r')
+ylim([410 470]);
 
 
 % ----- Play the sound vector

@@ -42,6 +42,15 @@ plot(f,Rx), hold on,
 title('Autocorrelation, Rx'),
 xlabel('Frequency Hz')
 
+%% Check 2
+% b)
+W = 2*10^6; % Arbitrary Bandwidth
+t=-3/(W):1*10^-9:3/(W);
+y=sinc(W*t);
+plot(t,y)
+
+
+
 %% 6
 close all;
 clear all;

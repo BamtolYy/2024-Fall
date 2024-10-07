@@ -58,14 +58,18 @@ for j = 1:length(tspan)
     %Find TOF through iteration
     error = 9999;
     i=1;
-    x(1)=0;
+    TOF_guess(1)=0;
     rTrain(j,1) = x0 + vTrain*tspan(j);
     while error > 0.0001
-        x(i+1)=norm(rObs-(rTrain(j,:)-[x(i)*vTrain 0]))/vs;
-        error = abs((x(i+1)-x(i))/x(i+1)*100);
+        TOF_guess(i+1)=norm(rObs-(rTrain(j,:)-[TOF_guess(i)*vTrain 0]))/vs;                 % From iterative method: norm[r_obs(t)-r_train(t-TOF)] gives you 
+                                                                            % the distance from the observer to the Train.
+                                                                            % Divide this by Speed of sound or the speed that the horn travels at.
+                                                                            % The result gives you the first guess of the TOF or the time of flight
+                                                                            % of the horn travel from the train to the observer.
+        error = abs((TOF_guess(i+1)-TOF_guess(i))/TOF_guess(i+1)*100);
         i=i+1;
     end
-    TOF(j) = x(end);
+    TOF(j) = TOF_guess(end);
 end
 
 for jj = 1:length(tspan)
