@@ -40,7 +40,7 @@ I_L1_p = f_L2^2/(f_L1^2-f_L2^2)*(p(:,2)-p(:,1));% Textbook notation of group del
 lambda_L1 = physconst('LightSpeed') / f_L1; % Wavelength for L1 in meters
 lambda_L2 = physconst('LightSpeed') / f_L2; % Wavelength for L2 in meters
 I_L1_c    = f_L2^2/(f_L1^2-f_L2^2)*(lambda_L1*c(:,1)-lambda_L2*c(:,2));
-I_L1_c    = I_L1_c-I_L1_c(1)-0.65; % offset so that it fits with code-derived
+I_L1_c    = I_L1_c-I_L1_c(1); % offset so that it fits with code-derived
 
 %% Plot
 figure(1)

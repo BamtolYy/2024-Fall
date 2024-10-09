@@ -2,8 +2,8 @@ h= 400;
 v= sqrt(398600.4/(6378+h));
 z= [0:0.01:pi/2];
 
-rdot  = sin(-z)*v;
-rddot = -v^2/h*(cos(z)).^3;
+rdot  = sin(z)*v;
+rddot = v^2/h*(cos(z)).^3;
 figure(1)
 sgtitle('Velocity and Acceleration of Line of Sight Vector of  Satellite to Observer')
 subplot(121)
@@ -30,4 +30,9 @@ end
 
 figure(3)
 plot (z,fd/1000);
-maxfd=max(abs(fd/1000))
+title('Doppler Frequency with a Satellite transmitting Radio Signal')
+ylabel('Doppler Frequency [kHz]')
+xlabel('Zenith Angle [radians^{-1}]')
+maxfd=max(abs(fd/1000));
+
+

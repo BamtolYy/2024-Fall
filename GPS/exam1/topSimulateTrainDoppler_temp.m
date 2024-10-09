@@ -10,8 +10,8 @@ x0 = 0;
 delt = 0.01;
 N = 1000;
 vs = 343;
-xObs = 54.3;
-dObs = 12.2;
+xObs = 73.6;
+dObs = 7.1;
 
 %----- Simulate
 [fDVec,tVec] = simulateTrainDoppler(fc,vTrain,t0,x0,xObs,dObs,delt,N,vs);
@@ -48,7 +48,7 @@ save trainData fApparentVec tVec
 
 %% Import Original File
 %----- Read provided audio file
-[y, fs] = audioread('H.wav');
+[y, fs] = audioread('originalSoundWave.wav');
 
 %----- Frequency Domain
 
@@ -63,8 +63,11 @@ OtVec = linspace(t0,tVec(end),length(y));
 plotoriginal = interp1(OtVec,original,tVec,'spline');
 figure(2)
 plot(tVec,plotoriginal,'o',tVec,fDVec + fc, 'r')
+xlabel('Time [s]')
+ylabel('Doppler Frequency(Hz)')
 ylim([410 470]);
-
+title('Doppler Frequency Change over Time with observer postion estimate at [73.6,7.1]')
+legend('trainout.wav','Estimated')
 
 % ----- Play the sound vector
 sound([soundVec,y], fs);   

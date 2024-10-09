@@ -1,4 +1,4 @@
-function [lfsrSeq] = generateLfsrSequence(n,ciVec,a0Vec)
+function [GoldSeq] = generateGoldLfsrSequence(n,ciVecA,ciVecB,a0VecA,a0VecB)
 %
 % Generate a 1/0-valued linear feedback shift register (LFSR) sequence.
 %
@@ -22,19 +22,25 @@ function [lfsrSeq] = generateLfsrSequence(n,ciVec,a0Vec)
 % repetition in the m sequence elements.
 %
 
-%% Current lfrs State
-lfrsState= a0Vec;
-initialLfsrState=lfrsState;
+
+lfrsStateA=a0VecA;
+lfrsStateB=a0VecB;
+
 m=2^n-1;
+  GoldSeq = zeros(m, 1);  % Preallocate GoldSeq
 for i=1:m
-    lfsrSeq(i) = lfrsState(end);
+    GoldSeq(i)= mod(lfrsStateA(end)+lfrsStateB(end),2);
     a=0;
-    for j = 1:length(ciVec)
-        a=mod(a+lfrsState(ciVec(j)),2);
+    b=0;
+    for jj = 1:length(ciVecA)
+        a=mod(a+lfrsStateA(ciVecA(jj)),2);
     end
-    lfrsState=[a;lfrsState(1:end-1)];
-    if isequal(lfrsState,initialLfsrState)
-        break;
+    
+    for kk = 1:length(ciVecB)
+        b=mod(b+lfrsStateB(ciVecB(kk)),2);
     end
+    lfrsStateA=[a;lfrsStateA(1:end-1)];
+    lfrsStateB=[b;lfrsStateB(1:end-1)];
+    
 end
 

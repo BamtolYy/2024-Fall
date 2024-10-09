@@ -79,23 +79,23 @@ num_samples = 400;
 % end
 
 % Plot 400 samples of Real and Imag part separately respect to time domain
-% figure(1)
+figure(1)
 Y_window = Y(520001:520001+400-1);
-% plot(real(Y_window),imag(Y_window),'o');
-% title(sprintf('Window starting at sample %d', 52001));
-% grid on;
-% figure(2)
-% subplot(2,1,1)
-% plot(real(Y_window));
-% title('Real Component');
-% grid on;
-% subplot(2,1,2)
-% plot(imag(Y_window));
-% title('img Component');
+plot(real(Y_window),imag(Y_window),'o');
+title(sprintf('Window starting at sample %d', 52001));
+grid on;
+figure(2)
+subplot(2,1,1)
+plot(real(Y_window));
+title('Real Component');
+grid on;
+subplot(2,1,2)
+plot(imag(Y_window));
+title('img Component');
 
 % Create Time vecotr to plot the 400 samples and find chip rate, Tc
 t= 0:(46.08e6)^-1:400*(46.08e6)^-1-(46.08e6)^-1;
-figure(2)
+figure(3)
 plot(t,real(Y_window));
 title('Real Component');
 
@@ -121,9 +121,7 @@ imagCNRatio=10*log10(imagamplitude^2/(4*imagstd^2*T));
 % Compare the amplitude of C/A to P(Y)
 ampratio= imagamplitude/realamplitude;
 
-% figure(3)
-% plot(t,imag(Y_window));
-% toitle('Imag Component');
+
 
 %% 7
 close all;
@@ -134,7 +132,7 @@ code = sign(randn([1, 2^14]));
 
 % Oversampling setup
 M = 10.1; % Oversampling factor
-delChip = 1/M; % Oversampling interval
+delChip = 1/M; % Oversampling interval; Chips per sample
 delOffset = 0; % No offset
 Np = length(code); % Length of binary sequence
 Ns = round(M * Np); % Number of samples after oversampling
@@ -150,7 +148,7 @@ ospxdb = 10*log10(ospx);
 figure(1)
 plot(osf, ospxdb)
 xlabel('Frequency (Hz)')
-ylabel('Power/Frequency (dB/Hz)')
+ylabel('Power/Frequency (dBW/Hz)')
 title('Power Spectral Density of Oversampled Binary Sequence')
 % Zoom in on the main lobe and first few sidelobes
 xlim([0, 3]) % Adjust based on the main lobe location
@@ -448,7 +446,7 @@ elseif(strcmp(codeType,'pi'))
 elseif(strcmp(codeType,'mseq'))
 ciVec1 = [10, 7]';  
 ciVec2 = [10, 9, 7, 6]';
-ciVec3 = [10, 9, 8, 7, 6, 5, 4, 1]';
+ciVec3 = [10, 9, 8, 7, 6, 5, 4, 3]';
 ciVec4 = [10, 9, 8, 7, 6, 5, 4, 1]';
 ciVec5 = [10, 9, 8, 6, 5, 1]';
 ciVec6 = [10, 9, 8, 6, 4, 3]';
@@ -536,8 +534,9 @@ maxValues=[minBoundCrossCorr; max(Rseq12); max(Rseq13); max(Rseq14) ;max(Rseq15)
 b= bar(maxValues);
 b.FaceColor = 'flat';
 b.CData(1,:) = [.5 0 .5];
-title('Maximum Crosscorrealtion')
-xlabel('Lag (samples)');
+title('Maximum Cross-correlation')
+xlabel('Sequence Correlation');
+legend('Maximum CrossCorrelation Lower Bound')
 grid on;
 
 
@@ -546,7 +545,7 @@ grid on;
 
 % %c)
 % 
-% clear;clc;
+clear;clc;
 % %----- Setup
 % nStages = 10;                  % Number of stages in LFSR
 % Tc = 1e-3/1023;               % Chip interval in seconds
