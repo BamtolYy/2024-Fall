@@ -1,74 +1,103 @@
-function [E,A,LLA]=findElevationAzimuthAngleANDLLA(recPos,satPos)
-%
+function [E, A, r_lla, s_lla]=findElevationAzimuthAngleANDLLA(recPos,satPos)
+%%  Calculate Elevation and Azimuth angle using LLA and Considering WGS84 Model
 % INPUTS
 %
 % recPos --- 3x1 position vector of receiver in ECEF
-% 
+%
 % satPos --- 3x1 position vector of satellite in ECEF
 %
 % OUTPUTS
-% 
-% E ---- Elevation Angle from receiver seeing satellite
-% 
-% A ---- Azimuth Angle from receiver seeing satellite
-% 
-% r_LLA -- [Latitude, Longitude, Alitude] Geodetic of receiver
-% 
-% s_LLA -- [Latitude, Longitude, Alitude] Geodetic of satellite
+%
+% E ---- Elevation Angle from receiver seeing satellite in rad
+%
+% A ---- Azimuth Angle from receiver seeing satellite in rad
+%
+% r_LLA -- [Latitude, Longitude, Alitude] Geodetic of receiver in rad
+%
+% s_LLA -- [Latitude, Longitude, Alitude] Geodetic of satellite in rad
 %+------------------------------------------------------------------------------+
 % Reference: https://www.ngs.noaa.gov/CORS/Articles/SolerEisemannJSE.pdf
 % https://www.youtube.com/watch?v=dwccsh_aRiM&t=466s
 %+==============================================================================+
-%% Calculate it using LLA and Considering WGS84 Model
+
+%% Get LLA
 r_lla    = ecef2lla(recPos,'WGS84')/180*pi;  % Also can be calculated with:
-                                                % z = r*sin(lat); y = r*cos(lat)*sin(long)
+% z = r*sin(lat); y = r*cos(lat)*sin(long)
 s_lla    = ecef2lla(satPos,'WGS84')/180*pi;
-
-r_r = norm(receiverPos); % Length of the receiver postition vector or
-                              % typically radius of earth for receivers on
-                              % the ground check iif it is around 6378 km
-
-t_r      = norm(GPSPos);      % Length of the GPS postition vector
-r_lat    = r_lla(1); 
+r_lat    = r_lla(1);
 s_lat    = s_lla(1);
 r_long   = r_lla(2);
 s_long   = s_lla(2);
-% Calculate subtanding angle between reciver vector and satellite subpoint
-% vector. (ASD05 Look Angles on Youtube)
-gamma  = acos(sin(t_lat)*sin(r_lat)+cos(t_lat)*cos(r_lat)...
-    *cos(t_long-r_long));
 
-% Elevation Angle (ASD05 Look Angles on Youtube)
-d1 = sqrt(1+(r_r/t_r)^2-2*(r_r/t_r)*cos(gamma));
-E = acos(sin(gamma)/(d1))/(2*pi)*360;
+%% Calculate subtanding angle between receiver vector and satellite
+%  subpoint vector.(ASD05 Look Angles on Youtube)
 
-% Azimuth Angle (ASD05 Look Angles on Youtube)
-alpha = atan(tan(abs(t_long-r_long))/sin(r_lat));
-A = asin(sin(abs(r_lla(2)-t_lla(2)))*cos(t_lat)/sin(gamma));
+r_r   = norm(recPos); % Length of the receiver postition vector or
+% typically radius of earth for receivers on
+% the ground check iif it is around 6378 km
+s_r   = norm(satPos); % Length of the GPS postition vector
+
+gamma = acos(sin(s_lat)*sin(r_lat)+cos(s_lat)*cos(r_lat)...
+    *cos(s_long-r_long));
+
+%% Elevation Angle (ASD05 Look Angles on Youtube)
+d = sqrt(1+(r_r/s_r)^2-2*(r_r/s_r)*cos(gamma));
+E = acos(sin(gamma)/(d));
+
+%% Azimuth Angle (ASD05 Look Angles on Youtube)
 
 
+alpha = asin(sin(abs(r_long-s_long))*cos(s_lat)/sin(gamma));
+if s_long <  r_long && tan(r_lat)*cos(s_long-r_long) < tan(s_lat)
+    % NorthWest
+    A = 2*pi - alpha;
+elseif s_long < r_long && tan(r_lat)*cos(s_long-r_long) > tan(s_lat)
+    % SouthWest
+    A = pi + alpha;
+elseif s_long > r_long && tan(r_lat)*cos(s_long-r_long) < tan(s_lat)
+    % NorthEast
+    A = alpha;
+elseif s_long > r_long && tan(r_lat)*cos(s_long-r_long) > tan(s_lat)
+    % SouthEast
+    A = pi - alpha;
+end
+
+
+
+
+
+
+
+
+%% --------------------------------------------------------------------------
+% IGNORE BELOW WORKS IT WAS FOR TRYING DIFFERENT METHODS
 % Try 2
-d2 =norm (t_ecef-r_ecef); 
-E2 = acos(t_r*sin(gamma)/d2)/(2*pi)*360;
-
-% Try 3
-
-d3 = t_r*sqrt(1+(r_r/t_r)^2-2*(r_r/t_r)*cos(gamma));
-E3 = acos(t_r*sin(gamma)/d3)/(2*pi)*360;
-
-
-%--------------------------------------------------------------------------
-
-
+% d2 =norm (satPos-recPos);
+% E2 = acos(s_r*sin(gamma)/d2)/(pi)*180;
+% % Try 3
+% d3 = s_r*sqrt(1+(r_r/s_r)^2-2*(r_r/s_r)*cos(gamma));
+% E3 = acos(s_r*sin(gamma)/d3)/(1*pi)*180;
 
 % Calcualte Elevation angle just using vectors:
 % Reference https://www.youtube.com/watch?v=dwccsh_aRiM&t=466s for Geometry
-r_r    = norm(receiverPos); % Length of the receiver postition vector or
-                            % typically radius of earth for receivers on
-                            % the ground check iif it is around 6378 km
-t_r    = norm(GPSPos);      % Length of the GPS postition vector                            
-d = norm (t_ecef-r_ecef); 
-psi = acos((t_r^2-d^2-r_r^2)/(-2*d*r_r));
-E = (psi-pi/2)/(2*pi)*360;
+% d5 = norm (satPos-recPos);
+% psi = acos((s_r^2-d5^2-r_r^2)/(-2*d5*r_r));
+% E5 = (psi-pi/2)/(pi)*180;
+
+% Another form of alpha equation
+% alpha2 = atan(tan(abs(s_long-r_long))/sin(r_lat));
+% if s_long <  r_long && tan(r_lat)*cos(s_long-r_long) < tan(s_lat)
+%     % NorthWest
+%     A2 = 2*pi - alpha2;
+% elseif s_long < r_long && tan(r_lat)*cos(s_long-r_long) > tan(s_lat)
+%     % SouthWest
+%     A2 = pi + alpha2;
+% elseif s_long > r_long && tan(r_lat)*cos(s_long-r_long) < tan(s_lat)
+%     % NorthEast
+%     A2 = alpha2;
+% elseif s_long > r_long && tan(r_lat)*cos(s_long-r_long) > tan(s_lat)
+%     % SouthEast
+%     A2 = pi - alpha2;
+% end
 
 

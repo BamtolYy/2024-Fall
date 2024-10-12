@@ -59,7 +59,7 @@ function [delTauG] = getIonoDelay(ionodata,fc,rRx,rSv,tGPS,model)
 %
 %+==============================================================================+
 
-[E,A]  = findElevationAzimuthAngle(rRx,rSv);
+[E, A, r_lla, s_lla]=findElevationAzimuthAngleANDLLA(rRx,rSv);
 
 alpha = [ionodata.broadcast.alpha0,ionodata.broadcast.alpha1,ionodata.broadcast.alpha2,ionodata.broadcast.alpha3];
 beta = [ionodata.broadcast.beta0,ionodata.broadcast.beta1,ionodata.broadcast.beta2,ionodata.broadcast.beta3];
