@@ -59,13 +59,17 @@ function [delTauG] = getIonoDelay(ionodata,fc,rRx,rSv,tGPS,model)
 %
 %+==============================================================================+
 
-[E, A, r_lla, s_lla]=findElevationAzimuthAngleANDLLA(rRx,rSv);
+% A is left as rad instead of semi-circle unit since they are only used for trig calculations
+[E, A, r_lla, s_lla]=findElevationAzimuthAngleANDLLA(rRx,rSv); 
+E = E/pi; % semi-circle
+phi_u    = r_lla(1)/pi; % semi-circles
+lambda_u = r_lla(2)/pi; % semi-circles
 
-alpha = [ionodata.broadcast.alpha0,ionodata.broadcast.alpha1,ionodata.broadcast.alpha2,ionodata.broadcast.alpha3];
-beta = [ionodata.broadcast.beta0,ionodata.broadcast.beta1,ionodata.broadcast.beta2,ionodata.broadcast.beta3];
+alpha    = [ionodata.broadcast.alpha0,ionodata.broadcast.alpha1,ionodata.broadcast.alpha2,ionodata.broadcast.alpha3];
+beta     = [ionodata.broadcast.beta0,ionodata.broadcast.beta1,ionodata.broadcast.beta2,ionodata.broadcast.beta3];
 
-psi   = 0.0137/(E+0.11)-0.22;
-phi_i = phi_u+psi*cos(A);
+psi   = 0.0137/(E+0.11)-0.22; % semi-circle
+phi_i = phi_u+psi*cos(A); % semi-circle
 
 if phi_i > 0.416
     phi_i = 0.416;
@@ -73,7 +77,7 @@ elseif phi_i < -0.416
     phi_i = -0.416;
 end
 
-lambda_i = lambda_u + psi*sin(A)/cos(phi_i);
+lambda_i = lambda_u + psi*sin(A)/cos(phi_i*pi); % semi-circle
 t        = 4.32*10^4*lambda_i +tGPS.seconds;
 
 if t >= 86400
@@ -82,7 +86,7 @@ elseif t<= -86000
     t = t+86400;
 end
 
-phi_m    = phi_i + 0.064*cos((lambda_i-1.617)*pi);
+phi_m    = phi_i + 0.064*cos((lambda_i-1.617)*pi); % Multiply by pi to remove semicircle unit
 F        = 1 + 16*(0.53 -E)^3;
 PER      = sum(beta.*phi_m);
 

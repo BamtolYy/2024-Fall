@@ -21,8 +21,8 @@ function [E, A, r_lla, s_lla]=findElevationAzimuthAngleANDLLA(recPos,satPos)
 %+==============================================================================+
 
 %% Get LLA
-r_lla    = ecef2lla(recPos,'WGS84')/180*pi;  % Also can be calculated with:
-% z = r*sin(lat); y = r*cos(lat)*sin(long)
+r_lla    = ecef2lla(recPos,'WGS84')/180*pi; % Also can be calculated with:
+                                            % z = r*sin(lat); y = r*cos(lat)*sin(long)
 s_lla    = ecef2lla(satPos,'WGS84')/180*pi;
 r_lat    = r_lla(1);
 s_lat    = s_lla(1);
