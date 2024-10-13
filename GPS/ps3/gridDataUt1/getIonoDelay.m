@@ -58,6 +58,20 @@ function [delTauG] = getIonoDelay(ionodata,fc,rRx,rSv,tGPS,model)
 % pp. 128-130.
 %
 %+==============================================================================+
+figure(),
+[X,Y,Z]=sphere;
+Re= 6378137 ; %Earth Radius in meters
+surf(X*Re,Y*Re,Z*Re);
+xlabel('m');
+ylabel('m');
+zlabel('m');
+axis equal,
+hold on,
+
+plot3(rRx(1),rRx(2),rRx(3),'o');
+hold on,
+plot3(rSv(1),rSv(2),rSv(3),'*')
+
 
 % A is left as rad instead of semi-circle unit since they are only used for trig calculations
 [E, A, r_lla, s_lla]=findElevationAzimuthAngleANDLLA(rRx,rSv); 
