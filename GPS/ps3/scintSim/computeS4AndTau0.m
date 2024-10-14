@@ -24,7 +24,15 @@ function [S4,tau0] = computeS4AndTau0(zkhist,tkhist)
 %
 %
 %+------------------------------------------------------------------------------+
-% References:
+% References:v
 %
 %
 %+==============================================================================+
+
+% Compute the intensity
+I   = abs(zkhist).^2;
+I_mean  = mean(I);
+I2_mean = mean(I.^2);
+S41 = sqrt((I2_mean-I_mean^2)/I_mean^2)
+tau0 = 1;
+
