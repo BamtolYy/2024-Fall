@@ -29,10 +29,10 @@ end
 iidum  = find(M(:,14)==31 & M(:,10) == 1);
 txid31 = M(iidum,:);
 % Extract L1 and L2 data
-jjdum = find(txid31(:,13) ==0);
-kkdum = find(txid31(:,13) == 2);
-L1_31 = txid31(jjdum,:);
-L2_31 = txid31(kkdum,:);
+lldum = find(txid31(:,13) ==0);
+mmdum = find(txid31(:,13) == 2);
+L1_31 = txid31(lldum,:);
+L2_31 = txid31(mmdum,:);
 % Match L1 and L2 that were taken simultaneously and extract their
 % pseudoranges and Carrier to Noise ratio
 p_31  = []; % Initiate Pseudorange container
@@ -153,4 +153,7 @@ ionoDelay_model_31 = delTauG*physconst('LightSpeed') % in meter
 % GPS.seconds to compare with 4th column of L1_TXID
 tdum = find(I_L1_p_31(:,1) == fix(tGPS.seconds)); 
 ionoDelay_meas_31   = I_L1_p_31(tdum,2) % meter
+
+
+
 
