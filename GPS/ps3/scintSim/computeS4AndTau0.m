@@ -34,19 +34,19 @@ I   = abs(zkhist).^2;
 I_mean  = mean(I);
 S4 = std(I)/I_mean;
 
-
-% Subtract the mean intensity to focus on fluctuations
-I_fluct = I - mean(I);
-
-% Calculate the autocorrelation of the intensity fluctuations
-[acf, lags] = xcorr(I_fluct, 'coeff');  % Autocorrelation of intensity fluctuations
-
-% Extract positive lags (to avoid negative lag calculations)
-acf = acf(lags >= 0);
-lags = lags(lags >= 0);
-
-% Find the time where the autocorrelation drops to 1/e
-e_frac = exp(-1);
-tau0_index = find(acf <= e_frac, 1);  % First index where ACF falls to 1/e
-tau0 = tkhist(tau0_index);  % Time at which ACF is 1/e
+% GPT Answer
+% % Subtract the mean intensity to focus on fluctuations
+% I_fluct = I - mean(I);
+% 
+% % Calculate the autocorrelation of the intensity fluctuations
+% [acf, lags] = xcorr(I_fluct, 'coeff');  % Autocorrelation of intensity fluctuations
+% 
+% % Extract positive lags (to avoid negative lag calculations)
+% acf = acf(lags >= 0);
+% lags = lags(lags >= 0);
+% 
+% % Find the time where the autocorrelation drops to 1/e
+% e_frac = exp(-1);
+% tau0_index = find(acf <= e_frac, 1);  % First index where ACF falls to 1/e
+% tau0 = tkhist(tau0_index);  % Time at which ACF is 1/e
 
