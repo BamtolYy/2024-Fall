@@ -32,10 +32,21 @@ function [S4,tau0] = computeS4AndTau0(zkhist,tkhist)
 % Compute the intensity
 I   = abs(zkhist).^2;
 I_mean  = mean(I);
-I2_mean = mean(I.^2);
-S4 = sqrt((I2_mean-I_mean^2)/I_mean^2)
+S4 = std(I)/I_mean;
 
 
+% Subtract the mean intensity to focus on fluctuations
+I_fluct = I - mean(I);
 
-tau0 = sqrt(1-S4^2) /(1-sqrt(1-S4^2))
+% Calculate the autocorrelation of the intensity fluctuations
+[acf, lags] = xcorr(I_fluct, 'coeff');  % Autocorrelation of intensity fluctuations
+
+% Extract positive lags (to avoid negative lag calculations)
+acf = acf(lags >= 0);
+lags = lags(lags >= 0);
+
+% Find the time where the autocorrelation drops to 1/e
+e_frac = exp(-1);
+tau0_index = find(acf <= e_frac, 1);  % First index where ACF falls to 1/e
+tau0 = tkhist(tau0_index);  % Time at which ACF is 1/e
 
