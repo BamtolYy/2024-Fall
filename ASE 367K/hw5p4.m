@@ -14,7 +14,7 @@ clear all;
 close all;
 clc; 
 
-cT   = 3.522*10^-5; % kg/(N*s)
+cT   = 3.552*10^-5; % kg/(N*s)
 S    = 125; % m^2
 k    = 0.048;
 Cd0  =  0.016;
@@ -26,7 +26,13 @@ a    = 295.046; % Speed of sound at 35000 ft. in m/s; constant at 35000 ft
 Mach = 0.8; % Given
 v    = a*Mach; % V
 
-fun   = @(m) 1./(0.5*rho*v*S*Cd0+(k*m.^2*g^2)/(2*rho*v^3*S))*1./-cT;
-range = integral (fun,mi,mf)
+format longG
+fun   = @(m) -1/cT*1./(0.5*rho*v*S*Cd0+2*k*m.^2*g^2./(rho*v^3*S))
+range = integral (fun,mi,mf)/1000
 
-
+% % Define the integrand for the range calculation
+% integrand = @(m) -1 ./ ( (cT / 2) * rho * v * S * ...
+%                          (Cd0 + k * (2 * (m * g) / (rho * v^2 * S)).^2));
+% % Calculate the range using the integral
+% r = integral(integrand, mf, mi)/1000 % From final mass to initial mass
+ % 3 b)
