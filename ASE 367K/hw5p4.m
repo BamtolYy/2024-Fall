@@ -30,9 +30,8 @@ format longG
 fun   = @(m) -1/cT*1./(0.5*rho*v*S*Cd0+2*k*m.^2*g^2./(rho*v^3*S))
 range = integral (fun,mi,mf)/1000
 
-% % Define the integrand for the range calculation
-% integrand = @(m) -1 ./ ( (cT / 2) * rho * v * S * ...
-%                          (Cd0 + k * (2 * (m * g) / (rho * v^2 * S)).^2));
-% % Calculate the range using the integral
-% r = integral(integrand, mf, mi)/1000 % From final mass to initial mass
- % 3 b)
+% Define the integrand for the range calculation
+integrand = @(m) -1 ./ ( (cT / 2) * rho * v * S * ...
+                         (Cd0 + k * (2 * (m * g) / (rho * v^2 * S)).^2));
+% Calculate the range using the integral
+r = integral(integrand, mf, mi)/1000 % From final mass to initial mass
