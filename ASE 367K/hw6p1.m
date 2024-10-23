@@ -81,6 +81,81 @@ dampLong = abs(real(eVal(3,3))/wnLong);
 delTLong = abs(log(2)/(real(eVal(3,3))));
 NLong = abs(log(2)*wdLong/(2*pi*real(eVal(3,3))));
 %% b)
-[b,a] = ss2tf(A,B,C,D);
+x0 = zeros(4,1);
+sys = ss(A,B,C,D);
+figure(1)
+impulse(sys)
+figure(2)
+step(sys)
+% cdt = 0.01;
+% ct= [0:0.01:2000];
+% 
+% for i = 1:ct
+
+%% Problem 2
 
 
+M2 = [u1 0;
+    -Madot 1];
+R2 = [Za u1;
+    Ma Mq];
+
+A2 = inv(M2)*R2;
+
+[eVec2,eVal2] = eig(A2);
+
+wd2   = imag(eVal2(1,1));
+wn2   = sqrt((real(eVal2(1,1)))^2+(wd2)^2);
+damp2 = abs(real(eVal2(1,1))/wn2);
+delT2 = abs(log(2)/(real(eVal2(1,1))));
+N2    = abs(log(2)*wd2/(2*pi*real(eVal2(1,1))));
+
+
+
+% b)
+
+F2 = [Zde;
+    Mde];
+B2 = inv(M2)*F2;
+C2 =eye(2);
+D2 = zeros(2,1);
+
+sys2 = ss(A2,B2,C2,D2);
+
+figure(3),
+step(sys2);
+figure (4),
+impulse(sys2);
+
+%% Problem 3
+% a)
+% A3 = [Xu+XTu -g;
+%     -Zu/u1 0];
+% F3 = [Xde;
+%     0];
+% B3 = F3;
+% C3 = eye(2);
+% D3 = zeros(2,1);
+% 
+% sys3 = ss(A3,B3,C3,D3);
+% 
+% figure(5),
+% dt = 0.01;
+% t = [0:dt:1000];
+% 
+% u = ones(length(t),1);
+% x0 = [0,1];
+% figure(5);
+% lsim(sys3,u,t,x0)
+
+A3 = [Xu+XTu -g;
+    -Zu/u1 0];
+F3 = [Xde;
+    -Zde/u1];
+B3 = F3;
+C3 = eye(2);
+D3 = 0;
+
+sys3 = ss(A3,B3,C3,D3);
+
+impulse(sys3)
