@@ -54,8 +54,8 @@ eVecUnitless(3,:) = eVec(3,:)/20; % Not sure how we get 20?
 
 % Normalize respect to delta theta
 
-eVec12 = abs(eVecUnitless(:,1)/eVecUnitless(4,1)); 
-eVec34 = abs(eVecUnitless(:,3)/eVecUnitless(4,3)); 
+eVec12 = abs(eVecUnitless(:,1)/eVecUnitless(4,1));
+eVec34 = abs(eVecUnitless(:,3)/eVecUnitless(4,3));
 
 
 %% Answer Questions
@@ -70,7 +70,7 @@ N = abs(log(2)*wd/(2*pi*real(eVal(1,1))));
 % wn   = sqrt(charEqShort(end));
 % damp = charEqShort(2)/2/wn;
 % wd   = wn*sqrt(1-damp^2);
-% beta = atan(sqrt(1-damp^2)/damp); 
+% beta = atan(sqrt(1-damp^2)/damp);
 % tr   = (pi-beta)/wd; % Rise time (0-100%)
 % tp   = pi/wd;% Peak Time
 % Mp   = exp(-damp*pi/sqrt(1-damp^2)); % Maximum overshoot
@@ -95,11 +95,22 @@ sgtitle('Impulse Response of Linear Longitudinal Dynamics')
 subplot(4,1,1)
 plot(t,h(:,1))
 ylabel('\Delta u [ft/s]');
-xlabel('Time [seconds]')
+xlabel('Time [seconds]');
+hold on,
+[pks, locs] = findpeaks(abs(h(:,1)));
+a2     =-log(pks(1)/pks(end)) /(t(1) - t(end));
+a1     = pks(end)/(exp(-a2*t(end)));
+dampeq =a1*exp(-a2*t);
+plot(t,dampeq)
+
+delTGraphu = log(pks(1)/2/a1)/-a2 ;
+
+
 subplot(4,1,2)
 plot(t,h(:,2))
 ylabel('\Delta  \alpha [rad^-1]');
-xlabel('Time [seconds]')
+xlabel('Time [seconds]');
+xlim([0, 200])
 subplot(4,1,3)
 plot(t,h(:,3))
 ylabel('\Delta q [rad/sec] ');
@@ -108,6 +119,13 @@ subplot(4,1,4)
 plot(t,h(:,4))
 ylabel('\Delta \theta [ft/s]');
 xlabel('Time [seconds]')
+
+
+
+
+
+
+
 
 [hs, ts] = step(sys);
 figure(2)

@@ -1,0 +1,650 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>hw6p1</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-10-24"><meta name="DC.source" content="hw6p1.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Set Up Matrix A, B C, D</a></li><li><a href="#3">eig Vectors and Values</a></li><li><a href="#4">Answer Questions</a></li><li><a href="#5">b)</a></li><li><a href="#6">Problem 2</a></li><li><a href="#7">Problem 3</a></li><li><a href="#8">Print Answers</a></li></ul></div><pre class="codeinput">clear <span class="string">all</span>;
+close <span class="string">all</span>;
+clc;
+
+Xu     =-0.0188;
+XTu    = 0;
+Xa     = 11.5905;
+Xde    = 0;
+Zu     = -0.1862;
+Za     = -149.4408;
+Zq     = -6.8045;
+Zadot  = -8.4426;
+Zde    = -8.7058;
+Mu     = 0.0001;
+MTu    = 0;
+Ma     = -0.5294;
+MTa    = 0;
+Mq     = -0.4275;
+Madot  = -0.0658;
+Mde    = -0.5630;
+u1     = 279.1094; <span class="comment">% ft/s</span>
+theta1 = 0;
+g = 32.2; <span class="comment">% ft/s^2</span>
+</pre><h2 id="2">Set Up Matrix A, B C, D</h2><pre class="codeinput">R = [Xu+XTu Xa 0 -g*cos(theta1);<span class="keyword">...</span>
+    Zu Za u1+Zq -g*sin(theta1);<span class="keyword">...</span>
+    Mu+MTu Ma+MTa Mq 0;<span class="keyword">...</span>
+    0 0 1 0];
+
+M = [1 0 0 0;
+    0 u1-Zadot 0 0;<span class="keyword">...</span>
+    0 -Madot 1 0;<span class="keyword">...</span>
+    0 0 0 1];
+
+F = [Xde; Zde; Mde; 0];
+
+A = inv(M)*R;
+B = inv(M)*F;
+
+C = eye(4);
+
+D = zeros(4,1);
+</pre><h2 id="3">eig Vectors and Values</h2><pre class="codeinput">[eVec,eVal] = eig(A);
+
+<span class="comment">% Make them unitless</span>
+eVecUnitless = eVec;
+eVecUnitless(1,:) = eVec(1,:)/u1;
+eVecUnitless(3,:) = eVec(3,:)/20; <span class="comment">% Not sure how we get 20?</span>
+<span class="comment">% eVecUnitless</span>
+
+<span class="comment">% Normalize respect to delta theta</span>
+
+eVec12 = abs(eVecUnitless(:,1)/eVecUnitless(4,1));
+eVec34 = abs(eVecUnitless(:,3)/eVecUnitless(4,3));
+</pre><h2 id="4">Answer Questions</h2><pre class="codeinput"><span class="comment">% Short</span>
+wd   = imag(eVal(1,1));
+wn   = sqrt((real(eVal(1,1)))^2+(wd)^2);
+damp = abs(real(eVal(1,1))/wn);
+delT = abs(log(2)/(real(eVal(1,1))));
+N = abs(log(2)*wd/(2*pi*real(eVal(1,1))));
+<span class="comment">% charEqShort=conv([1 -eVal(1,1)],[1 -eVal(2,2)]);</span>
+<span class="comment">% wn   = sqrt(charEqShort(end));</span>
+<span class="comment">% damp = charEqShort(2)/2/wn;</span>
+<span class="comment">% wd   = wn*sqrt(1-damp^2);</span>
+<span class="comment">% beta = atan(sqrt(1-damp^2)/damp);</span>
+<span class="comment">% tr   = (pi-beta)/wd; % Rise time (0-100%)</span>
+<span class="comment">% tp   = pi/wd;% Peak Time</span>
+<span class="comment">% Mp   = exp(-damp*pi/sqrt(1-damp^2)); % Maximum overshoot</span>
+<span class="comment">% ts   = 4/(damp*wn); % Settling Time (2% criterion)</span>
+<span class="comment">% delT = log(2)/(damp*wn);</span>
+<span class="comment">% N = log(2)*wd/(2*pi*damp*wn);</span>
+
+
+<span class="comment">% Long</span>
+wdLong   = imag(eVal(3,3));
+wnLong   = sqrt((real(eVal(3,3)))^2+(wdLong)^2);
+dampLong = abs(real(eVal(3,3))/wnLong);
+delTLong = abs(log(2)/(real(eVal(3,3))));
+NLong = abs(log(2)*wdLong/(2*pi*real(eVal(3,3))));
+</pre><h2 id="5">b)</h2><pre class="codeinput">x0 = zeros(4,1);
+sys = ss(A,B,C,D);
+[h, t] = impulse(sys);
+figure(1)
+sgtitle(<span class="string">'Impulse Response of Linear Longitudinal Dynamics'</span>)
+subplot(4,1,1)
+plot(t,h(:,1))
+ylabel(<span class="string">'\Delta u [ft/s]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>);
+hold <span class="string">on</span>,
+[pks, locs] = findpeaks(abs(h(:,1)));
+a2     =-log(pks(1)/pks(end)) /(t(1) - t(end));
+a1     = pks(end)/(exp(-a2*t(end)));
+dampeq =a1*exp(-a2*t);
+plot(t,dampeq)
+
+delTGraphu = log(pks(1)/2/a1)/-a2 ;
+
+
+subplot(4,1,2)
+plot(t,h(:,2))
+ylabel(<span class="string">'\Delta  \alpha [rad^-1]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>);
+xlim([0, 200])
+subplot(4,1,3)
+plot(t,h(:,3))
+ylabel(<span class="string">'\Delta q [rad/sec] '</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+subplot(4,1,4)
+plot(t,h(:,4))
+ylabel(<span class="string">'\Delta \theta [ft/s]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+
+
+
+
+
+
+
+
+[hs, ts] = step(sys);
+figure(2)
+sgtitle(<span class="string">'Step Response of Linear Longitudinal Dynamics'</span>)
+subplot(4,1,1)
+plot(ts,hs(:,1))
+ylabel(<span class="string">'\Delta u [ft/s]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+subplot(4,1,2)
+plot(ts,hs(:,2))
+ylabel(<span class="string">'\Delta  \alpha [rad^-1]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+subplot(4,1,3)
+plot(ts,hs(:,3))
+ylabel(<span class="string">'\Delta q [rad/sec] '</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+subplot(4,1,4)
+plot(ts,hs(:,4))
+ylabel(<span class="string">'\Delta \theta [ft/s]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+</pre><img vspace="5" hspace="5" src="hw6p1_01.png" alt=""> <img vspace="5" hspace="5" src="hw6p1_02.png" alt=""> <h2 id="6">Problem 2</h2><pre class="codeinput">M2 = [u1 0;
+    -Madot 1];
+R2 = [Za u1;
+    Ma Mq];
+A2 = inv(M2)*R2;
+
+[eVec2,eVal2] = eig(A2);
+
+wd2   = imag(eVal2(1,1));
+wn2   = sqrt((real(eVal2(1,1)))^2+(wd2)^2);
+damp2 = abs(real(eVal2(1,1))/wn2);
+delT2 = abs(log(2)/(real(eVal2(1,1))));
+N2    = abs(log(2)*wd2/(2*pi*real(eVal2(1,1))));
+
+
+
+<span class="comment">% b)</span>
+
+F2 = [Zde;
+    Mde];
+B2 = inv(M2)*F2;
+C2 =eye(2);
+D2 = zeros(2,1);
+
+sys2 = ss(A2,B2,C2,D2);
+
+[h2, t2] = impulse(sys2);
+figure(3)
+sgtitle(<span class="string">'Impulse Response of Short Period Mode'</span>)
+subplot(2,1,1)
+plot(t2,h2(:,1))
+ylabel(<span class="string">'\Delta \alpha [rad^-1]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+subplot(2,1,2)
+plot(t2,h2(:,2))
+ylabel(<span class="string">'\Delta  q [rad/sec]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+
+[h2s, t2s] = step(sys2);
+figure(4)
+sgtitle(<span class="string">'Step Response of Short Period Mode'</span>)
+subplot(2,1,1)
+plot(t2s,h2s(:,1))
+ylabel(<span class="string">'\Delta \alpha [rad^-1]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+subplot(2,1,2)
+plot(t2s,h2s(:,2))
+ylabel(<span class="string">'\Delta  q [rad/sec]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+</pre><img vspace="5" hspace="5" src="hw6p1_03.png" alt=""> <img vspace="5" hspace="5" src="hw6p1_04.png" alt=""> <h2 id="7">Problem 3</h2><p>a)</p><pre class="codeinput">A3 = [Xu+XTu -g;
+    -Zu/u1 0];
+F3 = [Xde;
+    -Zde/u1];
+B3 = F3;
+C3 = eye(2);
+D3 = 0;
+
+[eVec3,eVal3] = eig(A3);
+
+wd3   = imag(eVal3(1,1));
+wn3   = sqrt((real(eVal3(1,1)))^2+(wd3)^2);
+damp3 = abs(real(eVal3(1,1))/wn2);
+delT3 = abs(log(2)/(real(eVal3(1,1))));
+N3    = abs(log(2)*wd3/(2*pi*real(eVal3(1,1))));
+
+
+sys3 = ss(A3,B3,C3,D3);
+
+[h3, t3] = impulse(sys3);
+figure(5)
+sgtitle(<span class="string">'Impulse Response of Phugoid(long period) Mode'</span>)
+subplot(2,1,1)
+plot(t3,h3(:,1))
+ylabel(<span class="string">'\Delta u [rad^-1]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+subplot(2,1,2)
+plot(t3,h3(:,2))
+ylabel(<span class="string">'\Delta  \theta [rad/sec]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+
+[h3s, t3s] = step(sys3);
+figure(6)
+sgtitle(<span class="string">'Step Response of Phugoid(long period) Mode'</span>)
+subplot(2,1,1)
+plot(t3s,h3s(:,1))
+ylabel(<span class="string">'\Delta u [rad^-1]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+subplot(2,1,2)
+plot(t3s,h3s(:,2))
+ylabel(<span class="string">'\Delta  \theta [rad/sec]'</span>);
+xlabel(<span class="string">'Time [seconds]'</span>)
+</pre><img vspace="5" hspace="5" src="hw6p1_05.png" alt=""> <img vspace="5" hspace="5" src="hw6p1_06.png" alt=""> <h2 id="8">Print Answers</h2><pre class="codeinput">fprintf(<span class="string">'\nNumber 1 \n'</span>);
+fprintf(<span class="string">'Short Period\n'</span>);
+fprintf(<span class="string">'---------------------------\n'</span>);
+fprintf(<span class="string">'Damped Frequency: %f [rad/s]\n'</span>, wd);
+fprintf(<span class="string">'Natural Frequency: %f [rad/s]\n'</span>, wn);
+fprintf(<span class="string">'Damping Ratio: %f \n'</span>, damp);
+fprintf(<span class="string">'Time to Damp to Half the initial Amplitude: %f [sec]\n'</span>, delT);
+fprintf(<span class="string">'Cycle to Damp to Half the initial Amplitude: %f [cycle]\n'</span>, N);
+fprintf(<span class="string">'\nLong Period\n'</span>);
+fprintf(<span class="string">'---------------------------\n'</span>);
+fprintf(<span class="string">'Damped Frequency: %f [rad/s]\n'</span>, wdLong);
+fprintf(<span class="string">'Natural Frequency: %f [rad/s]\n'</span>, wnLong);
+fprintf(<span class="string">'Damping Ratio: %f \n'</span>, dampLong);
+fprintf(<span class="string">'Time to damp to half the initial Amplitude: %f [sec]\n'</span>, delTLong);
+fprintf(<span class="string">'Cycle to damp to half the initial Amplitude: %f [cycle]\n'</span>, NLong);
+
+fprintf(<span class="string">'\nNumber 2 \n'</span>);
+fprintf(<span class="string">'---------------------------\n'</span>);
+fprintf(<span class="string">'Damped Frequency: %f [rad/s]\n'</span>, wd2);
+fprintf(<span class="string">'Natural Frequency: %f [rad/s]\n'</span>, wn2);
+fprintf(<span class="string">'Damping Ratio: %f \n'</span>, damp2);
+fprintf(<span class="string">'Time to Damp to Half the initial Amplitude: %f [sec]\n'</span>, delT2);
+fprintf(<span class="string">'Cycle to Damp to Half the initial Amplitude: %f [cycle]\n'</span>, N2);
+
+
+
+fprintf(<span class="string">'\nNumber 3 \n'</span>);
+fprintf(<span class="string">'---------------------------\n'</span>);
+fprintf(<span class="string">'Damped Frequency: %f [rad/s]\n'</span>, wd3);
+fprintf(<span class="string">'Natural Frequency: %f [rad/s]\n'</span>, wn3);
+fprintf(<span class="string">'Damping Ratio: %f \n'</span>, damp3);
+fprintf(<span class="string">'Time to Damp to Half the initial Amplitude: %f [sec]\n'</span>, delT3);
+fprintf(<span class="string">'Cycle to Damp to Half the initial Amplitude: %f [cycle]\n'</span>, N3);
+</pre><pre class="codeoutput">
+Number 1 
+Short Period
+---------------------------
+Damped Frequency: 0.682998 [rad/s]
+Natural Frequency: 0.853890 [rad/s]
+Damping Ratio: 0.600178 
+Time to Damp to Half the initial Amplitude: 1.352520 [sec]
+Cycle to Damp to Half the initial Amplitude: 0.147022 [cycle]
+
+Long Period
+---------------------------
+Damped Frequency: 0.132028 [rad/s]
+Natural Frequency: 0.132039 [rad/s]
+Damping Ratio: 0.012647 
+Time to damp to half the initial Amplitude: 415.083320 [sec]
+Cycle to damp to half the initial Amplitude: 8.722113 [cycle]
+
+Number 2 
+---------------------------
+Damped Frequency: 0.702656 [rad/s]
+Natural Frequency: 0.870800 [rad/s]
+Damping Ratio: 0.590676 
+Time to Damp to Half the initial Amplitude: 1.347591 [sec]
+Cycle to Damp to Half the initial Amplitude: 0.150703 [cycle]
+
+Number 3 
+---------------------------
+Damped Frequency: 0.146263 [rad/s]
+Natural Frequency: 0.146565 [rad/s]
+Damping Ratio: 0.010795 
+Time to Damp to Half the initial Amplitude: 73.739062 [sec]
+Cycle to Damp to Half the initial Amplitude: 1.716537 [cycle]
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clear all;
+close all;
+clc;
+
+Xu     =-0.0188;
+XTu    = 0;
+Xa     = 11.5905;
+Xde    = 0;
+Zu     = -0.1862;
+Za     = -149.4408;
+Zq     = -6.8045;
+Zadot  = -8.4426;
+Zde    = -8.7058;
+Mu     = 0.0001;
+MTu    = 0;
+Ma     = -0.5294;
+MTa    = 0;
+Mq     = -0.4275;
+Madot  = -0.0658;
+Mde    = -0.5630;
+u1     = 279.1094; % ft/s
+theta1 = 0;
+g = 32.2; % ft/s^2
+%% Set Up Matrix A, B C, D
+
+R = [Xu+XTu Xa 0 -g*cos(theta1);...
+    Zu Za u1+Zq -g*sin(theta1);...
+    Mu+MTu Ma+MTa Mq 0;...
+    0 0 1 0];
+
+M = [1 0 0 0;
+    0 u1-Zadot 0 0;...
+    0 -Madot 1 0;...
+    0 0 0 1];
+
+F = [Xde; Zde; Mde; 0];
+
+A = inv(M)*R;
+B = inv(M)*F;
+
+C = eye(4);
+
+D = zeros(4,1);
+
+
+%% eig Vectors and Values
+[eVec,eVal] = eig(A);
+
+% Make them unitless
+eVecUnitless = eVec;
+eVecUnitless(1,:) = eVec(1,:)/u1;
+eVecUnitless(3,:) = eVec(3,:)/20; % Not sure how we get 20?
+% eVecUnitless
+
+% Normalize respect to delta theta
+
+eVec12 = abs(eVecUnitless(:,1)/eVecUnitless(4,1));
+eVec34 = abs(eVecUnitless(:,3)/eVecUnitless(4,3));
+
+
+%% Answer Questions
+
+% Short
+wd   = imag(eVal(1,1));
+wn   = sqrt((real(eVal(1,1)))^2+(wd)^2);
+damp = abs(real(eVal(1,1))/wn);
+delT = abs(log(2)/(real(eVal(1,1))));
+N = abs(log(2)*wd/(2*pi*real(eVal(1,1))));
+% charEqShort=conv([1 -eVal(1,1)],[1 -eVal(2,2)]);
+% wn   = sqrt(charEqShort(end));
+% damp = charEqShort(2)/2/wn;
+% wd   = wn*sqrt(1-damp^2);
+% beta = atan(sqrt(1-damp^2)/damp);
+% tr   = (pi-beta)/wd; % Rise time (0-100%)
+% tp   = pi/wd;% Peak Time
+% Mp   = exp(-damp*pi/sqrt(1-damp^2)); % Maximum overshoot
+% ts   = 4/(damp*wn); % Settling Time (2% criterion)
+% delT = log(2)/(damp*wn);
+% N = log(2)*wd/(2*pi*damp*wn);
+
+
+% Long
+wdLong   = imag(eVal(3,3));
+wnLong   = sqrt((real(eVal(3,3)))^2+(wdLong)^2);
+dampLong = abs(real(eVal(3,3))/wnLong);
+delTLong = abs(log(2)/(real(eVal(3,3))));
+NLong = abs(log(2)*wdLong/(2*pi*real(eVal(3,3))));
+
+%% b)
+x0 = zeros(4,1);
+sys = ss(A,B,C,D);
+[h, t] = impulse(sys);
+figure(1)
+sgtitle('Impulse Response of Linear Longitudinal Dynamics')
+subplot(4,1,1)
+plot(t,h(:,1))
+ylabel('\Delta u [ft/s]');
+xlabel('Time [seconds]');
+hold on,
+[pks, locs] = findpeaks(abs(h(:,1)));
+a2     =-log(pks(1)/pks(end)) /(t(1) - t(end));
+a1     = pks(end)/(exp(-a2*t(end)));
+dampeq =a1*exp(-a2*t);
+plot(t,dampeq)
+
+delTGraphu = log(pks(1)/2/a1)/-a2 ;
+
+
+subplot(4,1,2)
+plot(t,h(:,2))
+ylabel('\Delta  \alpha [rad^-1]');
+xlabel('Time [seconds]');
+xlim([0, 200])
+subplot(4,1,3)
+plot(t,h(:,3))
+ylabel('\Delta q [rad/sec] ');
+xlabel('Time [seconds]')
+subplot(4,1,4)
+plot(t,h(:,4))
+ylabel('\Delta \theta [ft/s]');
+xlabel('Time [seconds]')
+
+
+
+
+
+
+
+
+[hs, ts] = step(sys);
+figure(2)
+sgtitle('Step Response of Linear Longitudinal Dynamics')
+subplot(4,1,1)
+plot(ts,hs(:,1))
+ylabel('\Delta u [ft/s]');
+xlabel('Time [seconds]')
+subplot(4,1,2)
+plot(ts,hs(:,2))
+ylabel('\Delta  \alpha [rad^-1]');
+xlabel('Time [seconds]')
+subplot(4,1,3)
+plot(ts,hs(:,3))
+ylabel('\Delta q [rad/sec] ');
+xlabel('Time [seconds]')
+subplot(4,1,4)
+plot(ts,hs(:,4))
+ylabel('\Delta \theta [ft/s]');
+xlabel('Time [seconds]')
+
+%% Problem 2
+
+M2 = [u1 0;
+    -Madot 1];
+R2 = [Za u1;
+    Ma Mq];
+A2 = inv(M2)*R2;
+
+[eVec2,eVal2] = eig(A2);
+
+wd2   = imag(eVal2(1,1));
+wn2   = sqrt((real(eVal2(1,1)))^2+(wd2)^2);
+damp2 = abs(real(eVal2(1,1))/wn2);
+delT2 = abs(log(2)/(real(eVal2(1,1))));
+N2    = abs(log(2)*wd2/(2*pi*real(eVal2(1,1))));
+
+
+
+% b)
+
+F2 = [Zde;
+    Mde];
+B2 = inv(M2)*F2;
+C2 =eye(2);
+D2 = zeros(2,1);
+
+sys2 = ss(A2,B2,C2,D2);
+
+[h2, t2] = impulse(sys2);
+figure(3)
+sgtitle('Impulse Response of Short Period Mode')
+subplot(2,1,1)
+plot(t2,h2(:,1))
+ylabel('\Delta \alpha [rad^-1]');
+xlabel('Time [seconds]')
+subplot(2,1,2)
+plot(t2,h2(:,2))
+ylabel('\Delta  q [rad/sec]');
+xlabel('Time [seconds]')
+
+[h2s, t2s] = step(sys2);
+figure(4)
+sgtitle('Step Response of Short Period Mode')
+subplot(2,1,1)
+plot(t2s,h2s(:,1))
+ylabel('\Delta \alpha [rad^-1]');
+xlabel('Time [seconds]')
+subplot(2,1,2)
+plot(t2s,h2s(:,2))
+ylabel('\Delta  q [rad/sec]');
+xlabel('Time [seconds]')
+
+
+%% Problem 3
+% a)
+A3 = [Xu+XTu -g;
+    -Zu/u1 0];
+F3 = [Xde;
+    -Zde/u1];
+B3 = F3;
+C3 = eye(2);
+D3 = 0;
+
+[eVec3,eVal3] = eig(A3);
+
+wd3   = imag(eVal3(1,1));
+wn3   = sqrt((real(eVal3(1,1)))^2+(wd3)^2);
+damp3 = abs(real(eVal3(1,1))/wn2);
+delT3 = abs(log(2)/(real(eVal3(1,1))));
+N3    = abs(log(2)*wd3/(2*pi*real(eVal3(1,1))));
+
+
+sys3 = ss(A3,B3,C3,D3);
+
+[h3, t3] = impulse(sys3);
+figure(5)
+sgtitle('Impulse Response of Phugoid(long period) Mode')
+subplot(2,1,1)
+plot(t3,h3(:,1))
+ylabel('\Delta u [rad^-1]');
+xlabel('Time [seconds]')
+subplot(2,1,2)
+plot(t3,h3(:,2))
+ylabel('\Delta  \theta [rad/sec]');
+xlabel('Time [seconds]')
+
+[h3s, t3s] = step(sys3);
+figure(6)
+sgtitle('Step Response of Phugoid(long period) Mode')
+subplot(2,1,1)
+plot(t3s,h3s(:,1))
+ylabel('\Delta u [rad^-1]');
+xlabel('Time [seconds]')
+subplot(2,1,2)
+plot(t3s,h3s(:,2))
+ylabel('\Delta  \theta [rad/sec]');
+xlabel('Time [seconds]')
+
+
+%% Print Answers
+fprintf('\nNumber 1 \n');
+fprintf('Short Period\n');
+fprintf('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-\n');
+fprintf('Damped Frequency: %f [rad/s]\n', wd);
+fprintf('Natural Frequency: %f [rad/s]\n', wn);
+fprintf('Damping Ratio: %f \n', damp);
+fprintf('Time to Damp to Half the initial Amplitude: %f [sec]\n', delT);
+fprintf('Cycle to Damp to Half the initial Amplitude: %f [cycle]\n', N);
+fprintf('\nLong Period\n');
+fprintf('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-\n');
+fprintf('Damped Frequency: %f [rad/s]\n', wdLong);
+fprintf('Natural Frequency: %f [rad/s]\n', wnLong);
+fprintf('Damping Ratio: %f \n', dampLong);
+fprintf('Time to damp to half the initial Amplitude: %f [sec]\n', delTLong);
+fprintf('Cycle to damp to half the initial Amplitude: %f [cycle]\n', NLong);
+
+fprintf('\nNumber 2 \n');
+fprintf('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-\n');
+fprintf('Damped Frequency: %f [rad/s]\n', wd2);
+fprintf('Natural Frequency: %f [rad/s]\n', wn2);
+fprintf('Damping Ratio: %f \n', damp2);
+fprintf('Time to Damp to Half the initial Amplitude: %f [sec]\n', delT2);
+fprintf('Cycle to Damp to Half the initial Amplitude: %f [cycle]\n', N2);
+
+
+
+fprintf('\nNumber 3 \n');
+fprintf('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-\n');
+fprintf('Damped Frequency: %f [rad/s]\n', wd3);
+fprintf('Natural Frequency: %f [rad/s]\n', wn3);
+fprintf('Damping Ratio: %f \n', damp3);
+fprintf('Time to Damp to Half the initial Amplitude: %f [sec]\n', delT3);
+fprintf('Cycle to Damp to Half the initial Amplitude: %f [cycle]\n', N3);
+
+##### SOURCE END #####
+--></body></html>
