@@ -35,8 +35,8 @@
 
 R  = 2; % for iq2if. (Given)
 IVecResampled = interp(IVec,R);
-QVecResampled = interp(Qvec,R);
+QVecResampled = interp(QVec,R);
 T=Tl/2;
 n=(0:length(IVecResampled)-1)';
-xVec = IVecResampled*cos(2*pi*fIF*n*T)-QVecResampled*sin(2*pi*fIF*n*T); 
+xVec = IVecResampled.*cos(2*pi*fIF*n*T)-QVecResampled.*sin(2*pi*fIF*n*T); 
  
