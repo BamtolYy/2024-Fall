@@ -32,3 +32,14 @@
  %
  %
  %+==============================================================================+
+
+Tl        = 2*T; % Quadrature sampling interval
+r         = Tl/T; % Decimation factor
+n         = (0:length(xVec)-1)';
+InPhaComp = xVec*2*cos(2*pi*fIF*n*T); % In-phase component or I; Unfiltered;
+QuadComp  = xVec*2*sin(2*pi*fIF*n*T); % Quadrature component or Q; Unfiltered;
+
+% By default, decimate uses a lowpass Chebyshev Type I infinite 
+% impulse response (IIR) filter of order 8.
+Ivec =decimate (InPhaComp,r); 
+QVec =decimate(QuadComp,r);
