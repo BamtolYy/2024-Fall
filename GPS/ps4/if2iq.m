@@ -41,5 +41,5 @@ QuadComp  = xVec.*2.*sin(2*pi*fIF*n*T); % Quadrature component or Q; Unfiltered;
 
 % By default, decimate uses a lowpass Chebyshev Type I infinite 
 % impulse response (IIR) filter of order 8.
-IVec =decimate (InPhaComp,r); 
-QVec =decimate(QuadComp,r);
+IVec = decimate(InPhaComp,r); 
+QVec = decimate(QuadComp,r);
