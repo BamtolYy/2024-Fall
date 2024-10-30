@@ -32,13 +32,12 @@ grid on;
 shg;
 xlabel('Frequency (MHz)');
 ylabel('Power density (dB/Hz)');
-title('Power spectral density estimate of Complex Data');
+title('Power spectral density estimate from complex data');
 shg;
 
 %% Convert to Bandpass Signal
 Tl = 1/fsampIQ;
 [xVec] = iq2if(real(Y),imag(Y),Tl,fIF);
-xVec = xVec;
 [Syy2,fVec2] = pwelch(xVec,hann(nfft),[],nfft,2*fsampIQ);
 %----- Plot results
 figure,

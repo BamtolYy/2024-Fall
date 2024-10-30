@@ -1,0 +1,168 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>if2iq</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-10-29"><meta name="DC.source" content="if2iq.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"> <span class="keyword">function</span> [IVec,QVec] = if2iq(xVec,T,fIF)
+ <span class="comment">% IF2IQ : Convert intermediate frequency samples to baseband I and Q samples.</span>
+ <span class="comment">%</span>
+ <span class="comment">% Let x(n) = I(n*T)*cos(2*pi*fIF*n*T)- Q(n*T)*sin(2*pi*fIF*n*T) be a</span>
+ <span class="comment">% discrete-time bandpass signal centered at the user-specified intermediate</span>
+ <span class="comment">% frequency fIF, where T is the bandpass sampling interval. Then this</span>
+ <span class="comment">% function converts the bandpass samples to quadrature samples from a complex</span>
+ <span class="comment">% discrete-time baseband representation of the form xl(m*Tl) = I(m*Tl) +</span>
+ <span class="comment">% j*Q(m*Tl), where Tl = 2*T.</span>
+ <span class="comment">%</span>
+ <span class="comment">%</span>
+ <span class="comment">% INPUTS</span>
+ <span class="comment">%</span>
+ <span class="comment">% xVec-------- N-by-1 vector of intermediate frequency samples with</span>
+ <span class="comment">%              sampling interval T.</span>
+ <span class="comment">%</span>
+ <span class="comment">% T----------- Sampling interval of intermediate frequency samples, in</span>
+ <span class="comment">%              seconds.</span>
+ <span class="comment">%</span>
+ <span class="comment">% fIF--------- Intermediate frequency of the bandpass signal, in Hz.</span>
+ <span class="comment">%</span>
+ <span class="comment">%</span>
+ <span class="comment">% OUTPUTS</span>
+ <span class="comment">%</span>
+ <span class="comment">% IVec-------- N/2-by-1 vector of in-phase baseband samples.</span>
+ <span class="comment">%</span>
+ <span class="comment">% QVec-------- N/2-by-1 vector of quadrature baseband samples.</span>
+ <span class="comment">%</span>
+ <span class="comment">%</span>
+ <span class="comment">%+------------------------------------------------------------------------------+</span>
+ <span class="comment">% References:</span>
+ <span class="comment">%</span>
+ <span class="comment">%</span>
+ <span class="comment">%+==============================================================================+</span>
+
+Tl        = 2*T; <span class="comment">% Quadrature sampling interval</span>
+r         = Tl/T; <span class="comment">% Decimation factor</span>
+n         = (0:length(xVec)-1)';
+InPhaComp = xVec.*2.*cos(2*pi*fIF*n*T); <span class="comment">% In-phase component or I; Unfiltered;</span>
+QuadComp  = xVec.*2.*sin(2*pi*fIF*n*T); <span class="comment">% Quadrature component or Q; Unfiltered;</span>
+
+<span class="comment">% By default, decimate uses a lowpass Chebyshev Type I infinite</span>
+<span class="comment">% impulse response (IIR) filter of order 8.</span>
+IVec = decimate(InPhaComp,r);
+QVec = decimate(QuadComp,r);
+</pre><pre class="codeoutput error">Not enough input arguments.
+
+Error in if2iq (line 36)
+Tl        = 2*T; % Quadrature sampling interval
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+ function [IVec,QVec] = if2iq(xVec,T,fIF)
+ % IF2IQ : Convert intermediate frequency samples to baseband I and Q samples.
+ %
+ % Let x(n) = I(n*T)*cos(2*pi*fIF*n*T)- Q(n*T)*sin(2*pi*fIF*n*T) be a
+ % discrete-time bandpass signal centered at the user-specified intermediate
+ % frequency fIF, where T is the bandpass sampling interval. Then this
+ % function converts the bandpass samples to quadrature samples from a complex
+ % discrete-time baseband representation of the form xl(m*Tl) = I(m*Tl) +
+ % j*Q(m*Tl), where Tl = 2*T.
+ %
+ %
+ % INPUTS
+ %
+ % xVecREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH N-by-1 vector of intermediate frequency samples with
+ %              sampling interval T.
+ %
+ % TREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Sampling interval of intermediate frequency samples, in
+ %              seconds.
+ %
+ % fIFREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Intermediate frequency of the bandpass signal, in Hz.
+ %
+ %
+ % OUTPUTS
+ %
+ % IVecREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH N/2-by-1 vector of in-phase baseband samples.
+ %
+ % QVecREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH N/2-by-1 vector of quadrature baseband samples.
+ %
+ %
+ %+REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH+
+ % References:
+ %
+ %
+ %+==============================================================================+
+
+Tl        = 2*T; % Quadrature sampling interval
+r         = Tl/T; % Decimation factor
+n         = (0:length(xVec)-1)';
+InPhaComp = xVec.*2.*cos(2*pi*fIF*n*T); % In-phase component or I; Unfiltered;
+QuadComp  = xVec.*2.*sin(2*pi*fIF*n*T); % Quadrature component or Q; Unfiltered;
+
+% By default, decimate uses a lowpass Chebyshev Type I infinite 
+% impulse response (IIR) filter of order 8.
+IVec = decimate(InPhaComp,r); 
+QVec = decimate(QuadComp,r);
+
+##### SOURCE END #####
+--></body></html>
