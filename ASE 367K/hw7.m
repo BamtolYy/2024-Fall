@@ -1,16 +1,16 @@
 clear all; close all; clc;
-m= 636636;
-Ixx = 1.82*10^7*32.1740486;
-Izz = 4.97*10^7*32.1740486;
-Ixz = 9.70*10^5*32.1740486;
-S = 5500;
-b = 195.7;
-u1 = 202.537183; %ft/s
-theta = 2.4/180*pi;
-rho = 1.2673*10^-3*32.1740486;
-q = 1/2*rho*u1^2;
-g = 32.17405;
 
+Ixx = 1.82*10^7; %slugs-ft^2
+Izz = 4.97*10^7; %slugs-ft^2
+Ixz = 9.70*10^5; %slugs-ft^2
+S = 5500; %ft^2
+b = 195.7; %ft
+u1 = 275; %ft/s Mach 0.25 at Sea Level
+theta = 2.4/180*pi; % rad Arbitrary
+rho = 0.002378; % slugs/ft^3
+q = 1/2*rho*u1^2;
+g = 32.17405; % ft/s^2
+m= 636636/g; % lb
 
 %% Dimensional stability Derivatives
 Cyb=-0.96;
@@ -130,7 +130,7 @@ t = 0:0.01:50;
 figure,
 impRud(2,:) = zeros(length(t),1);
 impRud(1,:) = zeros(length(t),1);
-impRud(2,1) = 1/180*pi; % rad
+impRud(2,1) = 20/180*pi; % rad
 impRudResponse = lsim(sys,impRud,t);
 impRudResponse(:,2) = impRudResponse(:,2)*b/(2*u1);
 impRudResponse(:,3) = impRudResponse(:,3)*b/(2*u1);

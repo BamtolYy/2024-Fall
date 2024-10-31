@@ -68,17 +68,18 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Dimensional stability Derivatives</a></li><li><a href="#3">Set up state space equation</a></li><li><a href="#4">Problem 1 a)</a></li><li><a href="#5">Problem 1 b)</a></li><li><a href="#6">Dutch Roll Approximation</a></li><li><a href="#7">Problem 2a)</a></li><li><a href="#8">Problem 2b)</a></li></ul></div><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>; clc;
-m= 636636;
-Ixx = 1.82*10^7*32.1740486;
-Izz = 4.97*10^7*32.1740486;
-Ixz = 9.70*10^5*32.1740486;
-S = 5500;
-b = 195.7;
-u1 = 202.537183; <span class="comment">%ft/s</span>
-theta = 2.4/180*pi;
-rho = 1.2673*10^-3*32.1740486;
+
+Ixx = 1.82*10^7*32.1740486; <span class="comment">%lb-ft^2</span>
+Izz = 4.97*10^7*32.1740486; <span class="comment">%lb-ft^2</span>
+Ixz = 9.70*10^5*32.1740486; <span class="comment">%lb-ft^2</span>
+S = 5500; <span class="comment">%ft^2</span>
+b = 195.7; <span class="comment">%ft</span>
+u1 = 202.537183; <span class="comment">%ft/s Mach 0.25 at Sea Level</span>
+theta = 2.4/180*pi; <span class="comment">% rad Arbitrary</span>
+rho = 0.0765; <span class="comment">% lb/ft^3</span>
 q = 1/2*rho*u1^2;
-g = 32.17405;
+g = 32.17405; <span class="comment">% ft/s^2</span>
+m= 636636/g; <span class="comment">% lb</span>
 </pre><h2 id="2">Dimensional stability Derivatives</h2><pre class="codeinput">Cyb=-0.96;
 Clb=-0.221;
 Cnb=0.15;
@@ -184,21 +185,21 @@ fprintf(<span class="string">"Time to damp to half the initial amplitude: %f\n"<
 fprintf(<span class="string">"The number of cycles to damp to half the initial amplitude: %f\n"</span>,NSpiral)
 </pre><pre class="codeoutput">Roll-----------------------------------------------------------
 Damped Frequency: 0.000000
-Natural Frequency: 0.530864
+Natural Frequency: 2.042550
 Damping ratio: 1.000000
-Time to damp to half the initial amplitude: 1.305698
+Time to damp to half the initial amplitude: 0.339354
 The number of cycles to damp to half the initial amplitude: 0.000000
 Dutch Roll-----------------------------------------------------
-Damped Frequency: 0.406406
-Natural Frequency: 0.410465
-Damping ratio: 0.140276
-Time to damp to half the initial amplitude: 12.038320
-The number of cycles to damp to half the initial amplitude: 0.778657
+Damped Frequency: 0.216687
+Natural Frequency: 0.445681
+Damping ratio: 0.873852
+Time to damp to half the initial amplitude: 1.779769
+The number of cycles to damp to half the initial amplitude: 0.061379
 Sprial --------------------------------------------------------
 Damped Frequency: 0.000000
-Natural Frequency: 0.035054
+Natural Frequency: 0.027202
 Damping ratio: 1.000000
-Time to damp to half the initial amplitude: 19.773868
+Time to damp to half the initial amplitude: 25.481548
 The number of cycles to damp to half the initial amplitude: 0.000000
 </pre><h2 id="5">Problem 1 b)</h2><pre class="codeinput">sys = ss(A,B,C,D);
 
@@ -207,7 +208,7 @@ t = 0:0.01:50;
 figure,
 impRud(2,:) = zeros(length(t),1);
 impRud(1,:) = zeros(length(t),1);
-impRud(2,1) = 1/180*pi; <span class="comment">% rad</span>
+impRud(2,1) = 20/180*pi; <span class="comment">% rad</span>
 impRudResponse = lsim(sys,impRud,t);
 impRudResponse(:,2) = impRudResponse(:,2)*b/(2*u1);
 impRudResponse(:,3) = impRudResponse(:,3)*b/(2*u1);
@@ -301,11 +302,11 @@ fprintf(<span class="string">"Damping ratio: %f\n"</span>, damp2)
 fprintf(<span class="string">"Time to damp to half the initial amplitude: %f\n"</span>, delT2)
 fprintf(<span class="string">"The number of cycles to damp to half the initial amplitude: %f\n"</span>,N2)
 </pre><pre class="codeoutput">Dutch Roll Approximation --------------------------------------
-Damped Frequency: 0.289620
-Natural Frequency: 0.295354
-Damping ratio: 0.196095
-Time to damp to half the initial amplitude: 11.967860
-The number of cycles to damp to half the initial amplitude: 0.551651
+Damped Frequency: 0.000000
+Natural Frequency: 0.689106
+Damping ratio: 1.610991
+Time to damp to half the initial amplitude: 0.349983
+The number of cycles to damp to half the initial amplitude: 0.000000
 </pre><h2 id="8">Problem 2b)</h2><pre class="codeinput">sys2 = ss(A2,B2,C2,D2);
 
 t2 = 0:0.01:100;
@@ -337,21 +338,21 @@ plot(t2,stepResponse(:,2))
 ylabel(<span class="string">'\Delta r (rad^{-1})'</span>)
 xlabel(<span class="string">'Time (seconds)'</span>)
 sgtitle(<span class="string">'Dutch Roll Approximation Step Response'</span>)
-</pre><img vspace="5" hspace="5" src="hw7_05.png" alt=""> <img vspace="5" hspace="5" src="hw7_06.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+</pre><img vspace="5" hspace="5" src="hw7_05.png" alt=""> <img vspace="5" hspace="5" src="hw7_06.png" alt=""> <img vspace="5" hspace="5" src="hw7_07.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 clear all; close all; clc;
-m= 636636;
-Ixx = 1.82*10^7*32.1740486;
-Izz = 4.97*10^7*32.1740486;
-Ixz = 9.70*10^5*32.1740486;
-S = 5500;
-b = 195.7;
-u1 = 202.537183; %ft/s
-theta = 2.4/180*pi;
-rho = 1.2673*10^-3*32.1740486;
-q = 1/2*rho*u1^2;
-g = 32.17405;
 
+Ixx = 1.82*10^7*32.1740486; %lb-ft^2
+Izz = 4.97*10^7*32.1740486; %lb-ft^2
+Ixz = 9.70*10^5*32.1740486; %lb-ft^2
+S = 5500; %ft^2
+b = 195.7; %ft
+u1 = 202.537183; %ft/s Mach 0.25 at Sea Level
+theta = 2.4/180*pi; % rad Arbitrary
+rho = 0.0765; % lb/ft^3
+q = 1/2*rho*u1^2;
+g = 32.17405; % ft/s^2
+m= 636636/g; % lb
 
 %% Dimensional stability Derivatives
 Cyb=-0.96;
@@ -471,7 +472,7 @@ t = 0:0.01:50;
 figure,
 impRud(2,:) = zeros(length(t),1);
 impRud(1,:) = zeros(length(t),1);
-impRud(2,1) = 1/180*pi; % rad
+impRud(2,1) = 20/180*pi; % rad
 impRudResponse = lsim(sys,impRud,t);
 impRudResponse(:,2) = impRudResponse(:,2)*b/(2*u1);
 impRudResponse(:,3) = impRudResponse(:,3)*b/(2*u1);
