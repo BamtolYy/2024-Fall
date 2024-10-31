@@ -1,0 +1,609 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>hw7</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-10-31"><meta name="DC.source" content="hw7.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Dimensional stability Derivatives</a></li><li><a href="#3">Set up state space equation</a></li><li><a href="#4">Problem 1 a)</a></li><li><a href="#5">Problem 1 b)</a></li><li><a href="#6">Dutch Roll Approximation</a></li><li><a href="#7">Problem 2a)</a></li><li><a href="#8">Problem 2b)</a></li></ul></div><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>; clc;
+m= 636636;
+Ixx = 1.82*10^7*32.1740486;
+Izz = 4.97*10^7*32.1740486;
+Ixz = 9.70*10^5*32.1740486;
+S = 5500;
+b = 195.7;
+u1 = 202.537183; <span class="comment">%ft/s</span>
+theta = 2.4/180*pi;
+rho = 1.2673*10^-3*32.1740486;
+q = 1/2*rho*u1^2;
+g = 32.17405;
+</pre><h2 id="2">Dimensional stability Derivatives</h2><pre class="codeinput">Cyb=-0.96;
+Clb=-0.221;
+Cnb=0.15;
+Clp=-0.45;
+Cnp=-0.121;
+Clr=0.101;
+Cnr=-0.3;
+Clda=0.0461;
+Cnda=0.0064;
+Cydr=0.175;
+Cldr=0.007;
+Cndr=-0.109;
+Cyp = 0;
+Cyr = 0;
+Cyda = 0;
+CnTb = 0;
+CnTr = 0;
+
+
+Yb = q*S/m*Cyb;
+Yp = q*S*b/(2*m*u1)*Cyp;
+Yr = q*S*b/(2*m*u1)*Cyr;
+Yda = q*S/m*Cyda;
+Ydr = q*S/m*Cydr;
+Lb  = q*S*b/Ixx*Clb;
+Lp = q*S*b^2/(2*Ixx*u1)*Clp;
+Lr = q*S*b^2/(2*Ixx*u1)*Clr;
+Lda = q*S*b/Ixx*Clda;
+Ldr = q*S*b/Ixx*Cldr;
+Nb  = q*S*b/Izz*Cnb;
+NTb = q*S*b/Izz*CnTb;
+Np = q*S*b^2/(2*Izz*u1)*Cnp;
+Nr = q*S*b^2/(2*Izz*u1)*Cnr;
+NTr = q*S*b^2/(2*Izz*u1)*CnTr;
+Nda = q*S*b/Izz*Cnda;
+Ndr = q*S*b/Izz*Cndr;
+</pre><h2 id="3">Set up state space equation</h2><pre class="codeinput">M = [u1 0 0 0 0;
+    0 1 -Ixz/Ixx 0 0;
+    0 -Ixz/Izz 1 0 0;
+    0 0 0 1 0;
+    0 0 0 0 1];
+
+R= [Yb Yp Yr-u1 g*cos(theta) 0;
+    Lb Lp Lr 0 0;
+    Nb+NTb Np Nr+NTr 0 0;
+    0 1 tan(theta) 0 0;
+    0 0 sec(theta) 0 0];
+F = [Yda Ydr;
+    Lda Ldr;
+    Nda Ndr;
+    0 0;
+    0 0];
+
+A = inv(M)*R;
+B = inv(M)*F;
+C = eye(5);
+D = zeros(5,2);
+</pre><h2 id="4">Problem 1 a)</h2><pre class="codeinput">[eVec,eVal] = eig(A);
+
+<span class="comment">% Roll</span>
+eValRoll = eVal(:,2);
+wdRoll   = imag(eValRoll(2));
+wnRoll   = sqrt((real(eValRoll(2)))^2+(wdRoll)^2);
+dampRoll = abs(real(eValRoll(2))/wnRoll);
+delTRoll = log(2)/abs(real(eValRoll(2)));
+NRoll    = log(2)*wdRoll/abs(real(eValRoll(2))*2*pi);
+
+fprintf (<span class="string">"Roll-----------------------------------------------------------"</span>)
+fprintf (<span class="string">"\nDamped Frequency: %f\n"</span>, wdRoll)
+fprintf (<span class="string">"Natural Frequency: %f\n"</span>, wnRoll)
+fprintf(<span class="string">"Damping ratio: %f\n"</span>, dampRoll)
+fprintf(<span class="string">"Time to damp to half the initial amplitude: %f\n"</span>, delTRoll)
+fprintf(<span class="string">"The number of cycles to damp to half the initial amplitude: %f\n"</span>,NRoll)
+
+<span class="comment">% Dutch Roll</span>
+eValDutch = eVal(:,3);
+wdDutch   = imag(eValDutch(3));
+wnDutch   = sqrt((real(eValDutch(3)))^2+(wdDutch)^2);
+dampDutch = abs(real(eValDutch(3))/wnDutch);
+delTDutch = log(2)/abs(real(eValDutch(3)));
+NDutch    = log(2)*wdDutch/abs(real(eValDutch(3))*2*pi);
+
+fprintf (<span class="string">"Dutch Roll-----------------------------------------------------"</span>)
+fprintf (<span class="string">"\nDamped Frequency: %f\n"</span>, wdDutch)
+fprintf (<span class="string">"Natural Frequency: %f\n"</span>, wnDutch)
+fprintf(<span class="string">"Damping ratio: %f\n"</span>, dampDutch)
+fprintf(<span class="string">"Time to damp to half the initial amplitude: %f\n"</span>, delTDutch)
+fprintf(<span class="string">"The number of cycles to damp to half the initial amplitude: %f\n"</span>,NDutch)
+
+<span class="comment">% Spiral</span>
+eValSpiral = eVal(:,5);
+wdSpiral   = imag(eValSpiral(5));
+wnSpiral   = sqrt((real(eValSpiral(5)))^2+(wdSpiral)^2);
+dampSpiral = abs(real(eValSpiral(5))/wnSpiral);
+delTSpiral = log(2)/abs(real(eValSpiral(5)));
+NSpiral    = log(2)*wdSpiral/abs(real(eValSpiral(5))*2*pi);
+
+fprintf (<span class="string">"Sprial --------------------------------------------------------"</span>)
+fprintf (<span class="string">"\nDamped Frequency: %f\n"</span>, wdSpiral)
+fprintf (<span class="string">"Natural Frequency: %f\n"</span>, wnSpiral)
+fprintf(<span class="string">"Damping ratio: %f\n"</span>, dampSpiral)
+fprintf(<span class="string">"Time to damp to half the initial amplitude: %f\n"</span>, delTSpiral)
+fprintf(<span class="string">"The number of cycles to damp to half the initial amplitude: %f\n"</span>,NSpiral)
+</pre><pre class="codeoutput">Roll-----------------------------------------------------------
+Damped Frequency: 0.000000
+Natural Frequency: 0.530864
+Damping ratio: 1.000000
+Time to damp to half the initial amplitude: 1.305698
+The number of cycles to damp to half the initial amplitude: 0.000000
+Dutch Roll-----------------------------------------------------
+Damped Frequency: 0.406406
+Natural Frequency: 0.410465
+Damping ratio: 0.140276
+Time to damp to half the initial amplitude: 12.038320
+The number of cycles to damp to half the initial amplitude: 0.778657
+Sprial --------------------------------------------------------
+Damped Frequency: 0.000000
+Natural Frequency: 0.035054
+Damping ratio: 1.000000
+Time to damp to half the initial amplitude: 19.773868
+The number of cycles to damp to half the initial amplitude: 0.000000
+</pre><h2 id="5">Problem 1 b)</h2><pre class="codeinput">sys = ss(A,B,C,D);
+
+t = 0:0.01:50;
+
+figure,
+impRud(2,:) = zeros(length(t),1);
+impRud(1,:) = zeros(length(t),1);
+impRud(2,1) = 1/180*pi; <span class="comment">% rad</span>
+impRudResponse = lsim(sys,impRud,t);
+impRudResponse(:,2) = impRudResponse(:,2)*b/(2*u1);
+impRudResponse(:,3) = impRudResponse(:,3)*b/(2*u1);
+subplot(2,1,1)
+plot(t,impRudResponse(:,1:3))
+legend(<span class="string">'\Delta \beta'</span>, <span class="string">'\Delta p/2u1'</span>, <span class="string">'\Delta r/2u1s'</span>)
+ylabel(<span class="string">'rad^{-1}'</span>)
+xlabel(<span class="string">'Time (seconds)'</span>)
+subplot(2,1,2)
+plot(t,impRudResponse(:,4:5))
+ylabel(<span class="string">'rad^{-1}'</span>)
+xlabel(<span class="string">'Time (seconds)'</span>)
+legend(<span class="string">'\Delta \phi'</span>, <span class="string">'\Delta \psi'</span>)
+sgtitle(<span class="string">'Rudder Impulse Response'</span>)
+
+
+
+figure,
+impA(2,:) = zeros(length(t),1);
+impA(1,:) = zeros(length(t),1);
+impA(1,1) = 1/180*pi; <span class="comment">% rad</span>
+impAResponse = lsim(sys,impA,t);
+impAResponse(:,2) = impAResponse(:,2)*b/(2*u1);
+impAResponse(:,3) = impAResponse(:,3)*b/(2*u1);
+subplot(2,1,1)
+plot(t,impAResponse(:,1:3))
+legend(<span class="string">'\Delta \beta'</span>, <span class="string">'\Delta p/2u1'</span>, <span class="string">'\Delta r/2u1s'</span>)
+ylabel(<span class="string">'rad^{-1}'</span>)
+xlabel(<span class="string">'Time (seconds)'</span>)
+subplot(2,1,2)
+plot(t,impAResponse(:,4:5))
+ylabel(<span class="string">'rad^{-1}'</span>)
+xlabel(<span class="string">'Time (seconds)'</span>)
+legend(<span class="string">'\Delta \phi'</span>, <span class="string">'\Delta \psi'</span>)
+sgtitle(<span class="string">'Aerlion Impulse Response'</span>)
+
+
+stept = 0:0.01:100;
+figure,
+stepRud(2,:) = ones(length(stept),1);
+stepRud(1,:) = zeros(length(stept),1);
+stepRud(2,1:10) = 0;
+stepRudResponse = lsim(sys,stepRud,stept);
+subplot(2,1,1)
+plot(stept,stepRudResponse(:,1:3))
+ylabel(<span class="string">'rad^{-1}'</span>)
+xlabel(<span class="string">'Time (seconds)'</span>)
+legend(<span class="string">'\Delta \beta'</span>, <span class="string">'\Delta p'</span>, <span class="string">'\Delta r'</span>)
+subplot(2,1,2)
+plot(stept,stepRudResponse(:,4:5))
+ylabel(<span class="string">'rad^{-1}'</span>)
+xlabel(<span class="string">'Time (seconds)'</span>)
+legend(<span class="string">'\Delta \phi'</span>, <span class="string">'\Delta \psi'</span>)
+sgtitle(<span class="string">'Rudder Step Response'</span>)
+
+figure,
+stepA(2,:) = zeros(length(stept),1);
+stepA(1,:) = ones(length(stept),1);
+stepA(1,1:10) = 0;
+stepAResponse = lsim(sys,stepA,stept);
+subplot(2,1,1)
+plot(stept,stepAResponse(:,1:3))
+ylabel(<span class="string">'rad^{-1}'</span>)
+xlabel(<span class="string">'Time (seconds)'</span>)
+legend(<span class="string">'\Delta \beta'</span>, <span class="string">'\Delta p'</span>, <span class="string">'\Delta r'</span>)
+subplot(2,1,2)
+plot(stept,stepAResponse(:,4:5))
+ylabel(<span class="string">'rad^{-1}'</span>)
+xlabel(<span class="string">'Time (seconds)'</span>)
+legend(<span class="string">'\Delta \phi'</span>, <span class="string">'\Delta \psi'</span>)
+sgtitle(<span class="string">'Aerlion Step Response'</span>)
+</pre><img vspace="5" hspace="5" src="hw7_01.png" alt=""> <img vspace="5" hspace="5" src="hw7_02.png" alt=""> <img vspace="5" hspace="5" src="hw7_03.png" alt=""> <img vspace="5" hspace="5" src="hw7_04.png" alt=""> <h2 id="6">Dutch Roll Approximation</h2><pre class="codeinput">A2 = [Yb/u1 Yr/u1-1;
+    Nb Nr];
+B2 = [Ydr/u1;
+   Ndr];
+C2 = eye(2);
+D2  =zeros(2,1);
+[eVec2,eVal2] = eig(A2);
+</pre><h2 id="7">Problem 2a)</h2><pre class="codeinput">wd2 = imag(eVal2(1,1));
+<span class="comment">% sqrt((real(eVal2(1,1)))^2+(imag(eVal2(1,1)))^2)</span>
+<span class="comment">% real(eVal2(1,1))/sqrt((real(eVal2(1,1)))^2+(imag(eVal2(1,1)))^2)</span>
+wn2 = sqrt((Nr*Yb-Nb*Yr+Nb*u1)/u1);
+damp2 = -1/(2*wn2)*(Yb+Nr*u1)/u1;
+delT2 = log(2)/abs(real(eVal2(1,1)));
+N2    = log(2)*wd2/abs(real(eVal2(1,1))*2*pi);
+
+fprintf (<span class="string">"Dutch Roll Approximation --------------------------------------"</span>)
+fprintf (<span class="string">"\nDamped Frequency: %f\n"</span>, wd2)
+fprintf (<span class="string">"Natural Frequency: %f\n"</span>, wn2)
+fprintf(<span class="string">"Damping ratio: %f\n"</span>, damp2)
+fprintf(<span class="string">"Time to damp to half the initial amplitude: %f\n"</span>, delT2)
+fprintf(<span class="string">"The number of cycles to damp to half the initial amplitude: %f\n"</span>,N2)
+</pre><pre class="codeoutput">Dutch Roll Approximation --------------------------------------
+Damped Frequency: 0.289620
+Natural Frequency: 0.295354
+Damping ratio: 0.196095
+Time to damp to half the initial amplitude: 11.967860
+The number of cycles to damp to half the initial amplitude: 0.551651
+</pre><h2 id="8">Problem 2b)</h2><pre class="codeinput">sys2 = ss(A2,B2,C2,D2);
+
+t2 = 0:0.01:100;
+figure,
+imp = zeros(length(t2),1);
+imp(1) = 1/180*pi; <span class="comment">% rad</span>
+impResponse = lsim(sys2,imp,t2);
+subplot(2,1,1)
+plot(t2,impResponse(:,1))
+ylabel(<span class="string">'\Delta \beta (rad^{-1})'</span>)
+xlabel(<span class="string">'Time (seconds)'</span>)
+subplot(2,1,2)
+plot(t2,impResponse(:,2))
+ylabel(<span class="string">'\Delta r (rad^{-1})'</span>)
+xlabel(<span class="string">'Time (seconds)'</span>)
+sgtitle(<span class="string">'Dutch Roll Approximation Impulse Response'</span>)
+
+
+figure,
+step = ones(length(t2),1)/180*pi;
+step(1:100) = 0; <span class="comment">% rad</span>
+stepResponse = lsim(sys2,step,t2);
+subplot(2,1,1)
+plot(t2,stepResponse(:,1))
+ylabel(<span class="string">'\Delta \beta (rad^{-1})'</span>)
+xlabel(<span class="string">'Time (seconds)'</span>)
+subplot(2,1,2)
+plot(t2,stepResponse(:,2))
+ylabel(<span class="string">'\Delta r (rad^{-1})'</span>)
+xlabel(<span class="string">'Time (seconds)'</span>)
+sgtitle(<span class="string">'Dutch Roll Approximation Step Response'</span>)
+</pre><img vspace="5" hspace="5" src="hw7_05.png" alt=""> <img vspace="5" hspace="5" src="hw7_06.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clear all; close all; clc;
+m= 636636;
+Ixx = 1.82*10^7*32.1740486;
+Izz = 4.97*10^7*32.1740486;
+Ixz = 9.70*10^5*32.1740486;
+S = 5500;
+b = 195.7;
+u1 = 202.537183; %ft/s
+theta = 2.4/180*pi;
+rho = 1.2673*10^-3*32.1740486;
+q = 1/2*rho*u1^2;
+g = 32.17405;
+
+
+%% Dimensional stability Derivatives
+Cyb=-0.96;
+Clb=-0.221;
+Cnb=0.15;
+Clp=-0.45;
+Cnp=-0.121;
+Clr=0.101;
+Cnr=-0.3;
+Clda=0.0461;
+Cnda=0.0064;
+Cydr=0.175;
+Cldr=0.007;
+Cndr=-0.109;
+Cyp = 0;
+Cyr = 0;
+Cyda = 0;
+CnTb = 0;
+CnTr = 0;
+
+
+Yb = q*S/m*Cyb;
+Yp = q*S*b/(2*m*u1)*Cyp;
+Yr = q*S*b/(2*m*u1)*Cyr;
+Yda = q*S/m*Cyda;
+Ydr = q*S/m*Cydr;
+Lb  = q*S*b/Ixx*Clb;
+Lp = q*S*b^2/(2*Ixx*u1)*Clp;
+Lr = q*S*b^2/(2*Ixx*u1)*Clr;
+Lda = q*S*b/Ixx*Clda;
+Ldr = q*S*b/Ixx*Cldr;
+Nb  = q*S*b/Izz*Cnb;
+NTb = q*S*b/Izz*CnTb;
+Np = q*S*b^2/(2*Izz*u1)*Cnp;
+Nr = q*S*b^2/(2*Izz*u1)*Cnr;
+NTr = q*S*b^2/(2*Izz*u1)*CnTr;
+Nda = q*S*b/Izz*Cnda;
+Ndr = q*S*b/Izz*Cndr;
+
+%% Set up state space equation
+
+M = [u1 0 0 0 0;
+    0 1 -Ixz/Ixx 0 0;
+    0 -Ixz/Izz 1 0 0;
+    0 0 0 1 0;
+    0 0 0 0 1];
+
+R= [Yb Yp Yr-u1 g*cos(theta) 0;
+    Lb Lp Lr 0 0;
+    Nb+NTb Np Nr+NTr 0 0;
+    0 1 tan(theta) 0 0;
+    0 0 sec(theta) 0 0];
+F = [Yda Ydr;
+    Lda Ldr;
+    Nda Ndr;
+    0 0;
+    0 0];
+
+A = inv(M)*R;
+B = inv(M)*F;
+C = eye(5);
+D = zeros(5,2);
+%% Problem 1 a)
+[eVec,eVal] = eig(A);
+
+% Roll
+eValRoll = eVal(:,2);
+wdRoll   = imag(eValRoll(2));
+wnRoll   = sqrt((real(eValRoll(2)))^2+(wdRoll)^2);
+dampRoll = abs(real(eValRoll(2))/wnRoll);
+delTRoll = log(2)/abs(real(eValRoll(2)));
+NRoll    = log(2)*wdRoll/abs(real(eValRoll(2))*2*pi);
+
+fprintf ("RollREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-")
+fprintf ("\nDamped Frequency: %f\n", wdRoll)
+fprintf ("Natural Frequency: %f\n", wnRoll)
+fprintf("Damping ratio: %f\n", dampRoll)
+fprintf("Time to damp to half the initial amplitude: %f\n", delTRoll)
+fprintf("The number of cycles to damp to half the initial amplitude: %f\n",NRoll)
+
+% Dutch Roll
+eValDutch = eVal(:,3);
+wdDutch   = imag(eValDutch(3));
+wnDutch   = sqrt((real(eValDutch(3)))^2+(wdDutch)^2);
+dampDutch = abs(real(eValDutch(3))/wnDutch);
+delTDutch = log(2)/abs(real(eValDutch(3)));
+NDutch    = log(2)*wdDutch/abs(real(eValDutch(3))*2*pi);
+
+fprintf ("Dutch RollREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-")
+fprintf ("\nDamped Frequency: %f\n", wdDutch)
+fprintf ("Natural Frequency: %f\n", wnDutch)
+fprintf("Damping ratio: %f\n", dampDutch)
+fprintf("Time to damp to half the initial amplitude: %f\n", delTDutch)
+fprintf("The number of cycles to damp to half the initial amplitude: %f\n",NDutch)
+
+% Spiral
+eValSpiral = eVal(:,5);
+wdSpiral   = imag(eValSpiral(5));
+wnSpiral   = sqrt((real(eValSpiral(5)))^2+(wdSpiral)^2);
+dampSpiral = abs(real(eValSpiral(5))/wnSpiral);
+delTSpiral = log(2)/abs(real(eValSpiral(5)));
+NSpiral    = log(2)*wdSpiral/abs(real(eValSpiral(5))*2*pi);
+
+fprintf ("Sprial REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH")
+fprintf ("\nDamped Frequency: %f\n", wdSpiral)
+fprintf ("Natural Frequency: %f\n", wnSpiral)
+fprintf("Damping ratio: %f\n", dampSpiral)
+fprintf("Time to damp to half the initial amplitude: %f\n", delTSpiral)
+fprintf("The number of cycles to damp to half the initial amplitude: %f\n",NSpiral)
+
+%% Problem 1 b)
+
+sys = ss(A,B,C,D);
+
+t = 0:0.01:50;
+
+figure,
+impRud(2,:) = zeros(length(t),1);
+impRud(1,:) = zeros(length(t),1);
+impRud(2,1) = 1/180*pi; % rad
+impRudResponse = lsim(sys,impRud,t);
+impRudResponse(:,2) = impRudResponse(:,2)*b/(2*u1);
+impRudResponse(:,3) = impRudResponse(:,3)*b/(2*u1);
+subplot(2,1,1)
+plot(t,impRudResponse(:,1:3))
+legend('\Delta \beta', '\Delta p/2u1', '\Delta r/2u1s')
+ylabel('rad^{-1}')
+xlabel('Time (seconds)')
+subplot(2,1,2)
+plot(t,impRudResponse(:,4:5))
+ylabel('rad^{-1}')
+xlabel('Time (seconds)')
+legend('\Delta \phi', '\Delta \psi')
+sgtitle('Rudder Impulse Response')
+
+
+
+figure,
+impA(2,:) = zeros(length(t),1);
+impA(1,:) = zeros(length(t),1);
+impA(1,1) = 1/180*pi; % rad
+impAResponse = lsim(sys,impA,t);
+impAResponse(:,2) = impAResponse(:,2)*b/(2*u1);
+impAResponse(:,3) = impAResponse(:,3)*b/(2*u1);
+subplot(2,1,1)
+plot(t,impAResponse(:,1:3))
+legend('\Delta \beta', '\Delta p/2u1', '\Delta r/2u1s')
+ylabel('rad^{-1}')
+xlabel('Time (seconds)')
+subplot(2,1,2)
+plot(t,impAResponse(:,4:5))
+ylabel('rad^{-1}')
+xlabel('Time (seconds)')
+legend('\Delta \phi', '\Delta \psi')
+sgtitle('Aerlion Impulse Response')
+
+
+stept = 0:0.01:100;
+figure,
+stepRud(2,:) = ones(length(stept),1);
+stepRud(1,:) = zeros(length(stept),1);
+stepRud(2,1:10) = 0;
+stepRudResponse = lsim(sys,stepRud,stept);
+subplot(2,1,1)
+plot(stept,stepRudResponse(:,1:3))
+ylabel('rad^{-1}')
+xlabel('Time (seconds)')
+legend('\Delta \beta', '\Delta p', '\Delta r')
+subplot(2,1,2)
+plot(stept,stepRudResponse(:,4:5))
+ylabel('rad^{-1}')
+xlabel('Time (seconds)')
+legend('\Delta \phi', '\Delta \psi')
+sgtitle('Rudder Step Response')
+
+figure,
+stepA(2,:) = zeros(length(stept),1);
+stepA(1,:) = ones(length(stept),1);
+stepA(1,1:10) = 0;
+stepAResponse = lsim(sys,stepA,stept);
+subplot(2,1,1)
+plot(stept,stepAResponse(:,1:3))
+ylabel('rad^{-1}')
+xlabel('Time (seconds)')
+legend('\Delta \beta', '\Delta p', '\Delta r')
+subplot(2,1,2)
+plot(stept,stepAResponse(:,4:5))
+ylabel('rad^{-1}')
+xlabel('Time (seconds)')
+legend('\Delta \phi', '\Delta \psi')
+sgtitle('Aerlion Step Response')
+
+
+
+%% Dutch Roll Approximation
+A2 = [Yb/u1 Yr/u1-1;
+    Nb Nr];
+B2 = [Ydr/u1;
+   Ndr];
+C2 = eye(2);
+D2  =zeros(2,1);
+[eVec2,eVal2] = eig(A2);
+
+%% Problem 2a)
+wd2 = imag(eVal2(1,1));
+% sqrt((real(eVal2(1,1)))^2+(imag(eVal2(1,1)))^2)
+% real(eVal2(1,1))/sqrt((real(eVal2(1,1)))^2+(imag(eVal2(1,1)))^2)
+wn2 = sqrt((Nr*Yb-Nb*Yr+Nb*u1)/u1);
+damp2 = -1/(2*wn2)*(Yb+Nr*u1)/u1;
+delT2 = log(2)/abs(real(eVal2(1,1)));
+N2    = log(2)*wd2/abs(real(eVal2(1,1))*2*pi);
+
+fprintf ("Dutch Roll Approximation REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH")
+fprintf ("\nDamped Frequency: %f\n", wd2)
+fprintf ("Natural Frequency: %f\n", wn2)
+fprintf("Damping ratio: %f\n", damp2)
+fprintf("Time to damp to half the initial amplitude: %f\n", delT2)
+fprintf("The number of cycles to damp to half the initial amplitude: %f\n",N2)
+
+
+%% Problem 2b)
+
+sys2 = ss(A2,B2,C2,D2);
+
+t2 = 0:0.01:100;
+figure,
+imp = zeros(length(t2),1);
+imp(1) = 1/180*pi; % rad
+impResponse = lsim(sys2,imp,t2);
+subplot(2,1,1)
+plot(t2,impResponse(:,1))
+ylabel('\Delta \beta (rad^{-1})')
+xlabel('Time (seconds)')
+subplot(2,1,2)
+plot(t2,impResponse(:,2))
+ylabel('\Delta r (rad^{-1})')
+xlabel('Time (seconds)')
+sgtitle('Dutch Roll Approximation Impulse Response')
+
+
+figure,
+step = ones(length(t2),1)/180*pi;
+step(1:100) = 0; % rad
+stepResponse = lsim(sys2,step,t2);
+subplot(2,1,1)
+plot(t2,stepResponse(:,1))
+ylabel('\Delta \beta (rad^{-1})')
+xlabel('Time (seconds)')
+subplot(2,1,2)
+plot(t2,stepResponse(:,2))
+ylabel('\Delta r (rad^{-1})')
+xlabel('Time (seconds)')
+sgtitle('Dutch Roll Approximation Step Response')
+##### SOURCE END #####
+--></body></html>
