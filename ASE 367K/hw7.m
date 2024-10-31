@@ -125,7 +125,7 @@ fprintf("The number of cycles to damp to half the initial amplitude: %f\n",NSpir
 
 sys = ss(A,B,C,D);
 
-t = 0:0.01:50;
+t = 0:0.01:300;
 
 figure,
 impRud(2,:) = zeros(length(t),1);
@@ -136,7 +136,7 @@ impRudResponse(:,2) = impRudResponse(:,2)*b/(2*u1);
 impRudResponse(:,3) = impRudResponse(:,3)*b/(2*u1);
 subplot(2,1,1)
 plot(t,impRudResponse(:,1:3))
-legend('\Delta \beta', '\Delta p/2u1', '\Delta r/2u1s')
+legend('\Delta \beta', '\Delta p/2u1', '\Delta r/2u1')
 ylabel('rad^{-1}')
 xlabel('Time (seconds)')
 subplot(2,1,2)
@@ -157,7 +157,7 @@ impAResponse(:,2) = impAResponse(:,2)*b/(2*u1);
 impAResponse(:,3) = impAResponse(:,3)*b/(2*u1);
 subplot(2,1,1)
 plot(t,impAResponse(:,1:3))
-legend('\Delta \beta', '\Delta p/2u1', '\Delta r/2u1s')
+legend('\Delta \beta', '\Delta p/2u1', '\Delta r/2u1')
 ylabel('rad^{-1}')
 xlabel('Time (seconds)')
 subplot(2,1,2)
@@ -168,7 +168,7 @@ legend('\Delta \phi', '\Delta \psi')
 sgtitle('Aerlion Impulse Response')
 
 
-stept = 0:0.01:100;
+stept = 0:0.01:300;
 figure,
 stepRud(2,:) = ones(length(stept),1);
 stepRud(1,:) = zeros(length(stept),1);
@@ -235,7 +235,7 @@ fprintf("The number of cycles to damp to half the initial amplitude: %f\n",N2)
 
 sys2 = ss(A2,B2,C2,D2);
 
-t2 = 0:0.01:100;
+t2 = 0:0.01:300;
 figure,
 imp = zeros(length(t2),1);
 imp(1) = 1/180*pi; % rad
@@ -264,3 +264,29 @@ plot(t2,stepResponse(:,2))
 ylabel('\Delta r (rad^{-1})')
 xlabel('Time (seconds)')
 sgtitle('Dutch Roll Approximation Step Response')
+
+%% Problem 3
+
+fprintf (['The damped frequency of the dutch roll Mode is %f and that of dutch roll approximate \n' ...
+    'is %f. The difference in damped frequency is observed in the plots. The approximate model \n'...
+    'shows much less oscillation for both impulse and step response While we can count\n'...
+    'a little more than a few oscillation during the first 50 seconds of the approxmimate \n'...
+    'model sim for Δβ and Δr, there are definitely more oscillations\n'...
+    'observed in first 50 seconds of the simulation for the "Rudder responses" graphs.\n'],wdDutch,wd2)
+
+fprintf (['\nThe natural freqeuncy of of the full model is greater than that of the dutch\n'...
+     'roll approximate model by %f Hz.\n'], wnDutch-wn2)
+
+fprintf (['\nThe damping ratio of of the full model is less than that of the dutch\n'...
+     'roll approximate model by %f. There fore we see oscillations die much quicker in\n'...
+     'the approximation model then those in the full model.\n'], damp2-dampDutch)
+
+fprintf (['\nThe time to damp of of the full model is greater than that of the dutch\n'...
+     'roll approximate model by %f seconds.\n'], delTDutch-delT2)
+
+fprintf (['\nThe number of cycles to damp of of the full model is greater than that of the dutch\n'...
+     'roll approximate model by %f.\n'], NDutch-N2)
+
+fprintf (['\nAs I have stated before the oscillations die quicker in the approximation model than the\n'...
+     'full model, and this is represented by the larger time and cycle to damp in the full model than the approximate model\n'...
+     'This is due to approxmate model''s larger damping ratio than full model''s. \n'])

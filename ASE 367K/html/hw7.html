@@ -67,16 +67,16 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Dimensional stability Derivatives</a></li><li><a href="#3">Set up state space equation</a></li><li><a href="#4">Problem 1 a)</a></li><li><a href="#5">Problem 1 b)</a></li><li><a href="#6">Dutch Roll Approximation</a></li><li><a href="#7">Problem 2a)</a></li><li><a href="#8">Problem 2b)</a></li></ul></div><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>; clc;
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Dimensional stability Derivatives</a></li><li><a href="#3">Set up state space equation</a></li><li><a href="#4">Problem 1 a)</a></li><li><a href="#5">Problem 1 b)</a></li><li><a href="#6">Dutch Roll Approximation</a></li><li><a href="#7">Problem 2a)</a></li><li><a href="#8">Problem 2b)</a></li><li><a href="#9">Problem 3</a></li></ul></div><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>; clc;
 
-Ixx = 1.82*10^7*32.1740486; <span class="comment">%lb-ft^2</span>
-Izz = 4.97*10^7*32.1740486; <span class="comment">%lb-ft^2</span>
-Ixz = 9.70*10^5*32.1740486; <span class="comment">%lb-ft^2</span>
+Ixx = 1.82*10^7; <span class="comment">%slugs-ft^2</span>
+Izz = 4.97*10^7; <span class="comment">%slugs-ft^2</span>
+Ixz = 9.70*10^5; <span class="comment">%slugs-ft^2</span>
 S = 5500; <span class="comment">%ft^2</span>
 b = 195.7; <span class="comment">%ft</span>
-u1 = 202.537183; <span class="comment">%ft/s Mach 0.25 at Sea Level</span>
+u1 = 275; <span class="comment">%ft/s Mach 0.25 at Sea Level</span>
 theta = 2.4/180*pi; <span class="comment">% rad Arbitrary</span>
-rho = 0.0765; <span class="comment">% lb/ft^3</span>
+rho = 0.002378; <span class="comment">% slugs/ft^3</span>
 q = 1/2*rho*u1^2;
 g = 32.17405; <span class="comment">% ft/s^2</span>
 m= 636636/g; <span class="comment">% lb</span>
@@ -185,25 +185,25 @@ fprintf(<span class="string">"Time to damp to half the initial amplitude: %f\n"<
 fprintf(<span class="string">"The number of cycles to damp to half the initial amplitude: %f\n"</span>,NSpiral)
 </pre><pre class="codeoutput">Roll-----------------------------------------------------------
 Damped Frequency: 0.000000
-Natural Frequency: 2.042550
+Natural Frequency: 1.053454
 Damping ratio: 1.000000
-Time to damp to half the initial amplitude: 0.339354
+Time to damp to half the initial amplitude: 0.657975
 The number of cycles to damp to half the initial amplitude: 0.000000
 Dutch Roll-----------------------------------------------------
-Damped Frequency: 0.216687
-Natural Frequency: 0.445681
-Damping ratio: 0.873852
-Time to damp to half the initial amplitude: 1.779769
-The number of cycles to damp to half the initial amplitude: 0.061379
+Damped Frequency: 0.672518
+Natural Frequency: 0.673027
+Damping ratio: 0.038877
+Time to damp to half the initial amplitude: 26.490988
+The number of cycles to damp to half the initial amplitude: 2.835451
 Sprial --------------------------------------------------------
 Damped Frequency: 0.000000
-Natural Frequency: 0.027202
+Natural Frequency: 0.042649
 Damping ratio: 1.000000
-Time to damp to half the initial amplitude: 25.481548
+Time to damp to half the initial amplitude: 16.252376
 The number of cycles to damp to half the initial amplitude: 0.000000
 </pre><h2 id="5">Problem 1 b)</h2><pre class="codeinput">sys = ss(A,B,C,D);
 
-t = 0:0.01:50;
+t = 0:0.01:300;
 
 figure,
 impRud(2,:) = zeros(length(t),1);
@@ -214,7 +214,7 @@ impRudResponse(:,2) = impRudResponse(:,2)*b/(2*u1);
 impRudResponse(:,3) = impRudResponse(:,3)*b/(2*u1);
 subplot(2,1,1)
 plot(t,impRudResponse(:,1:3))
-legend(<span class="string">'\Delta \beta'</span>, <span class="string">'\Delta p/2u1'</span>, <span class="string">'\Delta r/2u1s'</span>)
+legend(<span class="string">'\Delta \beta'</span>, <span class="string">'\Delta p/2u1'</span>, <span class="string">'\Delta r/2u1'</span>)
 ylabel(<span class="string">'rad^{-1}'</span>)
 xlabel(<span class="string">'Time (seconds)'</span>)
 subplot(2,1,2)
@@ -235,7 +235,7 @@ impAResponse(:,2) = impAResponse(:,2)*b/(2*u1);
 impAResponse(:,3) = impAResponse(:,3)*b/(2*u1);
 subplot(2,1,1)
 plot(t,impAResponse(:,1:3))
-legend(<span class="string">'\Delta \beta'</span>, <span class="string">'\Delta p/2u1'</span>, <span class="string">'\Delta r/2u1s'</span>)
+legend(<span class="string">'\Delta \beta'</span>, <span class="string">'\Delta p/2u1'</span>, <span class="string">'\Delta r/2u1'</span>)
 ylabel(<span class="string">'rad^{-1}'</span>)
 xlabel(<span class="string">'Time (seconds)'</span>)
 subplot(2,1,2)
@@ -246,7 +246,7 @@ legend(<span class="string">'\Delta \phi'</span>, <span class="string">'\Delta \
 sgtitle(<span class="string">'Aerlion Impulse Response'</span>)
 
 
-stept = 0:0.01:100;
+stept = 0:0.01:300;
 figure,
 stepRud(2,:) = ones(length(stept),1);
 stepRud(1,:) = zeros(length(stept),1);
@@ -302,14 +302,14 @@ fprintf(<span class="string">"Damping ratio: %f\n"</span>, damp2)
 fprintf(<span class="string">"Time to damp to half the initial amplitude: %f\n"</span>, delT2)
 fprintf(<span class="string">"The number of cycles to damp to half the initial amplitude: %f\n"</span>,N2)
 </pre><pre class="codeoutput">Dutch Roll Approximation --------------------------------------
-Damped Frequency: 0.000000
-Natural Frequency: 0.689106
-Damping ratio: 1.610991
-Time to damp to half the initial amplitude: 0.349983
-The number of cycles to damp to half the initial amplitude: 0.000000
+Damped Frequency: 0.537090
+Natural Frequency: 0.556991
+Damping ratio: 0.264924
+Time to damp to half the initial amplitude: 4.697385
+The number of cycles to damp to half the initial amplitude: 0.401535
 </pre><h2 id="8">Problem 2b)</h2><pre class="codeinput">sys2 = ss(A2,B2,C2,D2);
 
-t2 = 0:0.01:100;
+t2 = 0:0.01:300;
 figure,
 imp = zeros(length(t2),1);
 imp(1) = 1/180*pi; <span class="comment">% rad</span>
@@ -338,18 +338,64 @@ plot(t2,stepResponse(:,2))
 ylabel(<span class="string">'\Delta r (rad^{-1})'</span>)
 xlabel(<span class="string">'Time (seconds)'</span>)
 sgtitle(<span class="string">'Dutch Roll Approximation Step Response'</span>)
-</pre><img vspace="5" hspace="5" src="hw7_05.png" alt=""> <img vspace="5" hspace="5" src="hw7_06.png" alt=""> <img vspace="5" hspace="5" src="hw7_07.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+</pre><img vspace="5" hspace="5" src="hw7_05.png" alt=""> <img vspace="5" hspace="5" src="hw7_06.png" alt=""> <h2 id="9">Problem 3</h2><pre class="codeinput">fprintf ([<span class="string">'The damped frequency of the dutch roll Mode is %f and that of dutch roll approximate \n'</span> <span class="keyword">...</span>
+    <span class="string">'is %f. The difference in damped frequency is observed in the plots. The approximate model \n'</span><span class="keyword">...</span>
+    <span class="string">'shows much less oscillation for both impulse and step response While we can count\n'</span><span class="keyword">...</span>
+    <span class="string">'a little more than a few oscillation during the first 50 seconds of the approxmimate \n'</span><span class="keyword">...</span>
+    <span class="string">'model sim for &#916;&#946; and &#916;r, there are definitely more oscillations\n'</span><span class="keyword">...</span>
+    <span class="string">'observed in first 50 seconds of the simulation for the "Rudder responses" graphs.\n'</span>],wdDutch,wd2)
+
+fprintf ([<span class="string">'\nThe natural freqeuncy of of the full model is greater than that of the dutch\n'</span><span class="keyword">...</span>
+     <span class="string">'roll approximate model by %f Hz.\n'</span>], wnDutch-wn2)
+
+fprintf ([<span class="string">'\nThe damping ratio of of the full model is less than that of the dutch\n'</span><span class="keyword">...</span>
+     <span class="string">'roll approximate model by %f. There fore we see oscillations die much quicker in\n'</span><span class="keyword">...</span>
+     <span class="string">'the approximation model then those in the full model.\n'</span>], damp2-dampDutch)
+
+fprintf ([<span class="string">'\nThe time to damp of of the full model is greater than that of the dutch\n'</span><span class="keyword">...</span>
+     <span class="string">'roll approximate model by %f seconds.\n'</span>], delTDutch-delT2)
+
+fprintf ([<span class="string">'\nThe number of cycles to damp of of the full model is greater than that of the dutch\n'</span><span class="keyword">...</span>
+     <span class="string">'roll approximate model by %f.\n'</span>], NDutch-N2)
+
+fprintf ([<span class="string">'\nAs I have stated before the oscillations die quicker in the approximation model than the\n'</span><span class="keyword">...</span>
+     <span class="string">'full model, and this is represented by the larger time and cycle to damp in the full model than the approximate model\n'</span><span class="keyword">...</span>
+     <span class="string">'This is due to approxmate model''s larger damping ratio than full model''s. \n'</span>])
+</pre><pre class="codeoutput">The damped frequency of the dutch roll Mode is 0.672518 and that of dutch roll approximate 
+is 0.537090. The difference in damped frequency is observed in the plots. The approximate model 
+shows much less oscillation for both impulse and step response While we can count
+a little more than a few oscillation during the first 50 seconds of the approxmimate 
+model sim for &#916;&#946; and &#916;r, there are definitely more oscillations
+observed in first 50 seconds of the simulation for the "Rudder responses" graphs.
+
+The natural freqeuncy of of the full model is greater than that of the dutch
+roll approximate model by 0.116035 Hz.
+
+The damping ratio of of the full model is less than that of the dutch
+roll approximate model by 0.226047. There fore we see oscillations die much quicker in
+the approximation model then those in the full model.
+
+The time to damp of of the full model is greater than that of the dutch
+roll approximate model by 21.793602 seconds.
+
+The number of cycles to damp of of the full model is greater than that of the dutch
+roll approximate model by 2.433916.
+
+As I have stated before the oscillations die quicker in the approximation model than the
+full model, and this is represented by the larger time and cycle to damp in the full model than the approximate model
+This is due to approxmate model's larger damping ratio than full model's. 
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 clear all; close all; clc;
 
-Ixx = 1.82*10^7*32.1740486; %lb-ft^2
-Izz = 4.97*10^7*32.1740486; %lb-ft^2
-Ixz = 9.70*10^5*32.1740486; %lb-ft^2
+Ixx = 1.82*10^7; %slugs-ft^2
+Izz = 4.97*10^7; %slugs-ft^2
+Ixz = 9.70*10^5; %slugs-ft^2
 S = 5500; %ft^2
 b = 195.7; %ft
-u1 = 202.537183; %ft/s Mach 0.25 at Sea Level
+u1 = 275; %ft/s Mach 0.25 at Sea Level
 theta = 2.4/180*pi; % rad Arbitrary
-rho = 0.0765; % lb/ft^3
+rho = 0.002378; % slugs/ft^3
 q = 1/2*rho*u1^2;
 g = 32.17405; % ft/s^2
 m= 636636/g; % lb
@@ -467,7 +513,7 @@ fprintf("The number of cycles to damp to half the initial amplitude: %f\n",NSpir
 
 sys = ss(A,B,C,D);
 
-t = 0:0.01:50;
+t = 0:0.01:300;
 
 figure,
 impRud(2,:) = zeros(length(t),1);
@@ -478,7 +524,7 @@ impRudResponse(:,2) = impRudResponse(:,2)*b/(2*u1);
 impRudResponse(:,3) = impRudResponse(:,3)*b/(2*u1);
 subplot(2,1,1)
 plot(t,impRudResponse(:,1:3))
-legend('\Delta \beta', '\Delta p/2u1', '\Delta r/2u1s')
+legend('\Delta \beta', '\Delta p/2u1', '\Delta r/2u1')
 ylabel('rad^{-1}')
 xlabel('Time (seconds)')
 subplot(2,1,2)
@@ -499,7 +545,7 @@ impAResponse(:,2) = impAResponse(:,2)*b/(2*u1);
 impAResponse(:,3) = impAResponse(:,3)*b/(2*u1);
 subplot(2,1,1)
 plot(t,impAResponse(:,1:3))
-legend('\Delta \beta', '\Delta p/2u1', '\Delta r/2u1s')
+legend('\Delta \beta', '\Delta p/2u1', '\Delta r/2u1')
 ylabel('rad^{-1}')
 xlabel('Time (seconds)')
 subplot(2,1,2)
@@ -510,7 +556,7 @@ legend('\Delta \phi', '\Delta \psi')
 sgtitle('Aerlion Impulse Response')
 
 
-stept = 0:0.01:100;
+stept = 0:0.01:300;
 figure,
 stepRud(2,:) = ones(length(stept),1);
 stepRud(1,:) = zeros(length(stept),1);
@@ -577,7 +623,7 @@ fprintf("The number of cycles to damp to half the initial amplitude: %f\n",N2)
 
 sys2 = ss(A2,B2,C2,D2);
 
-t2 = 0:0.01:100;
+t2 = 0:0.01:300;
 figure,
 imp = zeros(length(t2),1);
 imp(1) = 1/180*pi; % rad
@@ -606,5 +652,31 @@ plot(t2,stepResponse(:,2))
 ylabel('\Delta r (rad^{-1})')
 xlabel('Time (seconds)')
 sgtitle('Dutch Roll Approximation Step Response')
+
+%% Problem 3
+
+fprintf (['The damped frequency of the dutch roll Mode is %f and that of dutch roll approximate \n' ...
+    'is %f. The difference in damped frequency is observed in the plots. The approximate model \n'...
+    'shows much less oscillation for both impulse and step response While we can count\n'...
+    'a little more than a few oscillation during the first 50 seconds of the approxmimate \n'...
+    'model sim for Δβ and Δr, there are definitely more oscillations\n'...
+    'observed in first 50 seconds of the simulation for the "Rudder responses" graphs.\n'],wdDutch,wd2)
+
+fprintf (['\nThe natural freqeuncy of of the full model is greater than that of the dutch\n'...
+     'roll approximate model by %f Hz.\n'], wnDutch-wn2)
+
+fprintf (['\nThe damping ratio of of the full model is less than that of the dutch\n'...
+     'roll approximate model by %f. There fore we see oscillations die much quicker in\n'...
+     'the approximation model then those in the full model.\n'], damp2-dampDutch)
+
+fprintf (['\nThe time to damp of of the full model is greater than that of the dutch\n'...
+     'roll approximate model by %f seconds.\n'], delTDutch-delT2)
+
+fprintf (['\nThe number of cycles to damp of of the full model is greater than that of the dutch\n'...
+     'roll approximate model by %f.\n'], NDutch-N2)
+
+fprintf (['\nAs I have stated before the oscillations die quicker in the approximation model than the\n'...
+     'full model, and this is represented by the larger time and cycle to damp in the full model than the approximate model\n'...
+     'This is due to approxmate model''s larger damping ratio than full model''s. \n'])
 ##### SOURCE END #####
 --></body></html>
