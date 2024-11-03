@@ -26,12 +26,11 @@ function [GoldSeq] = generateGoldLfsrSequenceCA(n,ciVecA,ciVecB,a0VecA,...
 
 lfrsStateA=a0VecA;
 lfrsStateB=a0VecB;
-% Code Length
+% Sequence Length
 m=2^n-1;
 % Preallocate GoldSeq
-GoldSeq = zeros(m, 1);  
+GoldSeq = zeros(m, 1);
 for i=1:m
-    shiftB     = [];
     shiftB     = circshift(lfrsStateB,G2Delay);
     GoldSeq(i) = mod(lfrsStateA(end)+shiftB(end),2);
     a=0;
