@@ -33,11 +33,15 @@ G2Delay      = [5;6;7;8;17;18;139;140;141;251;252;254;255;256;257;258;...
     861;862;863;950;947;948;950];
 % Oversampling Parameters:
 Tc = 1e-3/1023;               % Chip interval in seconds
-delChip = 1/Tc*1/fsampIQ;     % Sampling interval in chips
+Tl = 1/fsampIQ;               % Baseband Sampling time interval in seconds
+T  = Tl/2;                    % Bandpass Sampling time interval in seconds
+delChip = T/Tc;               % Sampling interval in chips for bandpass
 delOffset  = 0;               % Offset of first sample
 delt = 1/fsampIQ;             % Sampling interval in seconds;
 Np = 2^nStages - 1;           % Period of the sequence in chips
 Ns = length(Y);               % Number of Samples should equal to that of Y(signal)
+Ta = 0.001;                   % Accumulation time in seconds
+Nk = floor(Ta/T);             % Number of samples in one 1-ms accumulation
 % Generate 37 Seqeuences and Oversample them:
 for i = 1:length(G2Delay)
     [GoldSeq] = generateGoldLfsrSequenceCA(nStages,ciVec1,ciVec2,a0Vec1,...
@@ -49,7 +53,7 @@ for i = 1:length(G2Delay)
     % rate. Assuming that the code I generate is sampled at the chip rate,
     % oversampling my code I generated at the rate the signal is sampled
     % will allow my code to correlate with the code embedded in the signal
-    GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,delOffset,Ns,Np);
+    GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,delOffset,Nk,Np);
     codeOS(:,i) = GoldSeqOS;
 end
 
@@ -79,25 +83,42 @@ end
 %--------------------------------------------------------------------------
 
 %----
-% Parameters:
+% Search Range Parameters:
 % Potential Doppler Frequencies
-fD = -5000:100:5000;
-% Sampling time interval in seconds
-T = 1/fsampIQ;
-% Nk is the number of samples is one 1-ms accumulation.  It's ok for this
-% number to be approximate
-Nk = 5714;
+fdk  = -4000:1/Ta/10:4000;      % fdk step size recommended on pp.29
+% Estimates of the code start time that applies over the kth accumulation
+tsk = 0:T:(Nk-1)*T;          % tsk step size recommended on pp.29
+%---- Begin fdk and tsk search
 % Time vector covering the accumulation
 tVec = [0:Nk-1]'*T;
-%---- 
-for ii = 1:length(fD)
-    %---- Generate local carrier Replica
-
-    % Generate the phase argument of the local carrier replica
-    ThetaVec = [2*pi*(fIF + fD(i))*tVec];
-    % Generate Phase argument of the local carrier replica
-    carrierVec = exp(-i*ThetaVec);
-    % Generate the full local replica, with both code and carrier
-    lVeck = carrierVec.*;
+Results = [];
+for prn = 1:2
+    for ii = 1:length(fdk)
+        for mm = 1:length(tsk)
+            % Find corresponding index and number of accumulated samples to tsk
+            jk        = round(tsk(mm).*fsampIQ)+1;
+            if Nk > length(Y(jk:end))
+                Nk = length(jk:end);
+            end
+            ThetaVec = [2*pi*(fIF + fdk(ii))*tVec];
+            carrierVec = exp(-i*ThetaVec);
+            lVeck = carrierVec.*codeOS(:,prn);
+            xVeck = Y(jk:jk+Nk-1);
+            Sk = sum(xVeck.*lVeck);
+            SkdB = 10*log10(abs(Sk)^2);
+            Results = [Results;prn,fdk(ii),tsk(mm),SkdB];
+        end
+    end
 end
+
+
+
+
+
+
+
+
+
+
+
 %--------------------------------------------------------------------------
