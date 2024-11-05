@@ -84,41 +84,34 @@ end
 
 %----
 % Search Range Parameters:
-% Potential Doppler Frequencies
-fdk  = -4000:1/Ta/10:4000;      % fdk step size recommended on pp.29
-% Estimates of the code start time that applies over the kth accumulation
-tsk = 0:T:(Nk-1)*T;          % tsk step size recommended on pp.29
-%---- Begin fdk and tsk search
+% PRN for target satellite
+txId = 2;
+% Approximate Doppler (taken from GRID output for PRN 31)
+fD = -1551.17;
+% The Doppler that acquisition and tracking see is opposite fD due to
+% high-side mixing
+fD_internal = -fD;
 % Time vector covering the accumulation
 tVec = [0:Nk-1]'*T;
+tsk  = [0:T:(Nk-1)*T];
 Results = [];
-for prn = 1:2
-    for ii = 1:length(fdk)
-        for mm = 1:length(tsk)
-            % Find corresponding index and number of accumulated samples to tsk
-            jk        = round(tsk(mm).*fsampIQ)+1;
-            if Nk > length(Y(jk:end))
-                Nk = length(jk:end);
-            end
-            ThetaVec = [2*pi*(fIF + fdk(ii))*tVec];
-            carrierVec = exp(-i*ThetaVec);
-            lVeck = carrierVec.*codeOS(:,prn);
-            xVeck = Y(jk:jk+Nk-1);
-            Sk = sum(xVeck.*lVeck);
-            SkdB = 10*log10(abs(Sk)^2);
-            Results = [Results;prn,fdk(ii),tsk(mm),SkdB];
-        end
-    end
+for i = 1:length(tsk)
+    jk = round(tsk(i)*fsampIQ)+1;
+    % Generate the phase argument of the local carrier replica
+    ThetaVec = [2*pi*(fIF + fD_internal)*tVec];
+    % Generate the local carrier replica
+    carrierVec = exp(-i*ThetaVec);
+    % Generate the full local replica, with both code and carrier
+    lVeck = carrierVec.*codeOS(:,txId);
+    % Isolate the kth code interval from the data. xVec here holds the +/-1 and
+    % +/-3-valued data samples from dfDataHead.bin.  The first element in xVec
+    % holds the first sample in dfDataHead.bin.
+    xVeck = Y(jk:jk+Nk-1);
+    % Perform correlation and accumulation
+    Sk = sum(xVeck.*lVeck);
+    % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
+    % dB
+    SkdB = 10*log10(abs(Sk)^2);
+    Results = [Results;SkdB];
 end
-
-
-
-
-
-
-
-
-
-
-
 %--------------------------------------------------------------------------
