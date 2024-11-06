@@ -15,8 +15,8 @@ Y = fread(fid, [2,N], 'int16')';
 Y = Y(:,1) + 1j*Y(:,2);
 fclose(fid);
 % %---- Convert IQ to IF
-% Tl = 1/fsampIQ;
-% [Y] = iq2if(real(Y),imag(Y),Tl,fIF);
+Tl = 1/fsampIQ;
+[Y] = iq2if(real(Y),imag(Y),Tl,fIF);
 
 %% Problem 8
 
@@ -31,14 +31,14 @@ G2Delay      = [5;6;7;8;17;18;139;140;141;251;252;254;255;256;257;258;...
     469;470;471;472;473;474;509;512;513;514;515;516;859;860;...
     861;862;863;950;947;948;950];
 % Oversampling Parameters:
-Tc = 1e-3/1023;               % Chip interval in seconds
-Tl = 1/fsampIQ;               % Baseband Sampling time interval in seconds
-T  = Tl/2;                    % Bandpass Sampling time interval in seconds
-delChip = Tl/Tc;               % Sampling interval in chips for baseband
-Np = 2^nStages - 1;           % Period of the sequence in chips
-Ns = length(Y);               % Number of Samples should equal to that of Y(signal)
-Ta = 0.001;                   % Accumulation time in seconds
-Nk = floor(Ta/Tl);             % Number of samples in one 1-ms accumulation
+Tc = 1e-3/1023;             % Chip interval in seconds
+Tl = 1/fsampIQ;             % Baseband Sampling time interval in seconds
+T  = Tl/2;                  % Bandpass Sampling time interval in seconds
+delChip = T/Tc;            % Sampling interval in chips for baseband
+Np = 2^nStages - 1;         % Period of the sequence in chips
+Ns = length(Y);             % Number of Samples should equal to that of Y(signal)
+Ta = 0.001;                 % Accumulation time in seconds
+Nk = floor(Ta/Tl);          % Number of samples in one 1-ms accumulation
 % Generate 37 Seqeuences and Oversample them:
 codeOS = zeros(Nk,37);
 for i = 1:length(G2Delay)
@@ -79,35 +79,38 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-txId = 2;
+txId = 10;
 % Approximate Doppler (taken from GRID output for PRN 31)
-fD = -1551.17;
+fD = [-1000:1/Ta*0.01:1000];
 % The Doppler that acquisition and tracking see is opposite fD due to
 % high-side mixing
 fD_internal = -fD;
 % Time vector covering the accumulation
 tVec = [0:Nk-1]'*T;
-% tsk  = [0:T:(Nk-1)*T];
-Results = [];
-for i = 1:length(tVec)
-    jk = round(tVec(i)*fsampIQ)+1;
-    % Generate the phase argument of the local carrier replica
-    ThetaVec = [2*pi*(fIF + fD_internal)*tVec];
-    % Generate the local carrier replica
-    carrierVec = exp(-i*ThetaVec);
-    % Generate the full local replica, with both code and carrier
-    lVeck = carrierVec.*codeOS(:,txId);
-    % Isolate the kth code interval from the data. xVec here holds the +/-1 and
-    % +/-3-valued data samples from dfDataHead.bin.  The first element in xVec
-    % holds the first sample in dfDataHead.bin.
-    xVeck = Y(jk:jk+Nk-1);
-    % Perform correlation and accumulation
-    Sk = sum(xVeck.*lVeck);
-   
-    % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
-    % dB
-    SkdB = 10*log10(abs(Sk)^2);
-    Results = [Results;SkdB];
+Results = zeros(length(tVec),length(fD_internal));
+for m = 1:length(fD_internal)
+    for i = 1:length(tVec)
+        jk = round(tVec(i)*fsampIQ)+2;
+        % Generate the phase argument of the local carrier replica
+        ThetaVec = [2*pi*(fIF + fD_internal(m))*tVec];
+        % Generate the local carrier replica
+        carrierVec = exp(-i*ThetaVec);
+        % Generate the full local replica, with both code and carrier
+        lVeck = carrierVec.*codeOS(:,txId);
+        % Isolate the kth code interval from the data. xVec here holds the +/-1 and
+        % +/-3-valued data samples from dfDataHead.bin.  The first element in xVec
+        % holds the first sample in dfDataHead.bin.
+        xVeck = Y(jk:jk+Nk-1);
+        % Perform correlation and accumulation
+        Sk = sum(xVeck.*lVeck);
+
+        % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
+        % dB
+        SkdB = 10*log10(abs(Sk)^2);
+        Results(i,m) = SkdB;
+    end
 end
+ plot(max(Results,[],1))
+ figure,
+ plot(Results(:,2))
 %--------------------------------------------------------------------------
-plot(Results)
