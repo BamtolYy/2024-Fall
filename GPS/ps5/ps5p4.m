@@ -3,22 +3,19 @@ clear all; close all; clc;
 % Number of simulations
 ensemble = 4000;
 % Number of Samples per simulation;
-Ns = 10000;
+Ns = 1000;
 % Sampling interval
 T = 0.001; % 1ms Given
 % Noise parameters
-sigma_theta = 0.01;
-sigma_omega = 0.01;
-sigma_alpha = 0.0001;
+sigma_omega = 0.01;     % radians
+sigma_alpha = 0.0001;   % radians
 %
-Ccoh2_phase    = zeros(Ns,1);
-Ccoh2_freq     = zeros(Ns,1);
-Ccoh2_freqRate = zeros(Ns,1);
+% Ccoh2_phase    = zeros(Ns,1);
+% Ccoh2_freq     = zeros(Ns,1);
+% Ccoh2_freqRate = zeros(Ns,1);
 
 %% Simulation
-for i = 1:ensemble
-    % Generate white phase noise
-    DeltaTheta_phase = sigma_theta*rand(Ns,1);
+parfor i = 1:ensemble
     % Generate white frequency noise
     DeltaOmega = sigma_omega*rand(Ns,1);
     DeltaTheta_freq = zeros(Ns, 1);
@@ -36,10 +33,14 @@ for i = 1:ensemble
 
     % Calculate Ccoh^2
     for N = 1:Ns
-        Ccoh2_phase(N) = Ccoh2_phase(N)+ computeCoherence(DeltaTheta_phase,N)^2;
-        Ccoh2_freq(N) = Ccoh2_freq(N)+ computeCoherence(DeltaTheta_freq,N)^2;
-        Ccoh2_freqRate(N) = Ccoh2_freqRate(N)+ computeCoherence(DeltaTheta_freqRate,N)^2;
+        Ccoh2_freq(N,i) =  computeCoherence(DeltaTheta_freq,N)^2;
+        Ccoh2_freqRate(N,i) =  computeCoherence(DeltaTheta_freqRate,N)^2;
     end
 
 end
+    sum1 = sum(Ccoh2_freq,2);
+    sum2 =sum(Ccoh2_freqRate,2);
+
+    Ccoh2_freq_mean = mean(Ccoh2_freq,2);
+    Ccoh2_freqRate_mean = mean(Ccoh2_freqRate,2);
 

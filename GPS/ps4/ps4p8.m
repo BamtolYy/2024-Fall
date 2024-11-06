@@ -1,6 +1,5 @@
 clear; close all; clc;
 %% Get Signal
-
 %----- Setup
 Tfull = 0.5;
 % Time interval of data to load
@@ -15,9 +14,9 @@ fid = fopen('C:\Users\gsh04\Desktop\2024-Fall\GPS\ps4\niData01head_5MHz.bin','r'
 Y = fread(fid, [2,N], 'int16')';
 Y = Y(:,1) + 1j*Y(:,2);
 fclose(fid);
-%---- Convert IQ to IF
-Tl = 1/fsampIQ;
-[Y] = iq2if(real(Y),imag(Y),Tl,fIF);
+% %---- Convert IQ to IF
+% Tl = 1/fsampIQ;
+% [Y] = iq2if(real(Y),imag(Y),Tl,fIF);
 
 %% Problem 8
 
@@ -35,14 +34,13 @@ G2Delay      = [5;6;7;8;17;18;139;140;141;251;252;254;255;256;257;258;...
 Tc = 1e-3/1023;               % Chip interval in seconds
 Tl = 1/fsampIQ;               % Baseband Sampling time interval in seconds
 T  = Tl/2;                    % Bandpass Sampling time interval in seconds
-delChip = T/Tc;               % Sampling interval in chips for bandpass
-delOffset  = 0;               % Offset of first sample
-delt = 1/fsampIQ;             % Sampling interval in seconds;
+delChip = Tl/Tc;               % Sampling interval in chips for baseband
 Np = 2^nStages - 1;           % Period of the sequence in chips
 Ns = length(Y);               % Number of Samples should equal to that of Y(signal)
 Ta = 0.001;                   % Accumulation time in seconds
-Nk = floor(Ta/T);             % Number of samples in one 1-ms accumulation
+Nk = floor(Ta/Tl);             % Number of samples in one 1-ms accumulation
 % Generate 37 Seqeuences and Oversample them:
+codeOS = zeros(Nk,37);
 for i = 1:length(G2Delay)
     [GoldSeq] = generateGoldLfsrSequenceCA(nStages,ciVec1,ciVec2,a0Vec1,...
         a0Vec2,G2Delay(i));
@@ -53,7 +51,7 @@ for i = 1:length(G2Delay)
     % rate. Assuming that the code I generate is sampled at the chip rate,
     % oversampling my code I generated at the rate the signal is sampled
     % will allow my code to correlate with the code embedded in the signal
-    GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,delOffset,Nk,Np);
+    GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,0,Nk,Np);
     codeOS(:,i) = GoldSeqOS;
 end
 
@@ -81,10 +79,6 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-
-%----
-% Search Range Parameters:
-% PRN for target satellite
 txId = 2;
 % Approximate Doppler (taken from GRID output for PRN 31)
 fD = -1551.17;
@@ -93,10 +87,10 @@ fD = -1551.17;
 fD_internal = -fD;
 % Time vector covering the accumulation
 tVec = [0:Nk-1]'*T;
-tsk  = [0:T:(Nk-1)*T];
+% tsk  = [0:T:(Nk-1)*T];
 Results = [];
-for i = 1:length(tsk)
-    jk = round(tsk(i)*fsampIQ)+1;
+for i = 1:length(tVec)
+    jk = round(tVec(i)*fsampIQ)+1;
     % Generate the phase argument of the local carrier replica
     ThetaVec = [2*pi*(fIF + fD_internal)*tVec];
     % Generate the local carrier replica
@@ -109,9 +103,11 @@ for i = 1:length(tsk)
     xVeck = Y(jk:jk+Nk-1);
     % Perform correlation and accumulation
     Sk = sum(xVeck.*lVeck);
+   
     % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
     % dB
     SkdB = 10*log10(abs(Sk)^2);
     Results = [Results;SkdB];
 end
 %--------------------------------------------------------------------------
+plot(Results)
