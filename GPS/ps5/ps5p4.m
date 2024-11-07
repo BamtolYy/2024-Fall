@@ -3,7 +3,7 @@ clear all; close all; clc;
 % Number of simulations
 ensemble = 4000;
 % Number of Samples per simulation;
-Ns = 1000;
+Ns = 5000;
 % Sampling interval
 T = 0.001; % 1ms Given
 % Noise parameters
@@ -17,7 +17,7 @@ sigma_alpha = 0.0001;   % radians
 %% Simulation
 parfor i = 1:ensemble
     % Generate white frequency noise
-    DeltaOmega = sigma_omega*rand(Ns,1);
+    DeltaOmega = sigma_omega*randn(Ns,1);
     DeltaTheta_freq = zeros(Ns, 1);
     for j = 2:Ns
         DeltaTheta_freq(j) = DeltaTheta_freq(j-1) + DeltaOmega(j) * T;
@@ -43,4 +43,6 @@ end
 
     Ccoh2_freq_mean = mean(Ccoh2_freq,2);
     Ccoh2_freqRate_mean = mean(Ccoh2_freqRate,2);
-
+plot(Ccoh2_freq_mean)
+xlabel('Number of Samples used for Coherence')
+ylabel('Mean C_{coh}^2')
