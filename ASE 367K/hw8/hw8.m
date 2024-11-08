@@ -80,18 +80,16 @@ v(end)
 %---- Variable Setup
 pw = zeros(length(t),1);
 vw = zeros(length(t),1);
-aw = zeros(length(t),1);
 Ww = 790100;                %N
-Tw = zeros(length(t),1);
-Lw = zeros(length(t),1);
-Nw = zeros(length(t),1);
-Dw = zeros(length(t),1);
-
-Tw(1) = 216000;  % N
+const_D = 0.5*rho*S*Cd;
+const_L = 0.5*rho*S*Cl;
+a = g/Ww*(const_F*k_prime_F2-const_D+mu*const_L);
+b = g/Ww*(const_F*k_prime_F1);
+c = g/Ww*(const_F*k_prime_F0-mu*Ww);
 
 for j = 1:length(t)-1
     pw(j+1) = pw(j)+vw(j)*delt;
-    vw(j+1) = g/Ww*(k0*delt-mu*Ww*delt+vw(j)^3/3*(k1+k2-0.5*rho*S*Cd+mu/2*rho*S*Cl));
+    vw(j+1) = (tan(t(j+1)*sqrt(4*a*c-b^2)/2)*sqrt(4*a*c-b^2)-b)/(2*a);
 end
 
 %---- Plot
