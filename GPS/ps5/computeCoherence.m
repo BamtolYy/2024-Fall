@@ -23,4 +23,4 @@ function [Ccoh] = computeCoherence(DeltaThetaVec,N)
 %
 %+==============================================================================+
 
-Ccoh = abs((1/N)*sum(exp(1i*DeltaThetaVec(1:N))));
+Ccoh = abs((1/N)*sum(exp(DeltaThetaVec(1:N))));
