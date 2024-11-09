@@ -1,4 +1,4 @@
-function [pZ_H0,pZ_H1,lambda0,Pd,ZVec] = performAcqHypothesisCalcs(s)
+function [pZ_H0,pZ_H1,lambda0,Pd,Zvec] = performAcqHypothesisCalcs(s)
 % performAcqHypothesisCalcs : Calculate the null-hypothesis and alternative
 %                             hypothesis probability density functions and the
 %                             decision threshold corresponding to GNSS signal
