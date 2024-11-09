@@ -90,3 +90,14 @@ function [pZ_H0,pZ_H1,lambda0,Pd,ZVec] = performAcqHypothesisCalcs(s)
 %
 %
 %+==============================================================================+
+
+CN0 = 10^(s.C_N0dBHz/10);    % Convert to linear scale
+
+rho=sqrt(CN0*2*s.Ta*s.N);
+lambda = s.N*rho^2;
+Zvec = [0:s.delZ:s.ZMax];
+pZ_H0=chi2pdf(Zvec,2*s.N);
+pZ_H1=ncx2pdf(Zvec,2*s.N,lambda);
+lambda0=1;
+Pd= 1- ncx2cdf(lambda0, 2* s.N,lambda0);
+
