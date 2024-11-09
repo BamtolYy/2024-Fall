@@ -4,10 +4,10 @@
 
 %----- Setup
 clear; clc;
-s.C_N0dBHz = 40;    
-s.N = 10;            
+s.C_N0dBHz = 50;    
+s.N = 1;            
 s.PfaAcq = 0.0001;   
-s.Ta = 0.001;     
+s.Ta = 0.00035;     
 s.fMax = 7000;
 s.nCodeOffsets = 1023*5; 
 s.ZMax = 1000;
@@ -28,7 +28,7 @@ set(get(ash,'children'), 'facecolor', 'g', 'linewidth', 2, 'facealpha', 0.5);
 hold on;
 ash = area(ZVec,pZ_H1);
 set(get(ash,'children'), 'facecolor', 'b', 'linewidth', 2, 'facealpha', 0.5);
-linemax = 1/5*max([pZ_H0;pZ_H1]);
+linemax = 1/5*max([pZ_H0(:);pZ_H1(:)]);
 line([lambda0,lambda0],[0,linemax], 'linewidth', 2, 'color', 'r');
 xlim([0 max(Zmax*2,lambda0*1.5)]);
 ylabel('Probability density');
