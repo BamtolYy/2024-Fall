@@ -1,4 +1,4 @@
-function [pZ_H0,pZ_H1,lambda0,Pd,Zvec] = performAcqHypothesisCalcs(s)
+function [pZ_H0,pZ_H1,lambda0,Pd,ZVec] = performAcqHypothesisCalcs(s)
 % performAcqHypothesisCalcs : Calculate the null-hypothesis and alternative
 %                             hypothesis probability density functions and the
 %                             decision threshold corresponding to GNSS signal
@@ -83,21 +83,27 @@ function [pZ_H0,pZ_H1,lambda0,Pd,Zvec] = performAcqHypothesisCalcs(s)
 %
 % Pd------------- The probability of detection.
 %
-% Zvec----------- The vector of Z values considered.
+% ZVec----------- The vector of Z values considered.
 %
 %+------------------------------------------------------------------------------+
 % References:
 %
 %
 %+==============================================================================+
-
+sigma_IQ = 1;
 CN0 = 10^(s.C_N0dBHz/10);    % Convert to linear scale
+Abark = sqrt(CN0*sigma_IQ^2*s.Ta*8/s.N^2);
+rhok = (s.N*Abark)/(2*sigma_IQ);
+lambda = s.N*rhok^2;
+ZVec = [0:s.delZ:s.ZMax];
+pZ_H0=chi2pdf(ZVec,2*s.N);
+pZ_H1=ncx2pdf(ZVec,2*s.N,lambda);
 
-rho=sqrt(CN0*2*s.Ta*s.N);
-lambda = s.N*rho^2;
-Zvec = [0:s.delZ:s.ZMax];
-pZ_H0=chi2pdf(Zvec,2*s.N);
-pZ_H1=ncx2pdf(Zvec,2*s.N,lambda);
-lambda0=1;
-Pd= 1- ncx2cdf(lambda0, 2* s.N,lambda0);
+nFreqOffsets = 2*s.fMax*s.Ta;
+nCells = s.nCodeOffsets * nFreqOffsets;
 
+PF = 1-(1-s.PfaAcq)^(1/ nCells);
+
+lambda0 = chi2inv(1-PF,2*s.N);
+
+Pd= 1- ncx2cdf(lambda0, 2*s.N,lambda);
