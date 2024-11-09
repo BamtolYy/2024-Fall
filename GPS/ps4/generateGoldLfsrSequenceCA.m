@@ -1,5 +1,5 @@
 function [GoldSeq] = generateGoldLfsrSequenceCA(n,ciVecA,ciVecB,a0VecA,...
-    a0VecB,G2Delay)
+    a0VecB,G2tab)
 %
 % Generate a 1/0-valued linear feedback shift register (LFSR) sequence.
 %
@@ -17,7 +17,7 @@ function [GoldSeq] = generateGoldLfsrSequenceCA(n,ciVecA,ciVecB,a0VecA,...
 %
 % OUTPUTS
 %
-% lfsrSeq -- m-by-1 vector whose elements are the 1/0-valued LFSR sequence
+% GoldSeq -- m-by-1 vector whose elements are the 1/0-valued LFSR sequence
 % corresponding to n, ciVec, and a0Vec, where m = 2^n - 1. If the
 % sequence is a maximal-length sequence, then there is no
 % repetition in the m sequence elements.
@@ -31,8 +31,9 @@ m=2^n-1;
 % Preallocate GoldSeq
 GoldSeq = zeros(m, 1);
 for i=1:m
-    shiftB     = circshift(lfrsStateB,G2Delay);
-    GoldSeq(i) = mod(lfrsStateA(end)+shiftB(end),2);
+    G2         = mod(lfrsStateB(G2tab(1))+lfrsStateB(G2tab(2)),2);
+    % shiftB     = circshift(lfrsStateB,G2Delay);
+    GoldSeq(i) = mod(lfrsStateA(end)+G2,2);
     a=0;
     b=0;
     for jj = 1:length(ciVecA)
