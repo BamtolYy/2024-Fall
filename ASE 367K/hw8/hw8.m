@@ -11,7 +11,7 @@ Papt    = 97716.6;              % Pascal
 P0      = 101325;               % Pascal
 kdelta  = Papt/P0;              
 ft2meter = 0.3048;              % feet to meter conversion rate
-h = 532*ft2meter;               % m
+h = 542*ft2meter;               % m
 ss = sqrt(T*R*gamma);           % m/s
 %Airplane
 Cd  = 0.025;
@@ -32,7 +32,7 @@ k_prime_F2 = k_2_M2F/ss^2;
 % Other parameters
 delt = 0.001;                   % seconds
 t= 0:delt:24;
-g   = 9.80665;                  % m/s^2
+g   = 9.81;                  % m/s^2
 mu  = 0.03;                     % Rolling friction Coefficient
 Wdot = 9;                       % N/s
 
@@ -86,7 +86,7 @@ const_L = 0.5*rho*S*Cl;
 a = g/Ww*(const_F*k_prime_F2-const_D+mu*const_L);
 b = g/Ww*(const_F*k_prime_F1);
 c = g/Ww*(const_F*k_prime_F0-mu*Ww);
-
+constant = -2/sqrt(4*a*c-b^2)*atan2(b,(4*a*c-b^2));
 for j = 1:length(t)-1
     pw(j+1) = pw(j)+vw(j)*delt;
     vw(j+1) = (tan(t(j+1)*sqrt(4*a*c-b^2)/2)*sqrt(4*a*c-b^2)-b)/(2*a);
@@ -103,7 +103,7 @@ ylabel('Speed (m/s)')
 xlabel('Time (s)')
 sgtitle('Takeoff Roll Constant Weight')
 
-%% Constant Weight and Acceleration Takeoff Roll
+% %% Constant Weight and Acceleration Takeoff Roll
 %---- Variable Setup
 pa = zeros(length(t),1);
 va = zeros(length(t),1);

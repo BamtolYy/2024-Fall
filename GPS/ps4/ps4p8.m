@@ -41,7 +41,7 @@ Ta = 0.001;                 % Accumulation time in seconds
 Nk = floor(Ta/Tl);          % Number of samples in one 1-ms accumulation
 % Generate 37 Seqeuences and Oversample them:
 codeOS = zeros(Nk,37);
-for i = 1:length(G2Delay)
+parfor i = 1:length(G2Delay)
     [GoldSeq] = generateGoldLfsrSequenceCA(nStages,ciVec1,ciVec2,a0Vec1,...
         a0Vec2,G2Delay(i));
     % Make code +1/-1 not +1/0
@@ -79,7 +79,7 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-txId = 10;
+txId = 2;
 % Approximate Doppler (taken from GRID output for PRN 31)
 fD = [-1000:1/Ta*0.01:1000];
 % The Doppler that acquisition and tracking see is opposite fD due to
