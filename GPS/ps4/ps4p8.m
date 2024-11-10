@@ -107,6 +107,7 @@ for m = 1:length(fD_internal)
         % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
         % dB
         SkdB = 10*log10(abs(Sk)^2);
+        SkdB
         Results(kk,m) = SkdB;
     end
 end

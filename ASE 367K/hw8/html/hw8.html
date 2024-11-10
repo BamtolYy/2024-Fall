@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>hw8</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-11-09"><meta name="DC.source" content="hw8.m"><style type="text/css">
+      --><title>hw8</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-11-10"><meta name="DC.source" content="hw8.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,7 +67,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Takeoff Roll</a></li><li><a href="#3">Constant Weight Takeoff Roll</a></li></ul></div><pre class="codeinput">close <span class="string">all</span>; clear <span class="string">all</span>; clc;
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Takeoff Roll</a></li><li><a href="#3">Constant Weight Takeoff Roll</a></li><li><a href="#4">Constant Weight and Acceleration Takeoff Roll</a></li><li><a href="#5">Comparison d)</a></li></ul></div><pre class="codeinput">close <span class="string">all</span>; clear <span class="string">all</span>; clc;
 </pre><h2 id="2">Takeoff Roll</h2><pre class="codeinput"><span class="comment">%-------- Parameter Setup</span>
 <span class="comment">% Atmosphere</span>
 rho = 1.18995;                  <span class="comment">% kg/m^3</span>
@@ -78,7 +78,7 @@ Papt    = 97716.6;              <span class="comment">% Pascal</span>
 P0      = 101325;               <span class="comment">% Pascal</span>
 kdelta  = Papt/P0;
 ft2meter = 0.3048;              <span class="comment">% feet to meter conversion rate</span>
-h = 532*ft2meter;               <span class="comment">% m</span>
+h = 542*ft2meter;               <span class="comment">% m</span>
 ss = sqrt(T*R*gamma);           <span class="comment">% m/s</span>
 <span class="comment">%Airplane</span>
 Cd  = 0.025;
@@ -97,112 +97,177 @@ k_prime_F0 = k_0_M2F;
 k_prime_F1 = k_1_M2F/ss;
 k_prime_F2 = k_2_M2F/ss^2;
 <span class="comment">% Other parameters</span>
-delt = 0.001;                   <span class="comment">% seconds</span>
+delt = 0.01;                   <span class="comment">% seconds</span>
 t= 0:delt:24;
-g   = 9.80665;                  <span class="comment">% m/s^2</span>
+g   = 9.81;                  <span class="comment">% m/s^2</span>
 mu  = 0.03;                     <span class="comment">% Rolling friction Coefficient</span>
 Wdot = 9;                       <span class="comment">% N/s</span>
 
 <span class="comment">%-------- Variable Setup</span>
-p = zeros(length(t),1);
-v = zeros(length(t),1);
-a = zeros(length(t),1);
-W = zeros(length(t),1);
-T = zeros(length(t),1);
-L = zeros(length(t),1);
-N = zeros(length(t),1);
-D = zeros(length(t),1);
-T(1) = const_F*(k_prime_F0 + k_prime_F1*v(1) + k_prime_F2*v(1)^2);  <span class="comment">% N</span>
-W(1) = 790100;  <span class="comment">% N</span>
-N(1) = W(1);
-a(1) = g/W(1)*(T(1)-D(1)-mu*N(1));
+p1 = zeros(length(t),1);
+v1 = zeros(length(t),1);
+a1 = zeros(length(t),1);
+W1 = zeros(length(t),1);
+T1 = zeros(length(t),1);
+L1 = zeros(length(t),1);
+N1 = zeros(length(t),1);
+D1 = zeros(length(t),1);
+T1(1) = const_F*(k_prime_F0 + k_prime_F1*v1(1) + k_prime_F2*v1(1)^2);  <span class="comment">% N</span>
+W1(1) = 790100;  <span class="comment">% N</span>
+N1(1) = W1(1);
+a1(1) = g/W1(1)*(T1(1)-D1(1)-mu*N1(1));
 
 <span class="comment">%-------- Simulate</span>
 <span class="keyword">for</span> i=1:length(t)-1
-    p(i+1) = p(i)+v(i)*delt;
-    v(i+1) = v(i)+a(i)*delt;
-    W(i+1) = W(i)-Wdot*delt;
-    T(i+1) = const_F*(k_prime_F0 + k_prime_F1*v(i+1) + k_prime_F2*v(i+1)^2);
-    L(i+1) = 0.5*rho*v(i+1)^2*S*Cl;
-    N(i+1) = W(i+1)-L(i+1);
-    D(i+1) = 0.5*rho*v(i+1)^2*S*Cd;
-    a(i+1) = g/W(i+1)*(T(i+1)-D(i+1)-mu*N(i+1));
-
+    p1(i+1) = p1(i)+v1(i)*delt;
+    v1(i+1) = v1(i)+a1(i)*delt;
+    W1(i+1) = W1(i)-Wdot*delt;
+    T1(i+1) = const_F*(k_prime_F0 + k_prime_F1*v1(i+1) + k_prime_F2*v1(i+1)^2);
+    L1(i+1) = 0.5*rho*v1(i+1)^2*S*Cl;
+    N1(i+1) = W1(i+1)-L1(i+1);
+    D1(i+1) = 0.5*rho*v1(i+1)^2*S*Cd;
+    a1(i+1) = g/W1(i+1)*(T1(i+1)-D1(i+1)-mu*N1(i+1));
 <span class="keyword">end</span>
 
 <span class="comment">%-------- Plot</span>
 subplot(3,1,1)
-plot(t,p)
+plot(t,p1)
 ylabel(<span class="string">'Position (m)'</span>)
 subplot(3,1,2)
-plot(t,v)
+plot(t,v1)
 ylabel(<span class="string">'Speed (m/s)'</span>)
 subplot(3,1,3)
-plot(t,a)
+plot(t,a1)
 ylabel(<span class="string">'Acceleration (m/s^2)'</span>)
 xlabel(<span class="string">'Time (s)'</span>)
 sgtitle(<span class="string">'Takeoff Roll'</span>)
-v(end)
+v1(end)
 </pre><pre class="codeoutput">
 ans =
 
-   50.2382
+   50.2612
 
 </pre><img vspace="5" hspace="5" src="hw8_01.png" alt=""> <h2 id="3">Constant Weight Takeoff Roll</h2><pre class="codeinput"><span class="comment">%---- Variable Setup</span>
-pw = zeros(length(t),1);
-vw = zeros(length(t),1);
-Ww = 790100;                <span class="comment">%N</span>
+p2 = zeros(length(t),1);
+v2 = zeros(length(t),1);
+aa2 = zeros(length(t),1);
+W2 = 790100;                <span class="comment">%N</span>
 const_D = 0.5*rho*S*Cd;
 const_L = 0.5*rho*S*Cl;
-a = g/Ww*(const_F*k_prime_F2-const_D+mu*const_L);
-b = g/Ww*(const_F*k_prime_F1);
-c = g/Ww*(const_F*k_prime_F0-mu*Ww);
-constant = -2/sqrt(4*a*c-b^2)*atan2(b,(4*a*c-b^2));
-<span class="keyword">for</span> j = 1:length(t)-1
-    pw(j+1) = pw(j)+vw(j)*delt;
-    vw(j+1) = (tan(t(j+1)*sqrt(4*a*c-b^2)/2)*sqrt(4*a*c-b^2)-b)/(2*a);
+a = g/W2*(const_F*k_prime_F2-const_D+mu*const_L);
+b = g/W2*(const_F*k_prime_F1);
+c = g/W2*(const_F*k_prime_F0-mu*W2);
+fprintf(<span class="string">'Analytical expression for the acceleration of the aircraft as a function of time: \n'</span>)
+fprintf(<span class="string">'v^2(g/W2*(const_F*k_prime_F2-const_D+mu*const_L))+v(g/W2*(const_F*k_prime_F1))+g/W2*(const_F*k_prime_F0-mu*W2)) \n'</span>)
+
+syms <span class="string">vv</span> <span class="string">time</span>
+a2 = vv^2*a+vv*b+c;
+<span class="comment">% Integrate acceleration</span>
+T = int(1/a2);
+intConstant = subs(T,0);
+T = int(1/a2)-intConstant;
+vv = solve(T==time,vv);
+aa2(1)= subs(a2,v2(1));
+<span class="keyword">for</span> i = 1:length(t)-1
+    p2(i+1) = p2(i)+delt*v2(i);
+    v2(i+1) = subs(vv,t(i+1));
+    aa2(i+1)= subs(a2,v2(i+1));
 <span class="keyword">end</span>
 
 <span class="comment">%---- Plot</span>
 figure,
-subplot(2,1,1)
-plot(t,pw)
+subplot(3,1,1)
+plot(t,p2)
 ylabel(<span class="string">'Position (m)'</span>)
-subplot(2,1,2)
-plot(t,vw)
+subplot(3,1,2)
+plot(t,v2)
 ylabel(<span class="string">'Speed (m/s)'</span>)
+subplot(3,1,3)
+plot(t,aa2)
+ylabel(<span class="string">'Acceleration (m/s^2)'</span>)
 xlabel(<span class="string">'Time (s)'</span>)
-sgtitle(<span class="string">'Takeoff Roll Constant Weight'</span>)
+sgtitle(<span class="string">'Takeoff Roll: Constant Weight'</span>)
+</pre><pre class="codeoutput">Analytical expression for the acceleration of the aircraft as a function of time: 
+v^2(g/W2*(const_F*k_prime_F2-const_D+mu*const_L))+v(g/W2*(const_F*k_prime_F1))+g/W2*(const_F*k_prime_F0-mu*W2)) 
+Warning: Solutions are only valid under certain conditions. To include
+parameters and conditions in the solution, specify the 'ReturnConditions' value
+as 'true'. 
+</pre><img vspace="5" hspace="5" src="hw8_02.png" alt=""> <h2 id="4">Constant Weight and Acceleration Takeoff Roll</h2><pre class="codeinput"><span class="comment">%---- Variable Setup</span>
+p3 = zeros(length(t),1);
+v3 = zeros(length(t),1);
+a3 = ones(length(t),1);
+W3 = 790100;                <span class="comment">%N</span>
 
-<span class="comment">% %% Constant Weight and Acceleration Takeoff Roll</span>
-<span class="comment">% %---- Variable Setup</span>
-<span class="comment">% pa = zeros(length(t),1);</span>
-<span class="comment">% va = zeros(length(t),1);</span>
-<span class="comment">% aa = zeros(length(t),1);</span>
-<span class="comment">% Wa = 790100;                %N</span>
-<span class="comment">%</span>
-<span class="comment">% Ta = 216000;  % N</span>
-<span class="comment">% Na = Wa;</span>
-<span class="comment">% a     = g/Wa*(Ta-mu*Na);</span>
-<span class="comment">% for k = 1:length(t)-1</span>
-<span class="comment">%     pa(k+1) = pa(k)+va(k)*delt;</span>
-<span class="comment">%     va(k+1) = va(k)+a*delt;</span>
-<span class="comment">% end</span>
-<span class="comment">%</span>
-<span class="comment">% %---- Plot</span>
-<span class="comment">% figure,</span>
-<span class="comment">% subplot(3,1,1)</span>
-<span class="comment">% plot(t,pa)</span>
-<span class="comment">% ylabel('Position (m)')</span>
-<span class="comment">% subplot(3,1,2)</span>
-<span class="comment">% plot(t,va)</span>
-<span class="comment">% ylabel('Speed (m/s)')</span>
-<span class="comment">% subplot(3,1,3)</span>
-<span class="comment">% plot(t,aa)</span>
-<span class="comment">% ylabel('Acceleration (m/s^2)')</span>
-<span class="comment">% xlabel('Time (s)')</span>
-<span class="comment">% sgtitle('Takeoff Roll: Constant Weight and Acceleration')</span>
-</pre><img vspace="5" hspace="5" src="hw8_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+T3 = const_F;  <span class="comment">% N</span>
+
+N3 = W3;
+a3 = a3*g/W3*(T3-mu*N3);
+<span class="keyword">for</span> k = 1:length(t)-1
+    p3(k+1) = p3(k)+v3(k)*delt;
+    v3(k+1) = v3(k)+a3(k)*delt;
+<span class="keyword">end</span>
+
+<span class="comment">%---- Plot</span>
+figure,
+subplot(3,1,1)
+plot(t,p3)
+ylabel(<span class="string">'Position (m)'</span>)
+subplot(3,1,2)
+plot(t,v3)
+ylabel(<span class="string">'Speed (m/s)'</span>)
+subplot(3,1,3)
+plot(t,a3)
+ylabel(<span class="string">'Acceleration (m/s^2)'</span>)
+xlabel(<span class="string">'Time (s)'</span>)
+sgtitle(<span class="string">'Takeoff Roll: Constant Weight and Acceleration'</span>)
+</pre><img vspace="5" hspace="5" src="hw8_03.png" alt=""> <h2 id="5">Comparison d)</h2><pre class="codeinput">figure,
+subplot(3,1,1)
+plot(t,p1)
+hold <span class="string">on</span>,
+plot(t,p2,<span class="string">'-.'</span>)
+hold <span class="string">on</span>,
+plot(t,p3)
+ylabel(<span class="string">'Position (m)'</span>)
+legend(<span class="string">'No Approximation'</span>,<span class="string">'Constant Weight'</span>,<span class="string">'Constant Weight and Acceleration'</span>)
+subplot(3,1,2)
+plot(t,v1)
+hold <span class="string">on</span>,
+plot(t,v2,<span class="string">'-.'</span>)
+hold <span class="string">on</span>,
+plot(t,v3)
+ylabel(<span class="string">'Velocity (m/s)'</span>)
+legend(<span class="string">'No Approximation'</span>,<span class="string">'Constant Weight'</span>,<span class="string">'Constant Weight and Acceleration'</span>)
+subplot(3,1,3)
+plot(t,a1)
+hold <span class="string">on</span>,
+plot(t,aa2,<span class="string">'-.'</span>)
+hold <span class="string">on</span>,
+plot(t,a3)
+xlabel(<span class="string">'Time (s)'</span>)
+ylabel(<span class="string">'Acceleration (m/s^2)'</span>)
+legend(<span class="string">'No Approximation'</span>,<span class="string">'Constant Weight'</span>,<span class="string">'Constant Weight and Acceleration'</span>)
+
+
+fprintf ([<span class="string">'The full model and the constant weight approximation model has almost identical \n'</span><span class="keyword">...</span>
+    <span class="string">'velocities and postion while the constant acceleration and weight model shares the same trend \n'</span> <span class="keyword">...</span>
+    <span class="string">'and is off in velociites and position estimates deviate at an increasingly rate as the time increases. \n'</span>])
+fprintf([<span class="string">'The psoition and velocities in the constant acceleration are greater than the other two models \n '</span><span class="keyword">...</span>
+    <span class="string">'This error is due to the model not accounting for the increase in drag as the speed increases. Therefore, \n'</span><span class="keyword">...</span>
+    <span class="string">'the velocities increases constantly and the plane travels further than the other two models. Also, I expected \n'</span><span class="keyword">...</span>
+    <span class="string">'a decrease in velocity when only the weight was kept constant because weight is inversely proportional to\n'</span><span class="keyword">...</span>
+    <span class="string">'the acceleration, but I didn''t see a much different in the velocities between the constant weight model. \n'</span><span class="keyword">...</span>
+    <span class="string">'Constant weight could have affected the velocity if the simulation was longer, but it the given amount of time \n'</span><span class="keyword">...</span>
+    <span class="string">'constant weight didn'' have a huge impact on the simulation.'</span>])
+</pre><pre class="codeoutput">The full model and the constant weight approximation model has almost identical 
+velocities and postion while the constant acceleration and weight model shares the same trend 
+and is off in velociites and position estimates deviate at an increasingly rate as the time increases. 
+The psoition and velocities in the constant acceleration are greater than the other two models 
+ This error is due to the model not accounting for the increase in drag as the speed increases. Therefore, 
+the velocities increases constantly and the plane travels further than the other two models. Also, I expected 
+a decrease in velocity when only the weight was kept constant because weight is inversely proportional to
+the acceleration, but I didn't see a much different in the velocities between the constant weight model. 
+Constant weight could have affected the velocity if the simulation was longer, but it the given amount of time 
+constant weight didn' have a huge impact on the simulation.</pre><img vspace="5" hspace="5" src="hw8_04.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 close all; clear all; clc;
 %% Takeoff Roll
@@ -217,7 +282,7 @@ Papt    = 97716.6;              % Pascal
 P0      = 101325;               % Pascal
 kdelta  = Papt/P0;              
 ft2meter = 0.3048;              % feet to meter conversion rate
-h = 532*ft2meter;               % m
+h = 542*ft2meter;               % m
 ss = sqrt(T*R*gamma);           % m/s
 %Airplane
 Cd  = 0.025;
@@ -236,106 +301,163 @@ k_prime_F0 = k_0_M2F;
 k_prime_F1 = k_1_M2F/ss;
 k_prime_F2 = k_2_M2F/ss^2;
 % Other parameters
-delt = 0.001;                   % seconds
+delt = 0.01;                   % seconds
 t= 0:delt:24;
-g   = 9.80665;                  % m/s^2
+g   = 9.81;                  % m/s^2
 mu  = 0.03;                     % Rolling friction Coefficient
 Wdot = 9;                       % N/s
 
 %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Variable Setup
-p = zeros(length(t),1);
-v = zeros(length(t),1);
-a = zeros(length(t),1);
-W = zeros(length(t),1);
-T = zeros(length(t),1);
-L = zeros(length(t),1);
-N = zeros(length(t),1);
-D = zeros(length(t),1);
-T(1) = const_F*(k_prime_F0 + k_prime_F1*v(1) + k_prime_F2*v(1)^2);  % N
-W(1) = 790100;  % N
-N(1) = W(1);
-a(1) = g/W(1)*(T(1)-D(1)-mu*N(1));
+p1 = zeros(length(t),1);
+v1 = zeros(length(t),1);
+a1 = zeros(length(t),1);
+W1 = zeros(length(t),1);
+T1 = zeros(length(t),1);
+L1 = zeros(length(t),1);
+N1 = zeros(length(t),1);
+D1 = zeros(length(t),1);
+T1(1) = const_F*(k_prime_F0 + k_prime_F1*v1(1) + k_prime_F2*v1(1)^2);  % N
+W1(1) = 790100;  % N
+N1(1) = W1(1);
+a1(1) = g/W1(1)*(T1(1)-D1(1)-mu*N1(1));
 
 %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Simulate
 for i=1:length(t)-1
-    p(i+1) = p(i)+v(i)*delt;
-    v(i+1) = v(i)+a(i)*delt;
-    W(i+1) = W(i)-Wdot*delt;
-    T(i+1) = const_F*(k_prime_F0 + k_prime_F1*v(i+1) + k_prime_F2*v(i+1)^2);
-    L(i+1) = 0.5*rho*v(i+1)^2*S*Cl;
-    N(i+1) = W(i+1)-L(i+1);
-    D(i+1) = 0.5*rho*v(i+1)^2*S*Cd;
-    a(i+1) = g/W(i+1)*(T(i+1)-D(i+1)-mu*N(i+1));
-
+    p1(i+1) = p1(i)+v1(i)*delt;
+    v1(i+1) = v1(i)+a1(i)*delt;
+    W1(i+1) = W1(i)-Wdot*delt;
+    T1(i+1) = const_F*(k_prime_F0 + k_prime_F1*v1(i+1) + k_prime_F2*v1(i+1)^2);
+    L1(i+1) = 0.5*rho*v1(i+1)^2*S*Cl;
+    N1(i+1) = W1(i+1)-L1(i+1);
+    D1(i+1) = 0.5*rho*v1(i+1)^2*S*Cd;
+    a1(i+1) = g/W1(i+1)*(T1(i+1)-D1(i+1)-mu*N1(i+1));
 end
 
 %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Plot
 subplot(3,1,1)
-plot(t,p)
+plot(t,p1)
 ylabel('Position (m)')
 subplot(3,1,2)
-plot(t,v)
+plot(t,v1)
 ylabel('Speed (m/s)')
 subplot(3,1,3)
-plot(t,a)
+plot(t,a1)
 ylabel('Acceleration (m/s^2)')
 xlabel('Time (s)')
 sgtitle('Takeoff Roll')
-v(end)
+v1(end)
 %% Constant Weight Takeoff Roll
 %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Variable Setup
-pw = zeros(length(t),1);
-vw = zeros(length(t),1);
-Ww = 790100;                %N
+p2 = zeros(length(t),1);
+v2 = zeros(length(t),1);
+aa2 = zeros(length(t),1);
+W2 = 790100;                %N
 const_D = 0.5*rho*S*Cd;
 const_L = 0.5*rho*S*Cl;
-a = g/Ww*(const_F*k_prime_F2-const_D+mu*const_L);
-b = g/Ww*(const_F*k_prime_F1);
-c = g/Ww*(const_F*k_prime_F0-mu*Ww);
-constant = -2/sqrt(4*a*c-b^2)*atan2(b,(4*a*c-b^2));
-for j = 1:length(t)-1
-    pw(j+1) = pw(j)+vw(j)*delt;
-    vw(j+1) = (tan(t(j+1)*sqrt(4*a*c-b^2)/2)*sqrt(4*a*c-b^2)-b)/(2*a);
+a = g/W2*(const_F*k_prime_F2-const_D+mu*const_L);
+b = g/W2*(const_F*k_prime_F1);
+c = g/W2*(const_F*k_prime_F0-mu*W2);
+fprintf('Analytical expression for the acceleration of the aircraft as a function of time: \n')
+fprintf('v^2(g/W2*(const_F*k_prime_F2-const_D+mu*const_L))+v(g/W2*(const_F*k_prime_F1))+g/W2*(const_F*k_prime_F0-mu*W2)) \n')
+
+syms vv time
+a2 = vv^2*a+vv*b+c;
+% Integrate acceleration
+T = int(1/a2);
+intConstant = subs(T,0);
+T = int(1/a2)-intConstant;
+vv = solve(T==time,vv);
+aa2(1)= subs(a2,v2(1));
+for i = 1:length(t)-1
+    p2(i+1) = p2(i)+delt*v2(i);
+    v2(i+1) = subs(vv,t(i+1));
+    aa2(i+1)= subs(a2,v2(i+1));
 end
 
 %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Plot
 figure,
-subplot(2,1,1)
-plot(t,pw)
+subplot(3,1,1)
+plot(t,p2)
 ylabel('Position (m)')
-subplot(2,1,2)
-plot(t,vw)
+subplot(3,1,2)
+plot(t,v2)
 ylabel('Speed (m/s)')
+subplot(3,1,3)
+plot(t,aa2)
+ylabel('Acceleration (m/s^2)')
 xlabel('Time (s)')
-sgtitle('Takeoff Roll Constant Weight')
+sgtitle('Takeoff Roll: Constant Weight')
 
-% %% Constant Weight and Acceleration Takeoff Roll
-% %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Variable Setup
-% pa = zeros(length(t),1);
-% va = zeros(length(t),1);
-% aa = zeros(length(t),1);
-% Wa = 790100;                %N
-% 
-% Ta = 216000;  % N
-% Na = Wa;
-% a     = g/Wa*(Ta-mu*Na);
-% for k = 1:length(t)-1
-%     pa(k+1) = pa(k)+va(k)*delt;
-%     va(k+1) = va(k)+a*delt;
-% end
-% 
-% %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Plot
-% figure,
-% subplot(3,1,1)
-% plot(t,pa)
-% ylabel('Position (m)')
-% subplot(3,1,2)
-% plot(t,va)
-% ylabel('Speed (m/s)')
-% subplot(3,1,3)
-% plot(t,aa)
-% ylabel('Acceleration (m/s^2)')
-% xlabel('Time (s)')
-% sgtitle('Takeoff Roll: Constant Weight and Acceleration')
+%% Constant Weight and Acceleration Takeoff Roll
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Variable Setup
+p3 = zeros(length(t),1);
+v3 = zeros(length(t),1);
+a3 = ones(length(t),1);
+W3 = 790100;                %N
+
+T3 = const_F;  % N
+
+N3 = W3;
+a3 = a3*g/W3*(T3-mu*N3);
+for k = 1:length(t)-1
+    p3(k+1) = p3(k)+v3(k)*delt;
+    v3(k+1) = v3(k)+a3(k)*delt;
+end
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Plot
+figure,
+subplot(3,1,1)
+plot(t,p3)
+ylabel('Position (m)')
+subplot(3,1,2)
+plot(t,v3)
+ylabel('Speed (m/s)')
+subplot(3,1,3)
+plot(t,a3)
+ylabel('Acceleration (m/s^2)')
+xlabel('Time (s)')
+sgtitle('Takeoff Roll: Constant Weight and Acceleration')
+
+%% Comparison d)
+figure,
+subplot(3,1,1)
+plot(t,p1)
+hold on,
+plot(t,p2,'-.')
+hold on,
+plot(t,p3)
+ylabel('Position (m)')
+legend('No Approximation','Constant Weight','Constant Weight and Acceleration')
+subplot(3,1,2)
+plot(t,v1)
+hold on,
+plot(t,v2,'-.')
+hold on,
+plot(t,v3)
+ylabel('Velocity (m/s)')
+legend('No Approximation','Constant Weight','Constant Weight and Acceleration')
+subplot(3,1,3)
+plot(t,a1)
+hold on,
+plot(t,aa2,'-.')
+hold on,
+plot(t,a3)
+xlabel('Time (s)')
+ylabel('Acceleration (m/s^2)')
+legend('No Approximation','Constant Weight','Constant Weight and Acceleration')
+
+
+fprintf (['The full model and the constant weight approximation model has almost identical \n'...
+    'velocities and postion while the constant acceleration and weight model shares the same trend \n' ...
+    'and is off in velociites and position estimates deviate at an increasingly rate as the time increases. \n'])
+fprintf(['The psoition and velocities in the constant acceleration are greater than the other two models \n '...
+    'This error is due to the model not accounting for the increase in drag as the speed increases. Therefore, \n'...
+    'the velocities increases constantly and the plane travels further than the other two models. Also, I expected \n'...
+    'a decrease in velocity when only the weight was kept constant because weight is inversely proportional to\n'...
+    'the acceleration, but I didn''t see a much different in the velocities between the constant weight model. \n'...
+    'Constant weight could have affected the velocity if the simulation was longer, but it the given amount of time \n'...
+    'constant weight didn'' have a huge impact on the simulation.'])
+
+
 ##### SOURCE END #####
 --></body></html>
