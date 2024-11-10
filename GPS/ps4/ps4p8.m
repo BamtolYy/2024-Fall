@@ -42,9 +42,9 @@ codeOS = zeros(Nk,37);
 G2tab = [2, 6;3,7;4,8;5,9;1,9;2,10;1,8;2,9;3,10;2,3;3,4;5,6;6,7;7,8;...
     8,9;9,10;1,4;2,5;3,6;4,7;5,8;6,9;1,3;4,6;5,7;6,8;7,9;8,10;1,6;2,7;...
     3,8;4,9;5,10;4,10;1,7;2,8;4,10];
-for i = 1:length(G2tab)
+parfor j = 1:length(G2tab)
     [GoldSeq] = generateGoldLfsrSequenceCA(nStages,ciVec1,ciVec2,a0Vec1,...
-        a0Vec2,G2tab(i,:));
+        a0Vec2,G2tab(j,:));
     % Make code +1/-1 not +1/0
     GoldSeq = 2*GoldSeq - 1;
     % Oversample Code: It makes sense to oversample code, since the code
@@ -53,7 +53,7 @@ for i = 1:length(G2tab)
     % oversampling my code I generated at the rate the signal is sampled
     % will allow my code to correlate with the code embedded in the signal
     GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,0,Nk,Np);
-    codeOS(:,i) = GoldSeqOS;
+    codeOS(:,j) = GoldSeqOS;
 end
 
 %--------------------------------------------------------------------------
@@ -80,7 +80,7 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-txId = 2;
+prn = 2;
 % Approximate Doppler (taken from GRID output for PRN 31)
 fD = [-1600:10:-1500];
 % The Doppler that acquisition and tracking see is opposite fD due to
@@ -90,28 +90,27 @@ fD_internal = -fD;
 tVec = [0:Nk-1]'*T;
 Results = zeros(length(tVec),length(fD_internal));
 for m = 1:length(fD_internal)
-    for i = 1:length(tVec)
-        jk = round(tVec(i)*fsampIQ)+1;
+    for kk = 1:length(tVec)
+        jk = round(tVec(kk)*fsampIQ)+1;
         % Generate the phase argument of the local carrier replica
         ThetaVec = [2*pi*(fIF + fD_internal(m))*tVec];
         % Generate the local carrier replica
-        carrierVec = exp(-i*ThetaVec);
+        carrierVec = exp(-1i*ThetaVec);
         % Generate the full local replica, with both code and carrier
-        lVeck = carrierVec.*codeOS(:,txId);
+        lVeck = carrierVec.*codeOS(:,prn);
         % Isolate the kth code interval from the data. xVec here holds the +/-1 and
         % +/-3-valued data samples from dfDataHead.bin.  The first element in xVec
         % holds the first sample in dfDataHead.bin.
         xVeck = Y(jk:jk+Nk-1);
         % Perform correlation and accumulation
         Sk = sum(xVeck.*lVeck);
-
         % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
         % dB
         SkdB = 10*log10(abs(Sk)^2);
-        Results(i,m) = SkdB;
+        Results(kk,m) = SkdB;
     end
 end
- max(Results,[],1)
+ max(Results,[],1);
 
  % for jj=length(Results(1,:))
  % figure,
