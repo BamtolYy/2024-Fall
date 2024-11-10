@@ -14,7 +14,7 @@ Y = Y(:,1) + 1j*Y(:,2);
 fclose(fid);
 %---- Convert IQ to IF
 Tl = 1/fsampIQ;
-[Y] = iq2if(real(Y),imag(Y),Tl,fIF);
+[Z] = iq2if(real(Y),imag(Y),Tl,fIF);
 
 %% Problem 8
 
@@ -34,7 +34,7 @@ Tl = 1/fsampIQ;             % Baseband Sampling time interval in seconds
 T  = Tl/2;                  % Bandpass Sampling time interval in seconds
 delChip = T/Tc;            % Sampling interval in chips for baseband
 Np = 2^nStages - 1;         % Period of the sequence in chips
-Ns = length(Y);             % Number of Samples should equal to that of Y(signal)
+Ns = length(Z);             % Number of Samples should equal to that of Y(signal)
 Ta = 0.001;                 % Accumulation time in seconds
 Nk = floor(Ta/Tl);          % Number of samples in one 1-ms accumulation
 % Generate 37 Seqeuences and Oversample them:
@@ -82,7 +82,7 @@ end
 %--------------------------------------------------------------------------
 prn = 2;
 % Approximate Doppler (taken from GRID output for PRN 31)
-fD = [-1600:10:-1500];
+fD = [-1580:1:-1540];
 % The Doppler that acquisition and tracking see is opposite fD due to
 % high-side mixing
 fD_internal = -fD;
@@ -101,13 +101,12 @@ for m = 1:length(fD_internal)
         % Isolate the kth code interval from the data. xVec here holds the +/-1 and
         % +/-3-valued data samples from dfDataHead.bin.  The first element in xVec
         % holds the first sample in dfDataHead.bin.
-        xVeck = Y(jk:jk+Nk-1);
+        xVeck = Z(jk:jk+Nk-1);
         % Perform correlation and accumulation
         Sk = sum(xVeck.*lVeck);
         % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
         % dB
         SkdB = 10*log10(abs(Sk)^2);
-        SkdB
         Results(kk,m) = SkdB;
     end
 end

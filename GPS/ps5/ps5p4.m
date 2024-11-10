@@ -3,7 +3,7 @@ clear all; close all; clc;
 % Number of simulations
 ensemble = 4000;
 % Number of Samples per simulation;
-Ns = 5000;
+Ns = 10000;
 % Sampling interval
 T = 0.001; % 1ms Given
 % Noise parameters
@@ -35,13 +35,18 @@ end
 
 
 % Calculate Ccoh^2
-Ccoh2_freq = zeros(Ns,ensemble);
-for k = 1:ensemble
+% Ccoh2_freq = zeros(Ns,ensemble);
+% for k = 1:ensemble
     for N = 1:Ns
-        Ccoh2_freq(N,k) =  computeCoherence(DeltaTheta_freq(:,k),N)^2;
+        a=DeltaTheta_freq(1:N,1)
+        b=1i.*DeltaTheta_freq(1:N,1)
+        c=exp(1i.*DeltaTheta_freq(1:N,1))
+        d=sum(exp(1i.*DeltaTheta_freq(1:N,1)))
+        e=sum(exp(1i.*DeltaTheta_freq(1:N,1)))/N
+        Ccoh2_freq(N,1) =  abs((1/N)*sum(exp(1i.*DeltaTheta_freq(1:N,1))))^2;
     end
-end
-
+% end
+plot(Ccoh2_freq)
 
 sum1 = sum(Ccoh2_freq,2);
 % sum2 =sum(Ccoh2_freqRate,2);
