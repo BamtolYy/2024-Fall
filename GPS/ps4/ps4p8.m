@@ -36,7 +36,7 @@ delChip = T/Tc;            % Sampling interval in chips for baseband
 Np = 2^nStages - 1;         % Period of the sequence in chips
 Ns = length(Z);             % Number of Samples should equal to that of Y(signal)
 Ta = 0.001;                 % Accumulation time in seconds
-Nk = floor(Ta/Tl);          % Number of samples in one 1-ms accumulation
+Nk = floor(Ta/T);          % Number of samples in one 1-ms accumulation
 % Generate 37 Seqeuences and Oversample them:
 codeOS = zeros(Nk,37);
 G2tab = [2, 6;3,7;4,8;5,9;1,9;2,10;1,8;2,9;3,10;2,3;3,4;5,6;6,7;7,8;...
@@ -82,7 +82,7 @@ end
 %--------------------------------------------------------------------------
 prn = 2;
 % Approximate Doppler (taken from GRID output for PRN 31)
-fD = [-1580:1:-1540];
+fD = [-1600:10:-1500];
 % The Doppler that acquisition and tracking see is opposite fD due to
 % high-side mixing
 fD_internal = -fD;
@@ -91,7 +91,8 @@ tVec = [0:Nk-1]'*T;
 Results = zeros(length(tVec),length(fD_internal));
 for m = 1:length(fD_internal)
     for kk = 1:length(tVec)
-        jk = round(tVec(kk)*fsampIQ)+1;
+        jk = round(tVec(kk)*1/T)+1;
+        jk
         % Generate the phase argument of the local carrier replica
         ThetaVec = [2*pi*(fIF + fD_internal(m))*tVec];
         % Generate the local carrier replica
@@ -110,7 +111,7 @@ for m = 1:length(fD_internal)
         Results(kk,m) = SkdB;
     end
 end
- max(Results,[],1);
+ max(Results(:));
 
  % for jj=length(Results(1,:))
  % figure,
