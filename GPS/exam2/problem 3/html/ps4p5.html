@@ -1,0 +1,276 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ps4p5</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-11-12"><meta name="DC.source" content="ps4p5.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Pwelch from signal</a></li><li><a href="#4">Convert to Bandpass Signal</a></li><li><a href="#5">Convert back to baseband signal</a></li></ul></div><pre class="codeinput">clear; close <span class="string">all</span>; clc;
+</pre><pre class="codeinput"><span class="comment">%----- Setup</span>
+Tfull   = 0.5;           <span class="comment">% Time interval of data to load</span>
+fsampIQ = 10.0e6;         <span class="comment">% IQ sampling frequency (Hz)</span>
+fIF     = 5e6;         <span class="comment">% Intermediate frequency (Hz)</span>
+
+N = floor(fsampIQ*Tfull);
+nfft = 2^9;            <span class="comment">% Size of FFT used in power spectrum estimation</span>
+<span class="comment">%----- Load data</span>
+fid = fopen(<span class="string">"C:\Users\gsh04\Desktop\2024-Fall\GPS\exam2\problem 3\niData03head_10MHz.bin"</span>,<span class="string">'r'</span>,<span class="string">'l'</span>);
+Y = fread(fid, [2,N], <span class="string">'int16'</span>)';
+Y = Y(:,1) + 1j*Y(:,2);
+fclose(fid);
+</pre><h2 id="3">Pwelch from signal</h2><pre class="codeinput"><span class="comment">%----- Compute power spectrum estimate</span>
+[Syy,fVec] = pwelch(Y,hann(nfft),[],nfft,fsampIQ);
+<span class="comment">%----- Plot results</span>
+<span class="comment">% figure,</span>
+<span class="comment">% yLow = -60;</span>
+<span class="comment">% yHigh = 50;</span>
+<span class="comment">% T = nfft/fsampIQ;</span>
+<span class="comment">% delf = 1/T;</span>
+<span class="comment">% fcenter = (nfft/2)*delf;</span>
+<span class="comment">% fVec = fVec - fcenter;</span>
+<span class="comment">% Syy = [Syy(nfft/2 + 1 : end); Syy(1:nfft/2)];</span>
+<span class="comment">% area(fVec/1e6,10*log10(Syy),yLow);</span>
+<span class="comment">% ylim([yLow,yHigh]);</span>
+<span class="comment">% grid on;</span>
+<span class="comment">% shg;</span>
+<span class="comment">% xlabel('Frequency (MHz)');</span>
+<span class="comment">% ylabel('Power density (dB/Hz)');</span>
+<span class="comment">% title('Power spectral density estimate from complex data');</span>
+<span class="comment">% shg;</span>
+</pre><h2 id="4">Convert to Bandpass Signal</h2><pre class="codeinput">Tl = 1/fsampIQ;
+[xVec] = iq2if(real(Y),imag(Y),Tl,fIF);
+[Syy2,fVec2] = pwelch(xVec,hann(nfft),[],nfft,2*fsampIQ);
+<span class="comment">%----- Plot results</span>
+figure,
+yLow2 = -60;
+yHigh2 = 55;
+area(fVec2/1e6,10*log10(Syy2),yLow2);
+ylim([yLow2,yHigh2]);
+grid <span class="string">on</span>;
+shg;
+xlabel(<span class="string">'Frequency (MHz)'</span>);
+ylabel(<span class="string">'Power density (dB/Hz)'</span>);
+title(<span class="string">'Power spectral density estimate of Bandpass Signal'</span>);
+shg;
+</pre><img vspace="5" hspace="5" src="ps4p5_01.png" alt=""> <h2 id="5">Convert back to baseband signal</h2><pre class="codeinput">T  = Tl/2;
+[IVec,QVec] = if2iq(xVec,T,fIF);
+<span class="comment">%----- Compute power spectrum estimate</span>
+Y_recovered = IVec +1j+QVec;
+[Syy3,fVec3] = pwelch(Y_recovered,hann(nfft),[],nfft,fsampIQ);
+<span class="comment">%----- Plot Comparative results</span>
+figure,
+yLow3 = -60;
+yHigh3 = 50;
+T = nfft/fsampIQ;
+delf = 1/T;
+fcenter = (nfft/2)*delf;
+fVec3 = fVec3 - fcenter;
+Syy3 = [Syy3(nfft/2 + 1 : end); Syy3(1:nfft/2)];
+plot(fVec3/1e6,10*log10(Syy3));
+ylim([yLow3,yHigh3]);
+grid <span class="string">on</span>;
+shg;
+xlabel(<span class="string">'Frequency (MHz)'</span>);
+ylabel(<span class="string">'Power density (dB/Hz)'</span>);
+
+hold <span class="string">on</span>,
+
+yLow = -60;
+yHigh = 50;
+T = nfft/fsampIQ;
+delf = 1/T;
+fcenter = (nfft/2)*delf;
+fVec = fVec - fcenter;
+Syy = [Syy(nfft/2 + 1 : end); Syy(1:nfft/2)];
+plot(fVec/1e6,10*log10(Syy));
+ylim([yLow,yHigh]);
+grid <span class="string">on</span>;
+shg;
+xlabel(<span class="string">'Frequency (MHz)'</span>);
+ylabel(<span class="string">'Power density (dB/Hz)'</span>);
+title(<span class="string">'Power spectral density estimate from complex data'</span>);
+shg;
+legend(<span class="string">'Estimate after Conversion'</span>, <span class="string">'Estimate from the signal'</span>)
+
+fprintf([<span class="string">'After converting back to baseband with the if2iq function, the higher \n'</span><span class="keyword">...</span>
+    <span class="string">'frequecny signals are lost. This is due to low pass filtering that happens \n'</span> <span class="keyword">...</span>
+    <span class="string">'within the MATLAB decimate function when we convert the bandpass signal back \n'</span><span class="keyword">...</span>
+    <span class="string">'to baseband signal. Also, the output of the if2iq was scaled by 2 because \n'</span> <span class="keyword">...</span>
+    <span class="string">'the discrete bandpass signal after mxing and going through the low pass \n'</span><span class="keyword">...</span>
+    <span class="string">'filter has the half the magnitude of the original signal. \n'</span>])
+</pre><pre class="codeoutput">After converting back to baseband with the if2iq function, the higher 
+frequecny signals are lost. This is due to low pass filtering that happens 
+within the MATLAB decimate function when we convert the bandpass signal back 
+to baseband signal. Also, the output of the if2iq was scaled by 2 because 
+the discrete bandpass signal after mxing and going through the low pass 
+filter has the half the magnitude of the original signal. 
+</pre><img vspace="5" hspace="5" src="ps4p5_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clear; close all; clc;
+%%
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Setup
+Tfull   = 0.5;           % Time interval of data to load
+fsampIQ = 10.0e6;         % IQ sampling frequency (Hz)
+fIF     = 5e6;         % Intermediate frequency (Hz)
+
+N = floor(fsampIQ*Tfull);
+nfft = 2^9;            % Size of FFT used in power spectrum estimation
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Load data
+fid = fopen("C:\Users\gsh04\Desktop\2024-Fall\GPS\exam2\problem 3\niData03head_10MHz.bin",'r','l');
+Y = fread(fid, [2,N], 'int16')';
+Y = Y(:,1) + 1j*Y(:,2);
+fclose(fid);
+
+%% Pwelch from signal
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Compute power spectrum estimate
+[Syy,fVec] = pwelch(Y,hann(nfft),[],nfft,fsampIQ);
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Plot results
+% figure,
+% yLow = -60;
+% yHigh = 50;
+% T = nfft/fsampIQ;
+% delf = 1/T;
+% fcenter = (nfft/2)*delf;
+% fVec = fVec - fcenter;
+% Syy = [Syy(nfft/2 + 1 : end); Syy(1:nfft/2)];
+% area(fVec/1e6,10*log10(Syy),yLow);
+% ylim([yLow,yHigh]);
+% grid on;
+% shg;
+% xlabel('Frequency (MHz)');
+% ylabel('Power density (dB/Hz)');
+% title('Power spectral density estimate from complex data');
+% shg;
+
+%% Convert to Bandpass Signal
+
+Tl = 1/fsampIQ;
+[xVec] = iq2if(real(Y),imag(Y),Tl,fIF);
+[Syy2,fVec2] = pwelch(xVec,hann(nfft),[],nfft,2*fsampIQ);
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Plot results
+figure,
+yLow2 = -60;
+yHigh2 = 55;
+area(fVec2/1e6,10*log10(Syy2),yLow2);
+ylim([yLow2,yHigh2]);
+grid on;
+shg;
+xlabel('Frequency (MHz)');
+ylabel('Power density (dB/Hz)');
+title('Power spectral density estimate of Bandpass Signal');
+shg;
+
+%% Convert back to baseband signal
+
+T  = Tl/2;
+[IVec,QVec] = if2iq(xVec,T,fIF);
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Compute power spectrum estimate
+Y_recovered = IVec +1j+QVec;
+[Syy3,fVec3] = pwelch(Y_recovered,hann(nfft),[],nfft,fsampIQ);
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Plot Comparative results
+figure,
+yLow3 = -60;
+yHigh3 = 50;
+T = nfft/fsampIQ;
+delf = 1/T;
+fcenter = (nfft/2)*delf;
+fVec3 = fVec3 - fcenter;
+Syy3 = [Syy3(nfft/2 + 1 : end); Syy3(1:nfft/2)];
+plot(fVec3/1e6,10*log10(Syy3));
+ylim([yLow3,yHigh3]);
+grid on;
+shg;
+xlabel('Frequency (MHz)');
+ylabel('Power density (dB/Hz)');
+
+hold on,
+
+yLow = -60;
+yHigh = 50;
+T = nfft/fsampIQ;
+delf = 1/T;
+fcenter = (nfft/2)*delf;
+fVec = fVec - fcenter;
+Syy = [Syy(nfft/2 + 1 : end); Syy(1:nfft/2)];
+plot(fVec/1e6,10*log10(Syy));
+ylim([yLow,yHigh]);
+grid on;
+shg;
+xlabel('Frequency (MHz)');
+ylabel('Power density (dB/Hz)');
+title('Power spectral density estimate from complex data');
+shg;
+legend('Estimate after Conversion', 'Estimate from the signal')
+
+fprintf(['After converting back to baseband with the if2iq function, the higher \n'...
+    'frequecny signals are lost. This is due to low pass filtering that happens \n' ...
+    'within the MATLAB decimate function when we convert the bandpass signal back \n'...
+    'to baseband signal. Also, the output of the if2iq was scaled by 2 because \n' ...
+    'the discrete bandpass signal after mxing and going through the low pass \n'...
+    'filter has the half the magnitude of the original signal. \n'])
+
+##### SOURCE END #####
+--></body></html>
