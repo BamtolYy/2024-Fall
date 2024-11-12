@@ -49,7 +49,7 @@ fprintf(['Coherence Time from white frequency Rate noise: %f \n'],tau_alpha)
 % Number of simulations
 ensemble = 1000;
 % Number of Samples per simulation;
-Ns = 49999;
+Ns = 1000;
 % Sampling interval
 T = 0.001; % 1ms Given
 % Noise parameters

@@ -21,7 +21,7 @@ fclose(fid);
 figure,
 yLow = -60;
 yHigh = 50;
-T = nfft/fsampIQ;
+T = nfft/fsampIQ;s
 delf = 1/T;
 fcenter = (nfft/2)*delf;
 fVec = fVec - fcenter;
