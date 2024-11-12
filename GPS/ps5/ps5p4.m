@@ -1,58 +1,66 @@
 clear all; close all; clc;
-%% Simulation Setup
+%% White Frequency Noise (Phase Random Walk)
+%----Simulation Setup
 % Number of simulations
-ensemble = 4000;
+ensemble = 1000;
 % Number of Samples per simulation;
-Ns = 10000;
+Ns = 49999;
 % Sampling interval
 T = 0.001; % 1ms Given
 % Noise parameters
 sigma_omega = 0.01;     % radians
-sigma_alpha = 0.0001;   % radians
-%
-% Ccoh2_phase    = zeros(Ns,1);
-% Ccoh2_freq     = zeros(Ns,1);
-% Ccoh2_freqRate = zeros(Ns,1);
-DeltaTheta_freq = zeros(Ns, ensemble);
-%% Simulation
-for m = 1:ensemble
-    % Generate white frequency noise
-    DeltaOmega = sigma_omega*randn(Ns,1);
 
-    for j = 2:Ns
-        DeltaTheta_freq(j,m) = DeltaTheta_freq(j-1,m) + DeltaOmega(j) * T;
-    end
-    % Generate white frequency rate noise
-    % DeltaAlpha = sigma_alpha * randn(Ns, 1);
-    % DeltaOmega = zeros(Ns, 1);
-    % DeltaTheta_freqRate = zeros(Ns, 1);
-    % for j = 2:Ns
-    %     DeltaOmega(j) = DeltaOmega(j-1) + DeltaAlpha(j) * T;
-    %     DeltaTheta_freqRate(j) = DeltaTheta_freqRate(j-1) + DeltaOmega(j) * T;
-    % end
+%----- Simulation
+DeltaOmega = sigma_omega*randn(Ns,ensemble);
+DeltaTheta_omega = cumsum(DeltaOmega,1);
+for ii= 1: ensemble
+    Ccoh(ii) =computeCoherence(DeltaTheta_omega(:,ii),Ns);
 end
+Ccoh2_mean = mean(Ccoh.^2)
+tau = T*Ns;
+fprintf(['Coherence Time from white frequency noise: %f \n'],tau)
+
+%% White Frequency Rate Noise (Frequency Random Walk)
+%---- Simulation Setup
+% Number of simulations
+ensemble = 1000;
+% Number of Samples per simulation;
+Ns_alpha = 1599;
+% Sampling interval
+T = 0.001; % 1ms Given
+% Noise parameters
+sigma_alpha = 0.0001;   % radians
 
 
+%----- Simulation
+DeltaAlpha = sigma_alpha*randn(Ns_alpha,ensemble);
+DeltaOmega_alpha = cumsum(DeltaAlpha,1);
+DeltaTheta_alpha = cumsum(DeltaOmega_alpha,1);
+for ii= 1: ensemble
+    Ccoh_alpha(ii) =computeCoherence(DeltaTheta_alpha(:,ii),Ns_alpha);
+end
+Ccoh2_mean_alpha = mean(Ccoh_alpha.^2)
+tau_alpha = T*Ns_alpha;
+fprintf(['Coherence Time from white frequency Rate noise: %f \n'],tau_alpha)
 
-% Calculate Ccoh^2
-% Ccoh2_freq = zeros(Ns,ensemble);
-% for k = 1:ensemble
-    for N = 1:Ns
-        a=DeltaTheta_freq(1:N,1)
-        b=1i.*DeltaTheta_freq(1:N,1)
-        c=exp(1i.*DeltaTheta_freq(1:N,1))
-        d=sum(exp(1i.*DeltaTheta_freq(1:N,1)))
-        e=sum(exp(1i.*DeltaTheta_freq(1:N,1)))/N
-        Ccoh2_freq(N,1) =  abs((1/N)*sum(exp(1i.*DeltaTheta_freq(1:N,1))))^2;
-    end
-% end
-plot(Ccoh2_freq)
 
-sum1 = sum(Ccoh2_freq,2);
-% sum2 =sum(Ccoh2_freqRate,2);
+%% White Phass noise (Phase Random Walk)
+%----Simulation Setup
+% Number of simulations
+ensemble = 1000;
+% Number of Samples per simulation;
+Ns = 49999;
+% Sampling interval
+T = 0.001; % 1ms Given
+% Noise parameters
+sigma = 0.8;     % radians
 
-Ccoh2_freq_mean = mean(Ccoh2_freq,2);
-% Ccoh2_freqRate_mean = mean(Ccoh2_freqRate,2);
-plot(Ccoh2_freq_mean)
-xlabel('Number of Samples used for Coherence')
-ylabel('Mean C_{coh}^2')
+%----- Simulation
+Delta = sigma*randn(Ns,ensemble);
+for ii= 1: ensemble
+    Ccoh(ii) =computeCoherence(Delta(:,ii),Ns);
+end
+Ccoh2_mean = mean(Ccoh.^2)
+tau = T*Ns;
+fprintf(['Coherence Time from white frequency noise: %f \n'],tau)
+

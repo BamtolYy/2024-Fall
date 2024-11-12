@@ -80,9 +80,9 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-prn = 2;
+prn = 10;
 % Approximate Doppler (taken from GRID output for PRN 31)
-fD = [-1600:10:-1500];
+fD = [-6000:100:6000];
 % The Doppler that acquisition and tracking see is opposite fD due to
 % high-side mixing
 fD_internal = -fD;
@@ -92,7 +92,6 @@ Results = zeros(length(tVec),length(fD_internal));
 for m = 1:length(fD_internal)
     for kk = 1:length(tVec)
         jk = round(tVec(kk)*1/T)+1;
-        jk
         % Generate the phase argument of the local carrier replica
         ThetaVec = [2*pi*(fIF + fD_internal(m))*tVec];
         % Generate the local carrier replica
@@ -107,14 +106,21 @@ for m = 1:length(fD_internal)
         Sk = sum(xVeck.*lVeck);
         % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
         % dB
-        SkdB = 10*log10(abs(Sk)^2);
+        SkdB = abs(Sk)^2;
         Results(kk,m) = SkdB;
     end
 end
- max(Results(:));
-
- % for jj=length(Results(1,:))
- % figure,
- % plot(Results(:,jj))
- % end
+figure()
+surf(Results)
+zlabel('Sk^2')
+xlabel('Doppler Frequency, fD, (Hz)')
+ylabel('Start Time (s)')
+[~,max_index] = max(Results(:));
+[ts_index,fD_index]=ind2sub(size(Results),max_index);
+apparent_doppler_frequency = fD_internal(fD_index);
+start_time = tVec(ts_index)*1e6;
+sigmaIQ = 32.4;
+CN0 =10*log10(max(Results(:))-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta)
+disp(['Apparent Doppler Frequency: ', num2str(apparent_doppler_frequency), ' Hz']);
+disp(['Approximate Start Time of First Full C/A Code: ', num2str(start_time), ' microseconds']);
 %--------------------------------------------------------------------------
