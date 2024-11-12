@@ -1,0 +1,262 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>topPerformAcqHypothesisCalcs</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-11-12"><meta name="DC.source" content="topPerformAcqHypothesisCalcs.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">change N</a></li><li><a href="#3">Change Ta</a></li></ul></div><pre class="codeinput"><span class="comment">% topPerformAcqHypothesisCalcs</span>
+<span class="comment">%</span>
+<span class="comment">% Top-level script for performing acquisition calculations</span>
+</pre><h2 id="2">change N</h2><pre class="codeinput"><span class="comment">%----- Setup</span>
+clear; clc;
+CN0 = [27,30,33,36,39,42,45,48,51];
+Pd=1;
+testN = flip([1:500],2);
+<span class="keyword">for</span> n = 1:length(CN0)
+    Pd=1;
+    <span class="keyword">for</span> k = 1: length(testN)
+        s.C_N0dBHz = CN0(n);
+        s.N = testN(k);
+        s.PfaAcq = 0.0001;
+        s.Ta = 0.001;
+        s.fMax = 7000;
+        s.nCodeOffsets = 1023*5;
+        s.ZMax = 1000;
+        s.delZ = 0.1;
+
+        <span class="comment">%----- Execute</span>
+        [pZ_H0,pZ_H1,lambda0,Pd,ZVec] = performAcqHypothesisCalcs(s);
+        <span class="keyword">if</span> Pd &lt;= 0.95
+            N(n) =testN(k)+1;
+            <span class="keyword">break</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% Plot Results</span>
+figure,
+plot(CN0,[N,1,1])
+xlabel(<span class="string">'C/N0'</span>)
+ylabel(<span class="string">'Number of Samples'</span>)
+title(<span class="string">'Number of Samples required to Achieve P_D = 0.95 or more'</span>)
+</pre><img vspace="5" hspace="5" src="topPerformAcqHypothesisCalcs_01.png" alt=""> <h2 id="3">Change Ta</h2><pre class="codeinput"><span class="comment">%----- Setup</span>
+clear; clc;
+CN0 = linspace(5,50,10);
+testTa = flip([0.0001:0.0001:0.1]);
+<span class="keyword">for</span> n = 1:length(CN0)
+    Pd=1;
+    <span class="keyword">for</span> k = 1: length(testTa)
+        s.C_N0dBHz =CN0(n);
+        s.N = 1;
+        s.PfaAcq = 0.001;
+        s.Ta = testTa(k);
+        s.fMax = 7000;
+        s.nCodeOffsets = 1023*5;
+        s.ZMax = 1000;
+        s.delZ = 0.1;
+
+        <span class="comment">%----- Execute</span>
+        [pZ_H0,pZ_H1,lambda0,Pd,ZVec] = performAcqHypothesisCalcs(s);
+        <span class="keyword">if</span> Pd &lt;= 0.95
+            T(n) =testTa(k);
+            <span class="keyword">break</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% Plot Results</span>
+figure,
+plot(CN0,T)
+xlabel(<span class="string">'C/N0'</span>)
+ylabel(<span class="string">'Accumulation Time '</span>)
+title(<span class="string">'Accumulation Time required to achieve P_D = 0.95 or more'</span>)
+
+
+<span class="comment">%</span>
+<span class="comment">% %----- Visualize the results</span>
+<span class="comment">% figure(2);</span>
+<span class="comment">% [pmax,iimax] = max(pZ_H1);</span>
+<span class="comment">% Zmax = ZVec(iimax);</span>
+<span class="comment">% clf;</span>
+<span class="comment">% ash = area(ZVec,pZ_H0);</span>
+<span class="comment">% set(get(ash,'children'), 'facecolor', 'g', 'linewidth', 2, 'facealpha', 0.5);</span>
+<span class="comment">% hold on;</span>
+<span class="comment">% ash = area(ZVec,pZ_H1);</span>
+<span class="comment">% set(get(ash,'children'), 'facecolor', 'b', 'linewidth', 2, 'facealpha', 0.5);</span>
+<span class="comment">% linemax = 1/5*max([pZ_H0(:);pZ_H1(:)]);</span>
+<span class="comment">% line([lambda0,lambda0],[0,linemax], 'linewidth', 2, 'color', 'r');</span>
+<span class="comment">% xlim([0 max(Zmax*2,lambda0*1.5)]);</span>
+<span class="comment">% ylabel('Probability density');</span>
+<span class="comment">% xlabel('Z');</span>
+<span class="comment">% fs = 12;</span>
+<span class="comment">% title('GNSS Acquisition Hypothesis Testing Problem');</span>
+<span class="comment">% disp(['Probability of acquisition false alarm (PfaAcq): ' ...</span>
+<span class="comment">%     num2str(s.PfaAcq)]);</span>
+<span class="comment">% disp(['Probability of detection (Pd): ' num2str(Pd)]);</span>
+<span class="comment">% text(lambda0,linemax*1.1, ['\lambda_0 = ' num2str(lambda0) ], ...</span>
+<span class="comment">%     'fontsize',fs);</span>
+<span class="comment">% shg</span>
+</pre><img vspace="5" hspace="5" src="topPerformAcqHypothesisCalcs_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% topPerformAcqHypothesisCalcs
+%
+% Top-level script for performing acquisition calculations
+%% change N
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Setup
+clear; clc;
+CN0 = [27,30,33,36,39,42,45,48,51];
+Pd=1;
+testN = flip([1:500],2);
+for n = 1:length(CN0)
+    Pd=1;
+    for k = 1: length(testN)
+        s.C_N0dBHz = CN0(n);
+        s.N = testN(k);
+        s.PfaAcq = 0.0001;
+        s.Ta = 0.001;
+        s.fMax = 7000;
+        s.nCodeOffsets = 1023*5;
+        s.ZMax = 1000;
+        s.delZ = 0.1;
+
+        %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Execute
+        [pZ_H0,pZ_H1,lambda0,Pd,ZVec] = performAcqHypothesisCalcs(s);
+        if Pd <= 0.95
+            N(n) =testN(k)+1;
+            break;
+        end
+    end
+end
+
+% Plot Results
+figure,
+plot(CN0,[N,1,1])
+xlabel('C/N0')
+ylabel('Number of Samples')
+title('Number of Samples required to Achieve P_D = 0.95 or more')
+
+
+
+%% Change Ta
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Setup
+clear; clc;
+CN0 = linspace(5,50,10);
+testTa = flip([0.0001:0.0001:0.1]);
+for n = 1:length(CN0)
+    Pd=1;
+    for k = 1: length(testTa)
+        s.C_N0dBHz =CN0(n);
+        s.N = 1;
+        s.PfaAcq = 0.001;
+        s.Ta = testTa(k);
+        s.fMax = 7000;
+        s.nCodeOffsets = 1023*5;
+        s.ZMax = 1000;
+        s.delZ = 0.1;
+
+        %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Execute
+        [pZ_H0,pZ_H1,lambda0,Pd,ZVec] = performAcqHypothesisCalcs(s);
+        if Pd <= 0.95
+            T(n) =testTa(k);
+            break;
+        end
+    end
+end
+
+% Plot Results
+figure,
+plot(CN0,T)
+xlabel('C/N0')
+ylabel('Accumulation Time ')
+title('Accumulation Time required to achieve P_D = 0.95 or more')
+
+
+% 
+% %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Visualize the results
+% figure(2);
+% [pmax,iimax] = max(pZ_H1);
+% Zmax = ZVec(iimax);
+% clf;
+% ash = area(ZVec,pZ_H0);
+% set(get(ash,'children'), 'facecolor', 'g', 'linewidth', 2, 'facealpha', 0.5);
+% hold on;
+% ash = area(ZVec,pZ_H1);
+% set(get(ash,'children'), 'facecolor', 'b', 'linewidth', 2, 'facealpha', 0.5);
+% linemax = 1/5*max([pZ_H0(:);pZ_H1(:)]);
+% line([lambda0,lambda0],[0,linemax], 'linewidth', 2, 'color', 'r');
+% xlim([0 max(Zmax*2,lambda0*1.5)]);
+% ylabel('Probability density');
+% xlabel('Z');
+% fs = 12;
+% title('GNSS Acquisition Hypothesis Testing Problem');
+% disp(['Probability of acquisition false alarm (PfaAcq): ' ...
+%     num2str(s.PfaAcq)]);
+% disp(['Probability of detection (Pd): ' num2str(Pd)]);
+% text(lambda0,linemax*1.1, ['\lambda_0 = ' num2str(lambda0) ], ...
+%     'fontsize',fs);
+% shg
+##### SOURCE END #####
+--></body></html>

@@ -25,7 +25,7 @@ fprintf(['Coherence Time from white frequency noise: %f \n'],tau)
 % Number of simulations
 ensemble = 1000;
 % Number of Samples per simulation;
-Ns_alpha = 1599;
+Ns_alpha = 1600;
 % Sampling interval
 T = 0.001; % 1ms Given
 % Noise parameters
@@ -49,7 +49,7 @@ fprintf(['Coherence Time from white frequency Rate noise: %f \n'],tau_alpha)
 % Number of simulations
 ensemble = 1000;
 % Number of Samples per simulation;
-Ns = 1000;
+Ns = 10000;
 % Sampling interval
 T = 0.001; % 1ms Given
 % Noise parameters
@@ -62,5 +62,12 @@ for ii= 1: ensemble
 end
 Ccoh2_mean = mean(Ccoh.^2)
 tau = T*Ns;
-fprintf(['Coherence Time from white frequency noise: %f \n'],tau)
+fprintf(['Coherence Time from white frequency noise: Ccoh^2 stalls at 0.5275'])
+
+fprintf(['\n ---------------------------------------------------\n'])
+fprintf(['It doesn''t make sense to estimate the coherence time for the \n'...
+        'white phase noise process because with the coherence time, we also seek \n ' ...
+        'how many samples we can accumulate before the coherence drops to a value.\n' ...
+        'The individual samples of this white noise are completely independent \n' ...
+        'of each other and random. The samples are inherently not related to each other.'])
 
