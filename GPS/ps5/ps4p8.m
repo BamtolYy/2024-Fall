@@ -57,38 +57,72 @@ parfor j = 1:length(G2tab)
     GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,0,Nk,Np);
     codeOS(:,j) = GoldSeqOS;
 end
-% 
-% fD = [-6000:10:6000];
-fD = [-6000:10:6000];
-tk = [0:Nk-1]'*T;
-PF = 0.05;
-sigmaIQ = 25.5;
-threshold = chi2inv(1-PF,2*Nk);
-for mm = 1:size(codeOS,2)
 
-    for kk = 1:length(fD)
-        Cr = fft(codeOS(:,mm));
-        fi = fD(kk) + fIF;
-        xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
-        XrTilde = fft(xkTilde);
-        Zr = XrTilde.*(conj(Cr));
-        zk = ifft(Zr);
-        [maxValue,kmax] = max(abs(zk).^2);
-        Results(kk)  = maxValue;
-
-
-        if maxValue > threshold
-            start_time = tk(kmax+1)*10^6;
-            [~,I] = max(Results(:));
-            apparent_fD = fD(I);
-            CN0 =10*log10(maxValue-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta);
-            disp('-----------------------------------------------------------')
-            disp(['PRN :',num2str(mm)])
-            disp(['Apparent Doppler Frequency: ', num2str(apparent_fD), ' Hz']);
-            disp(['Approximate Start Time from first sample: ', num2str(start_time), ' microseconds']);
-            disp (['C/N0: ', num2str(CN0)])
-            break;
-        end
+%--------------------------------------------------------------------------
+% % Check if two lfsr m-sequence are truly Golden
+% X1 = generateLfsrSequence(nStages,ciVec1,a0Vec1);
+% X2 = generateLfsrSequence(nStages,ciVec2,a0Vec1);
+% X1 = 2*X1 - 1;
+% X2 = 2*X2 - 1;
+% % Calculate t(n)
+% if mod(nStages, 2) == 1  % n is odd
+%     t_n = 1 + 2^((nStages + 1) / 2);
+% else  % n is even
+%     t_n = 1 + 2^((nStages + 2) / 2);
+% end
+% % Define preferred correlation values
+% preferredCorrelations = [-t_n, -1, t_n - 2]
+% [R12,iiVecSeq] = ccorr(X1,X2);
+% figure;clf;
+% plot(iiVecSeq,R12);
+% title(['Potential X1 and X2 crosscorrelation'])
+% ylabel('R_{X1,X2}');
+% xlabel('Lag (samples)');
+% grid on;
+% % Because the crosscorrelation of the two lfsr seqeunce has the expected
+% % crosscorrelation values, they do make up gold codes.
+%--------------------------------------------------------------------------
+prn = 31;
+% Approximate Doppler (taken from GRID output for PRN 31)
+fD = [-6000:100:6000];
+% The Doppler that acquisition and tracking see is opposite fD due to
+% high-side mixing
+fD_internal = -fD;
+% Time vector covering the accumulation
+tVec = [0:Nk-1]'*T;
+Results = zeros(length(tVec),length(fD_internal));
+for m = 1:length(fD_internal)
+    for kk = 1:length(tVec)
+        jk = round(tVec(kk)*1/T)+1;
+        % Generate the phase argument of the local carrier replica
+        ThetaVec = [2*pi*(fIF + fD_internal(m))*tVec];
+        % Generate the local carrier replica
+        carrierVec = exp(-1i*ThetaVec);
+        % Generate the full local replica, with both code and carrier
+        lVeck = carrierVec.*codeOS(:,prn);
+        % Isolate the kth code interval from the data. xVec here holds the +/-1 and
+        % +/-3-valued data samples from dfDataHead.bin.  The first element in xVec
+        % holds the first sample in dfDataHead.bin.
+        xVeck = Y(jk:jk+Nk-1);
+        % Perform correlation and accumulation
+        Sk = sum(xVeck.*lVeck);
+        % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
+        % dB
+        SkdB = abs(Sk)^2;
+        Results(kk,m) = SkdB;
     end
 end
-
+figure()
+surf(Results)
+zlabel('Sk^2')
+xlabel('Doppler Frequency, fD, (Hz)')
+ylabel('Start Time (s)')
+[~,max_index] = max(Results(:));
+[ts_index,fD_index]=ind2sub(size(Results),max_index);
+apparent_doppler_frequency = fD_internal(fD_index);
+start_time = tVec(ts_index)*1e6;
+sigmaIQ = 25.5;
+CN0 =10*log10(max(Results(:))-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta)
+disp(['Apparent Doppler Frequency: ', num2str(apparent_doppler_frequency), ' Hz']);
+disp(['Approximate Start Time of First Full C/A Code: ', num2str(start_time), ' microseconds']);
+%--------------------------------------------------------------------------

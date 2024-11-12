@@ -80,7 +80,7 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-prn = 10;
+prn = 14;
 % Approximate Doppler (taken from GRID output for PRN 31)
 fD = [-6000:100:6000];
 % The Doppler that acquisition and tracking see is opposite fD due to
