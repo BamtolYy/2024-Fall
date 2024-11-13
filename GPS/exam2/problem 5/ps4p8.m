@@ -84,9 +84,12 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-for prn = 1:1
+for prn = 29
+    if prn == 1 || prn == 11 || prn == 18
+        continue;
+    end
     % Approximate Doppler (taken from GRID output for PRN 31)
-    fD = [20000:100:50000];
+    fD = [280000:1000:300000];
     % The Doppler that acquisition and tracking see is opposite fD due to
     % high-side mixing
     fD_internal = -fD;
@@ -94,7 +97,7 @@ for prn = 1:1
     tVec = [0:Nk-1]'*T;
     Results = zeros(length(tVec),length(fD_internal));
     for m = 1:length(fD_internal)
-        for kk = 1:length(tVec)
+        parfor kk = 1:length(tVec)
             jk = round(tVec(kk)*1/T)+1;
             % Generate the phase argument of the local carrier replica
             ThetaVec = [2*pi*(fIF + fD_internal(m))*tVec];
@@ -124,7 +127,7 @@ for prn = 1:1
     [ts_index,fD_index]=ind2sub(size(Results),max_index);
     apparent_doppler_frequency = fD_internal(fD_index);
     start_time = tVec(ts_index)*1e6;
-    sigmaIQ = 130;
+    sigmaIQ = 145;
     CN0 =10*log10((max(Results(:))-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta));
     disp(['PRN ',num2str(prn)])
     disp(['C/N0 :',num2str(CN0)])

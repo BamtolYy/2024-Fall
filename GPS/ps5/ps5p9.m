@@ -58,13 +58,17 @@ parfor j = 1:length(G2tab)
     codeOS(:,j) = GoldSeqOS;
 end
 % 
-% fD = [-6000:10:6000];
-fD = [-6000:10:6000];
+fD = [0:10:6000];
+
 tk = [0:Nk-1]'*T;
-PF = 0.05;
-sigmaIQ = 25.5;
-threshold = chi2inv(1-PF,2*Nk);
-for mm = 1:size(codeOS,2)
+
+sigmaIQ =142;
+
+PF = 0.001;
+threshold = chi2inv(1-PF,2);
+
+
+for mm = 14
 
     for kk = 1:length(fD)
         Cr = fft(codeOS(:,mm));
@@ -75,13 +79,13 @@ for mm = 1:size(codeOS,2)
         zk = ifft(Zr);
         [maxValue,kmax] = max(abs(zk).^2);
         Results(kk)  = maxValue;
-
-
-        if maxValue > threshold
+        CN0 = 10*log10((maxValue - 2 * sigmaIQ^2) / (2 * sigmaIQ^2 * Ta));
+        % 
+        if CN0 > 47
             start_time = tk(kmax+1)*10^6;
             [~,I] = max(Results(:));
             apparent_fD = fD(I);
-            CN0 =10*log10(maxValue-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta);
+            % CN0 =10*log10(maxValue-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta);
             disp('-----------------------------------------------------------')
             disp(['PRN :',num2str(mm)])
             disp(['Apparent Doppler Frequency: ', num2str(apparent_fD), ' Hz']);

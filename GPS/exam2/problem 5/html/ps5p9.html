@@ -1,0 +1,402 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ps5p9</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-11-13"><meta name="DC.source" content="ps5p9.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Load Data from rawtrimmed_158.bin</a></li><li><a href="#2">Get Signal</a></li><li><a href="#3">Genererate Code</a></li><li><a href="#4">Find the best estimates for fd and ts</a></li><li><a href="#5">Weak Signal Search</a></li></ul></div><h2 id="1">Load Data from rawtrimmed_158.bin</h2><pre class="codeinput">clear; close <span class="string">all</span>; clc;
+</pre><h2 id="2">Get Signal</h2><pre class="codeinput"><span class="comment">%----- Setup</span>
+Tfull = 0.5;         <span class="comment">% Time interval of data to load</span>
+fs = 40e6/7;         <span class="comment">% Sampling frequency (Hz)</span>
+N = fs*Tfull;
+N = floor(N/16)*16;  <span class="comment">% Number of data samples to load</span>
+nfft = 2^10;          <span class="comment">% Size of FFT used in power spectrum estimation</span>
+fIF     = 1.610476e6;        <span class="comment">% Intermediate frequency (Hz)</span>
+
+<span class="comment">%----- Load data</span>
+fid = fopen(<span class="string">"C:\Users\gsh04\Desktop\2024-Fall\GPS\exam2\problem 5\dataout_raw_trimmed_158.bin"</span>,<span class="string">'r'</span>,<span class="string">'l'</span>);
+[Y,count] = binloadSamples(fid,N,<span class="string">'dual'</span>);
+Y = Y(:,1);
+</pre><h2 id="3">Genererate Code</h2><pre class="codeinput"><span class="comment">%---- Generate all possible PRN (37 SVIDs or PRN Sign No.)</span>
+<span class="comment">% LFSR Parameters:</span>
+nStages      = 10;
+ciVec1       = [10, 3]';
+ciVec2       = [10, 9, 8, 6, 3, 2,]';
+a0Vec1       = ones(nStages,1);
+a0Vec2       = ones(nStages,1);
+<span class="comment">% G2Delay      = [5;6;7;8;17;18;139;140;141;251;252;254;255;256;257;258;...</span>
+<span class="comment">%     469;470;471;472;473;474;509;512;513;514;515;516;859;860;...</span>
+<span class="comment">%     861;862;863;950;947;948;950];</span>
+<span class="comment">% Oversampling Parameters:</span>
+Tc = 1e-3/1023;             <span class="comment">% Chip interval in seconds</span>
+T  = 1/fs;                  <span class="comment">% Bandpass Sampling time interval in seconds</span>
+delChip = T/Tc;             <span class="comment">% Sampling interval in chips</span>
+Np = 2^nStages - 1;         <span class="comment">% Period of the sequence in chips</span>
+Ns = length(Y);             <span class="comment">% Number of Samples should equal to that of Y(signal)</span>
+Ta = 0.001;                 <span class="comment">% Accumulation time in seconds</span>
+Nk = floor(Ta/T);           <span class="comment">% Number of samples in one 1-ms accumulation</span>
+<span class="comment">% Generate 37 Seqeuences and Oversample them:</span>
+codeOS = zeros(Nk,37);
+G2tab = [2,6;3,7;4,8;5,9;1,9;2,10;1,8;2,9;3,10;2,3;3,4;5,6;6,7;7,8;<span class="keyword">...</span>
+    8,9;9,10;1,4;2,5;3,6;4,7;5,8;6,9;1,3;4,6;5,7;6,8;7,9;8,10;1,6;2,7;<span class="keyword">...</span>
+    3,8;4,9;5,10;4,10;1,7;2,8;4,10];
+<span class="keyword">parfor</span> j = 1:length(G2tab)
+    [GoldSeq] = generateGoldLfsrSequenceCA(nStages,ciVec1,ciVec2,a0Vec1,<span class="keyword">...</span>
+        a0Vec2,G2tab(j,:));
+    <span class="comment">% Make code +1/-1 not +1/0</span>
+    GoldSeq = 2*GoldSeq - 1;
+    <span class="comment">% Oversample Code: It makes sense to oversample code, since the code</span>
+    <span class="comment">% embedded within the signal is sampled at a higher rate than its chip</span>
+    <span class="comment">% rate. Assuming that the code I generate is sampled at the chip rate,</span>
+    <span class="comment">% oversampling my code I generated at the rate the signal is sampled</span>
+    <span class="comment">% will allow my code to correlate with the code embedded in the signal</span>
+    GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,0,Nk,Np);
+    codeOS(:,j) = GoldSeqOS;
+<span class="keyword">end</span>
+<span class="comment">%</span>
+
+fD = [-300000:100:0];
+tk = [0:Nk-1]'*T;
+PF = 0.05;
+sigmaIQ = 149;
+threshold = 39.5;
+CN0 = zeros(37,1);
+<span class="keyword">for</span> mm =1:37
+    <span class="keyword">for</span> kk = 1:length(fD)
+        Cr = fft(codeOS(:,mm));
+        fi = fD(kk) + fIF;
+        xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
+        XrTilde = fft(xkTilde);
+        Zr = XrTilde.*(conj(Cr));
+        zk = ifft(Zr);
+        [maxValue,kmax] = max(abs(zk).^2);
+        CN0(mm) =10*log10((maxValue-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta));
+        <span class="keyword">if</span> CN0(mm)  &gt; threshold
+            signalStrenghth(mm)=CN0(mm);
+            start_time(mm) = tk(kmax+1)*10^6;
+            apparent_fD(mm) = fD(kk);
+            disp(<span class="string">'----------------------------------------------------------'</span>)
+            disp([<span class="string">'PRN :'</span>,num2str(mm)])
+            disp([<span class="string">'Apparent Doppler Frequency: '</span>, num2str(apparent_fD(mm)), <span class="string">' Hz'</span>]);
+            disp([<span class="string">'Approximate Start Time from first sample: '</span>, num2str(start_time(mm)), <span class="string">' microseconds'</span>]);
+            disp ([<span class="string">'C/N0: '</span>, num2str(CN0(mm))])
+            <span class="keyword">break</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">----------------------------------------------------------
+PRN :1
+Apparent Doppler Frequency: -34300 Hz
+Approximate Start Time from first sample: 411.075 microseconds
+C/N0: 41.491
+----------------------------------------------------------
+PRN :11
+Apparent Doppler Frequency: -36500 Hz
+Approximate Start Time from first sample: 578.55 microseconds
+C/N0: 41.8547
+----------------------------------------------------------
+PRN :18
+Apparent Doppler Frequency: -34800 Hz
+Approximate Start Time from first sample: 370.125 microseconds
+C/N0: 41.5946
+----------------------------------------------------------
+PRN :21
+Apparent Doppler Frequency: -135200 Hz
+Approximate Start Time from first sample: 42.875 microseconds
+C/N0: 39.7039
+----------------------------------------------------------
+PRN :29
+Apparent Doppler Frequency: -287200 Hz
+Approximate Start Time from first sample: 584.85 microseconds
+C/N0: 39.514
+</pre><h2 id="4">Find the best estimates for fd and ts</h2><pre class="codeinput">[~,strongPrn] = max(CN0)
+
+<span class="comment">% Sk vs fdk</span>
+<span class="keyword">for</span> hh = 1:length(fD)
+    Cr = fft(codeOS(:,strongPrn));
+    fi = fD(hh) + fIF;
+    xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
+    XrTilde = fft(xkTilde);
+    Zr = XrTilde.*(conj(Cr));
+    zk = ifft(Zr);
+    Sk(hh) = max(abs(zk));
+<span class="keyword">end</span>
+figure,
+plot(fD,Sk)
+ylabel(<span class="string">'Correlation, Sk'</span>)
+xlabel(<span class="string">'Doppler Frequency, fD (Hz)'</span>)
+title([<span class="string">'|S_k| vs f_{D,k}'</span>])
+
+<span class="comment">% Sk vs tsk</span>
+[~,idx] = max(Sk);
+fd_best = fD(idx);
+Cr = fft(codeOS(:,strongPrn));
+fi = fd_best + fIF;
+xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
+XrTilde = fft(xkTilde);
+Zr = XrTilde.*(conj(Cr));
+zk = ifft(Zr);
+Sk = abs(zk);
+figure,
+plot(tk,Sk)
+ylabel(<span class="string">'Correlation, Sk'</span>)
+xlabel(<span class="string">'Code offset  (s)'</span>)
+title([<span class="string">'|S_k| vs t_{s,k}'</span>])
+</pre><pre class="codeoutput">
+strongPrn =
+
+    11
+
+</pre><img vspace="5" hspace="5" src="ps5p9_01.png" alt=""> <img vspace="5" hspace="5" src="ps5p9_02.png" alt=""> <h2 id="5">Weak Signal Search</h2><pre class="codeinput">fD = [-300000:100:0];
+tk = [0+110e-3:Nk-1+110e-3]'*T;
+
+threshold = 36;
+CN0 = zeros(37,1);
+<span class="keyword">for</span> mm = 31
+    <span class="keyword">for</span> kk = 1:length(fD)
+        Cr = fft(codeOS(:,mm));
+        fi = fD(kk) + fIF;
+        Y = Y(round(110e-3/T):end);
+        xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
+        XrTilde = fft(xkTilde);
+        Zr = XrTilde.*(conj(Cr));
+        zk = ifft(Zr);
+        [maxValue,kmax] = max(abs(zk).^2);
+        CN0(mm) =10*log10((maxValue-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta));
+        <span class="keyword">if</span> CN0(mm)  &gt; threshold
+            signalStrenghth(mm)=CN0(mm);
+            start_time(mm) = tk(kmax+1)*10^6;
+            apparent_fD(mm) = fD(kk);
+            disp(<span class="string">'----------------------------------------------------------'</span>)
+            disp([<span class="string">'PRN :'</span>,num2str(mm)])
+            disp([<span class="string">'Apparent Doppler Frequency: '</span>, num2str(apparent_fD(mm)), <span class="string">' Hz'</span>]);
+            disp([<span class="string">'Approximate Start Time from first sample: '</span>, num2str(start_time(mm)), <span class="string">' microseconds'</span>]);
+            disp ([<span class="string">'C/N0: '</span>, num2str(CN0(mm))])
+            <span class="keyword">break</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">----------------------------------------------------------
+PRN :31
+Apparent Doppler Frequency: -300000 Hz
+Approximate Start Time from first sample: 173.7942 microseconds
+C/N0: 36.9558
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Load Data from rawtrimmed_158.bin
+clear; close all; clc;
+%% Get Signal
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Setup
+Tfull = 0.5;         % Time interval of data to load
+fs = 40e6/7;         % Sampling frequency (Hz)
+N = fs*Tfull;
+N = floor(N/16)*16;  % Number of data samples to load
+nfft = 2^10;          % Size of FFT used in power spectrum estimation
+fIF     = 1.610476e6;        % Intermediate frequency (Hz)
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Load data
+fid = fopen("C:\Users\gsh04\Desktop\2024-Fall\GPS\exam2\problem 5\dataout_raw_trimmed_158.bin",'r','l');
+[Y,count] = binloadSamples(fid,N,'dual');
+Y = Y(:,1);
+
+
+%% Genererate Code
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Generate all possible PRN (37 SVIDs or PRN Sign No.)
+% LFSR Parameters:
+nStages      = 10;
+ciVec1       = [10, 3]';
+ciVec2       = [10, 9, 8, 6, 3, 2,]';
+a0Vec1       = ones(nStages,1);
+a0Vec2       = ones(nStages,1);
+% G2Delay      = [5;6;7;8;17;18;139;140;141;251;252;254;255;256;257;258;...
+%     469;470;471;472;473;474;509;512;513;514;515;516;859;860;...
+%     861;862;863;950;947;948;950];
+% Oversampling Parameters:
+Tc = 1e-3/1023;             % Chip interval in seconds
+T  = 1/fs;                  % Bandpass Sampling time interval in seconds
+delChip = T/Tc;             % Sampling interval in chips
+Np = 2^nStages - 1;         % Period of the sequence in chips
+Ns = length(Y);             % Number of Samples should equal to that of Y(signal)
+Ta = 0.001;                 % Accumulation time in seconds
+Nk = floor(Ta/T);           % Number of samples in one 1-ms accumulation
+% Generate 37 Seqeuences and Oversample them:
+codeOS = zeros(Nk,37);
+G2tab = [2,6;3,7;4,8;5,9;1,9;2,10;1,8;2,9;3,10;2,3;3,4;5,6;6,7;7,8;...
+    8,9;9,10;1,4;2,5;3,6;4,7;5,8;6,9;1,3;4,6;5,7;6,8;7,9;8,10;1,6;2,7;...
+    3,8;4,9;5,10;4,10;1,7;2,8;4,10];
+parfor j = 1:length(G2tab)
+    [GoldSeq] = generateGoldLfsrSequenceCA(nStages,ciVec1,ciVec2,a0Vec1,...
+        a0Vec2,G2tab(j,:));
+    % Make code +1/-1 not +1/0
+    GoldSeq = 2*GoldSeq - 1;
+    % Oversample Code: It makes sense to oversample code, since the code
+    % embedded within the signal is sampled at a higher rate than its chip
+    % rate. Assuming that the code I generate is sampled at the chip rate,
+    % oversampling my code I generated at the rate the signal is sampled
+    % will allow my code to correlate with the code embedded in the signal
+    GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,0,Nk,Np);
+    codeOS(:,j) = GoldSeqOS;
+end
+%
+
+fD = [-300000:100:0];
+tk = [0:Nk-1]'*T;
+PF = 0.05;
+sigmaIQ = 149;
+threshold = 39.5;
+CN0 = zeros(37,1);
+for mm =1:37
+    for kk = 1:length(fD)
+        Cr = fft(codeOS(:,mm));
+        fi = fD(kk) + fIF;
+        xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
+        XrTilde = fft(xkTilde);
+        Zr = XrTilde.*(conj(Cr));
+        zk = ifft(Zr);
+        [maxValue,kmax] = max(abs(zk).^2);
+        CN0(mm) =10*log10((maxValue-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta));
+        if CN0(mm)  > threshold
+            signalStrenghth(mm)=CN0(mm);
+            start_time(mm) = tk(kmax+1)*10^6;
+            apparent_fD(mm) = fD(kk);
+            disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH')
+            disp(['PRN :',num2str(mm)])
+            disp(['Apparent Doppler Frequency: ', num2str(apparent_fD(mm)), ' Hz']);
+            disp(['Approximate Start Time from first sample: ', num2str(start_time(mm)), ' microseconds']);
+            disp (['C/N0: ', num2str(CN0(mm))])
+            break;
+        end
+    end
+end
+
+%% Find the best estimates for fd and ts
+[~,strongPrn] = max(CN0)
+
+% Sk vs fdk
+for hh = 1:length(fD)
+    Cr = fft(codeOS(:,strongPrn));
+    fi = fD(hh) + fIF;
+    xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
+    XrTilde = fft(xkTilde);
+    Zr = XrTilde.*(conj(Cr));
+    zk = ifft(Zr);
+    Sk(hh) = max(abs(zk));
+end
+figure,
+plot(fD,Sk)
+ylabel('Correlation, Sk')
+xlabel('Doppler Frequency, fD (Hz)')
+title(['|S_k| vs f_{D,k}'])
+
+% Sk vs tsk
+[~,idx] = max(Sk);
+fd_best = fD(idx); 
+Cr = fft(codeOS(:,strongPrn));
+fi = fd_best + fIF;
+xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
+XrTilde = fft(xkTilde);
+Zr = XrTilde.*(conj(Cr));
+zk = ifft(Zr);
+Sk = abs(zk);
+figure,
+plot(tk,Sk)
+ylabel('Correlation, Sk')
+xlabel('Code offset  (s)')
+title(['|S_k| vs t_{s,k}'])
+
+%% Weak Signal Search
+fD = [-300000:100:0];
+tk = [0+110e-3:Nk-1+110e-3]'*T;
+
+threshold = 36;
+CN0 = zeros(37,1);
+for mm = 31
+    for kk = 1:length(fD)
+        Cr = fft(codeOS(:,mm));
+        fi = fD(kk) + fIF;
+        Y = Y(round(110e-3/T):end);
+        xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
+        XrTilde = fft(xkTilde);
+        Zr = XrTilde.*(conj(Cr));
+        zk = ifft(Zr);
+        [maxValue,kmax] = max(abs(zk).^2);
+        CN0(mm) =10*log10((maxValue-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta));
+        if CN0(mm)  > threshold
+            signalStrenghth(mm)=CN0(mm);
+            start_time(mm) = tk(kmax+1)*10^6;
+            apparent_fD(mm) = fD(kk);
+            disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH')
+            disp(['PRN :',num2str(mm)])
+            disp(['Apparent Doppler Frequency: ', num2str(apparent_fD(mm)), ' Hz']);
+            disp(['Approximate Start Time from first sample: ', num2str(start_time(mm)), ' microseconds']);
+            disp (['C/N0: ', num2str(CN0(mm))])
+            break;
+        end
+    end
+end
+
+##### SOURCE END #####
+--></body></html>

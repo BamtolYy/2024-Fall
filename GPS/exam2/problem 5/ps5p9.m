@@ -1,7 +1,6 @@
 %% Load Data from rawtrimmed_158.bin
 clear; close all; clc;
 %% Get Signal
-clear; clc;
 %----- Setup
 Tfull = 0.5;         % Time interval of data to load
 fs = 40e6/7;         % Sampling frequency (Hz)
@@ -53,15 +52,15 @@ parfor j = 1:length(G2tab)
     GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,0,Nk,Np);
     codeOS(:,j) = GoldSeqOS;
 end
-% 
-% fD = [-6000:10:6000];
-fD = [-6000:10:6000];
+%
+
+fD = [-300000:100:0];
 tk = [0:Nk-1]'*T;
 PF = 0.05;
-sigmaIQ = 130;
+sigmaIQ = 149;
 threshold = 39.5;
-for mm = 1:size(codeOS,2)
-
+CN0 = zeros(37,1);
+for mm =1:37
     for kk = 1:length(fD)
         Cr = fft(codeOS(:,mm));
         fi = fD(kk) + fIF;
@@ -70,19 +69,83 @@ for mm = 1:size(codeOS,2)
         Zr = XrTilde.*(conj(Cr));
         zk = ifft(Zr);
         [maxValue,kmax] = max(abs(zk).^2);
-        Results(kk)  = maxValue;
-        CN0 =10*log10((maxValue-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta));
-        if maxValue > threshold
-            start_time = tk(kmax+1)*10^6;
-            [~,I] = max(Results(:));
-            apparent_fD = fD(I);
-            disp('-----------------------------------------------------------')
+        CN0(mm) =10*log10((maxValue-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta));
+        if CN0(mm)  > threshold
+            signalStrenghth(mm)=CN0(mm);
+            start_time(mm) = tk(kmax+1)*10^6;
+            apparent_fD(mm) = fD(kk);
+            disp('----------------------------------------------------------')
             disp(['PRN :',num2str(mm)])
-            disp(['Apparent Doppler Frequency: ', num2str(apparent_fD), ' Hz']);
-            disp(['Approximate Start Time from first sample: ', num2str(start_time), ' microseconds']);
-            disp (['C/N0: ', num2str(CN0)])
+            disp(['Apparent Doppler Frequency: ', num2str(apparent_fD(mm)), ' Hz']);
+            disp(['Approximate Start Time from first sample: ', num2str(start_time(mm)), ' microseconds']);
+            disp (['C/N0: ', num2str(CN0(mm))])
             break;
         end
     end
 end
 
+%% Find the best estimates for fd and ts
+[~,strongPrn] = max(CN0)
+
+% Sk vs fdk
+for hh = 1:length(fD)
+    Cr = fft(codeOS(:,strongPrn));
+    fi = fD(hh) + fIF;
+    xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
+    XrTilde = fft(xkTilde);
+    Zr = XrTilde.*(conj(Cr));
+    zk = ifft(Zr);
+    Sk(hh) = max(abs(zk));
+end
+figure,
+plot(fD,Sk)
+ylabel('Correlation, Sk')
+xlabel('Doppler Frequency, fD (Hz)')
+title(['|S_k| vs f_{D,k}'])
+
+% Sk vs tsk
+[~,idx] = max(Sk);
+fd_best = fD(idx); 
+Cr = fft(codeOS(:,strongPrn));
+fi = fd_best + fIF;
+xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
+XrTilde = fft(xkTilde);
+Zr = XrTilde.*(conj(Cr));
+zk = ifft(Zr);
+Sk = abs(zk);
+figure,
+plot(tk,Sk)
+ylabel('Correlation, Sk')
+xlabel('Code offset  (s)')
+title(['|S_k| vs t_{s,k}'])
+
+%% Weak Signal Search
+fD = [-300000:100:0];
+tk = [0+110e-3:Nk-1+110e-3]'*T;
+
+threshold = 36;
+CN0 = zeros(37,1);
+for mm = 31
+    for kk = 1:length(fD)
+        Cr = fft(codeOS(:,mm));
+        fi = fD(kk) + fIF;
+        Y = Y(round(110e-3/T):end);
+        xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
+        XrTilde = fft(xkTilde);
+        Zr = XrTilde.*(conj(Cr));
+        zk = ifft(Zr);
+        [maxValue,kmax] = max(abs(zk).^2);
+        CN0(mm) =10*log10((maxValue-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta));
+        if CN0(mm)  > threshold
+            signalStrenghth(mm)=CN0(mm);
+            start_time(mm) = tk(kmax+1)*10^6;
+            apparent_fD(mm) = fD(kk);
+            disp('----------------------------------------------------------')
+            disp(['PRN :',num2str(mm)])
+            disp(['Apparent Doppler Frequency: ', num2str(apparent_fD(mm)), ' Hz']);
+            disp(['Approximate Start Time from first sample: ', num2str(start_time(mm)), ' microseconds']);
+            disp (['C/N0: ', num2str(CN0(mm))])
+            break;
+        end
+    end
+end
