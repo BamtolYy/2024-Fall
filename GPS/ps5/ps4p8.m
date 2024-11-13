@@ -120,9 +120,9 @@ ylabel('Start Time (s)')
 [~,max_index] = max(Results(:));
 [ts_index,fD_index]=ind2sub(size(Results),max_index);
 apparent_doppler_frequency = fD_internal(fD_index);
-start_time = tVec(ts_index)*1e6;
-sigmaIQ = 25.5;
-CN0 =10*log10(max(Results(:))-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta)
+start_time = tVec(ts_index+1)*1e6;
+sigmaIQ = 130;
+CN0 =10*log10((max(Results(:))-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta))
 disp(['Apparent Doppler Frequency: ', num2str(apparent_doppler_frequency), ' Hz']);
 disp(['Approximate Start Time of First Full C/A Code: ', num2str(start_time), ' microseconds']);
 %--------------------------------------------------------------------------

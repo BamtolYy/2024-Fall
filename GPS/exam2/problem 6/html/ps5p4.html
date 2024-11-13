@@ -67,7 +67,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">White Frequency Noise (Phase Random Walk)</a></li><li><a href="#3">White Frequency Rate Noise (Frequency Random Walk)</a></li><li><a href="#4">White Phass noise (Phase Random Walk)</a></li></ul></div><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>; clc;
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">White Frequency Noise (Phase Random Walk)</a></li><li><a href="#3">White Frequency Rate Noise (Frequency Random Walk)</a></li><li><a href="#4">White Phass noise</a></li></ul></div><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>; clc;
 </pre><h2 id="2">White Frequency Noise (Phase Random Walk)</h2><pre class="codeinput"><span class="comment">%----Simulation Setup</span>
 <span class="comment">% Number of simulations</span>
 ensemble = 1000;
@@ -90,7 +90,7 @@ fprintf([<span class="string">'Coherence Time from white frequency noise: %f \n'
 </pre><pre class="codeoutput">
 Ccoh2_mean =
 
-      0.50603
+    0.5138
 
 Coherence Time from white frequency noise: 49.999000 
 </pre><h2 id="3">White Frequency Rate Noise (Frequency Random Walk)</h2><pre class="codeinput"><span class="comment">%---- Simulation Setup</span>
@@ -117,10 +117,10 @@ fprintf([<span class="string">'Coherence Time from white frequency Rate noise: %
 </pre><pre class="codeoutput">
 Ccoh2_mean_alpha =
 
-       0.5047
+    0.4887
 
 Coherence Time from white frequency Rate noise: 1.600000 
-</pre><h2 id="4">White Phass noise (Phase Random Walk)</h2><pre class="codeinput"><span class="comment">%----Simulation Setup</span>
+</pre><h2 id="4">White Phass noise</h2><pre class="codeinput"><span class="comment">%----Simulation Setup</span>
 <span class="comment">% Number of simulations</span>
 ensemble = 1000;
 <span class="comment">% Number of Samples per simulation;</span>
@@ -148,7 +148,7 @@ fprintf([<span class="string">'It doesn''t make sense to estimate the coherence 
 </pre><pre class="codeoutput">
 Ccoh2_mean =
 
-      0.52716
+    0.5274
 
 Coherence Time from white frequency noise: Ccoh^2 stalls at 0.5275
  ---------------------------------------------------
@@ -204,7 +204,7 @@ tau_alpha = T*Ns_alpha;
 fprintf(['Coherence Time from white frequency Rate noise: %f \n'],tau_alpha)
 
 
-%% White Phass noise (Phase Random Walk)
+%% White Phass noise
 %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHSimulation Setup
 % Number of simulations
 ensemble = 1000;

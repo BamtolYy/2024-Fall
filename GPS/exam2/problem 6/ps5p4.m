@@ -44,7 +44,7 @@ tau_alpha = T*Ns_alpha;
 fprintf(['Coherence Time from white frequency Rate noise: %f \n'],tau_alpha)
 
 
-%% White Phass noise (Phase Random Walk)
+%% White Phass noise
 %----Simulation Setup
 % Number of simulations
 ensemble = 1000;

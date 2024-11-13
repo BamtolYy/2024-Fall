@@ -1,0 +1,322 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>getIonoDelay</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-11-12"><meta name="DC.source" content="getIonoDelay.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">function</span> [delTauG] = getIonoDelay(ionodata,fc,rRx,rSv,tGPS,model)
+<span class="comment">% getIonoDelay : Return a model-based estimate of the ionospheric delay</span>
+<span class="comment">% experienced by a transionospheric GNSS signal as it</span>
+<span class="comment">% propagates from a GNSS SV to the antenna of a terrestrial</span>
+<span class="comment">% GNSS receiver.</span>
+<span class="comment">%</span>
+<span class="comment">% INPUTS</span>
+<span class="comment">%</span>
+<span class="comment">% ionodata ------- Structure containing a parameterization of the</span>
+<span class="comment">% ionosphere that is valid at time tGPS. The structure is</span>
+<span class="comment">% defined differently depending on what ionospheric model</span>
+<span class="comment">% is selected:</span>
+<span class="comment">%</span>
+<span class="comment">% broadcast --- For the broadcast (Klobuchar) model, ionodata</span>
+<span class="comment">% is a structure containing the following fields:</span>
+<span class="comment">%</span>
+<span class="comment">% alpha0 ... alpha3 -- power series expansion coefficients</span>
+<span class="comment">% for amplitude of ionospheric delay</span>
+<span class="comment">%</span>
+<span class="comment">% beta0 ... beta3 -- power series expansion coefficients</span>
+<span class="comment">% for period of ionospheric plasma density cycle</span>
+<span class="comment">%</span>
+<span class="comment">%</span>
+<span class="comment">% Other models TBD ...</span>
+<span class="comment">%</span>
+<span class="comment">% fc ------------- Carrier frequency of the GNSS signal, in Hz.</span>
+<span class="comment">%</span>
+<span class="comment">% rRx ------------ A 3-by-1 vector representing the receiver antenna position</span>
+<span class="comment">% at the time of receipt of the signal, expressed in meters</span>
+<span class="comment">% in the ECEF reference frame.</span>
+<span class="comment">%</span>
+<span class="comment">% rSv ------------ A 3-by-1 vector representing the space vehicle antenna</span>
+<span class="comment">% position at the time of transmission of the signal,</span>
+<span class="comment">% expressed in meters in the ECEF reference frame.</span>
+<span class="comment">%</span>
+<span class="comment">% tGPS ----------- A structure containing the true GPS time of receipt of</span>
+<span class="comment">% the signal. The structure has the following fields:</span>
+<span class="comment">%</span>
+<span class="comment">% week -- unambiguous GPS week number</span>
+<span class="comment">%</span>
+<span class="comment">% seconds -- seconds (including fractional seconds) of the</span>
+<span class="comment">% GPS week</span>
+<span class="comment">%</span>
+<span class="comment">% model ---------- A string identifying the model to be used in the</span>
+<span class="comment">% computation of the ionospheric delay:</span>
+<span class="comment">%</span>
+<span class="comment">% broadcast --- The broadcast (Klobuchar) model.</span>
+<span class="comment">%</span>
+<span class="comment">% Other models TBD ...</span>
+<span class="comment">%</span>
+<span class="comment">% OUTPUTS</span>
+<span class="comment">%</span>
+<span class="comment">% delTauG -------- Modeled scalar excess group ionospheric delay experienced</span>
+<span class="comment">% by the transionospheric GNSS signal, in seconds.</span>
+<span class="comment">%</span>
+<span class="comment">%+------------------------------------------------------------------------------+</span>
+<span class="comment">% References: For the broadcast (Klobuchar) model, see IS-GPS-200F</span>
+<span class="comment">% pp. 128-130.</span>
+<span class="comment">%</span>
+<span class="comment">%+==============================================================================+</span>
+figure(),
+[X,Y,Z]=sphere;
+Re= 6378137 ; <span class="comment">%Earth Radius in meters</span>
+surf(X*Re,Y*Re,Z*Re);
+xlabel(<span class="string">'m'</span>);
+ylabel(<span class="string">'m'</span>);
+zlabel(<span class="string">'m'</span>);
+axis <span class="string">equal</span>,
+hold <span class="string">on</span>,
+
+plot3(rRx(1),rRx(2),rRx(3),<span class="string">'o'</span>);
+hold <span class="string">on</span>,
+plot3(rSv(1),rSv(2),rSv(3),<span class="string">'*'</span>)
+
+
+<span class="comment">% A is left as rad instead of semi-circle unit since they are only used for trig calculations</span>
+[E, A, r_lla, s_lla]=findElevationAzimuthAngleANDLLA(rRx,rSv);
+E = E/pi; <span class="comment">% semi-circle</span>
+phi_u    = r_lla(1)/pi; <span class="comment">% semi-circles</span>
+lambda_u = r_lla(2)/pi; <span class="comment">% semi-circles</span>
+
+alpha    = [ionodata.broadcast.alpha0,ionodata.broadcast.alpha1,ionodata.broadcast.alpha2,ionodata.broadcast.alpha3];
+beta     = [ionodata.broadcast.beta0,ionodata.broadcast.beta1,ionodata.broadcast.beta2,ionodata.broadcast.beta3];
+
+psi   = 0.0137/(E+0.11)-0.22; <span class="comment">% semi-circle</span>
+phi_i = phi_u+psi*cos(A); <span class="comment">% semi-circle</span>
+
+<span class="keyword">if</span> phi_i &gt; 0.416
+    phi_i = 0.416;
+<span class="keyword">elseif</span> phi_i &lt; -0.416
+    phi_i = -0.416;
+<span class="keyword">end</span>
+
+lambda_i = lambda_u + psi*sin(A)/cos(phi_i*pi); <span class="comment">% semi-circle</span>
+t        = 4.32*10^4*lambda_i +tGPS.seconds;
+
+<span class="keyword">if</span> t &gt;= 86400
+    t = t-86400;
+<span class="keyword">elseif</span> t&lt;= -86000
+    t = t+86400;
+<span class="keyword">end</span>
+
+phi_m    = phi_i + 0.064*cos((lambda_i-1.617)*pi); <span class="comment">% Multiply by pi to remove semicircle unit</span>
+F        = 1 + 16*(0.53 -E)^3;
+PER      = sum(beta.*phi_m);
+
+<span class="keyword">if</span> PER &lt; 72000
+    PER = 72000;
+<span class="keyword">end</span>
+
+x      = 2*pi*(t-50400)/PER;
+AMP    = sum(alpha.*phi_m);
+
+<span class="keyword">if</span> AMP &lt; 0
+    AMP = 0;
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> abs(x) &lt; 1.57
+    delTauG = F*(5*10^-9+AMP*(1-x^2/2+x^4/24)); <span class="comment">% sec</span>
+<span class="keyword">elseif</span> abs(x) &gt;= 1.57
+    delTauG = F*5*10^-9; <span class="comment">% sec</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput error">Not enough input arguments.
+
+Error in getIonoDelay (line 71)
+plot3(rRx(1),rRx(2),rRx(3),'o');
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [delTauG] = getIonoDelay(ionodata,fc,rRx,rSv,tGPS,model)
+% getIonoDelay : Return a model-based estimate of the ionospheric delay
+% experienced by a transionospheric GNSS signal as it
+% propagates from a GNSS SV to the antenna of a terrestrial
+% GNSS receiver.
+%
+% INPUTS
+%
+% ionodata REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Structure containing a parameterization of the
+% ionosphere that is valid at time tGPS. The structure is
+% defined differently depending on what ionospheric model
+% is selected:
+%
+% broadcast REPLACE_WITH_DASH_DASH- For the broadcast (Klobuchar) model, ionodata
+% is a structure containing the following fields:
+%
+% alpha0 ... alpha3 REPLACE_WITH_DASH_DASH power series expansion coefficients
+% for amplitude of ionospheric delay
+%
+% beta0 ... beta3 REPLACE_WITH_DASH_DASH power series expansion coefficients
+% for period of ionospheric plasma density cycle
+%
+%
+% Other models TBD ...
+%
+% fc REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Carrier frequency of the GNSS signal, in Hz.
+%
+% rRx REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH A 3-by-1 vector representing the receiver antenna position
+% at the time of receipt of the signal, expressed in meters
+% in the ECEF reference frame.
+%
+% rSv REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH A 3-by-1 vector representing the space vehicle antenna
+% position at the time of transmission of the signal,
+% expressed in meters in the ECEF reference frame.
+%
+% tGPS REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- A structure containing the true GPS time of receipt of
+% the signal. The structure has the following fields:
+%
+% week REPLACE_WITH_DASH_DASH unambiguous GPS week number
+%
+% seconds REPLACE_WITH_DASH_DASH seconds (including fractional seconds) of the
+% GPS week
+%
+% model REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH A string identifying the model to be used in the
+% computation of the ionospheric delay:
+%
+% broadcast REPLACE_WITH_DASH_DASH- The broadcast (Klobuchar) model.
+%
+% Other models TBD ...
+%
+% OUTPUTS
+%
+% delTauG REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Modeled scalar excess group ionospheric delay experienced
+% by the transionospheric GNSS signal, in seconds.
+%
+%+REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH+
+% References: For the broadcast (Klobuchar) model, see IS-GPS-200F
+% pp. 128-130.
+%
+%+==============================================================================+
+figure(),
+[X,Y,Z]=sphere;
+Re= 6378137 ; %Earth Radius in meters
+surf(X*Re,Y*Re,Z*Re);
+xlabel('m');
+ylabel('m');
+zlabel('m');
+axis equal,
+hold on,
+
+plot3(rRx(1),rRx(2),rRx(3),'o');
+hold on,
+plot3(rSv(1),rSv(2),rSv(3),'*')
+
+
+% A is left as rad instead of semi-circle unit since they are only used for trig calculations
+[E, A, r_lla, s_lla]=findElevationAzimuthAngleANDLLA(rRx,rSv); 
+E = E/pi; % semi-circle
+phi_u    = r_lla(1)/pi; % semi-circles
+lambda_u = r_lla(2)/pi; % semi-circles
+
+alpha    = [ionodata.broadcast.alpha0,ionodata.broadcast.alpha1,ionodata.broadcast.alpha2,ionodata.broadcast.alpha3];
+beta     = [ionodata.broadcast.beta0,ionodata.broadcast.beta1,ionodata.broadcast.beta2,ionodata.broadcast.beta3];
+
+psi   = 0.0137/(E+0.11)-0.22; % semi-circle
+phi_i = phi_u+psi*cos(A); % semi-circle
+
+if phi_i > 0.416
+    phi_i = 0.416;
+elseif phi_i < -0.416
+    phi_i = -0.416;
+end
+
+lambda_i = lambda_u + psi*sin(A)/cos(phi_i*pi); % semi-circle
+t        = 4.32*10^4*lambda_i +tGPS.seconds;
+
+if t >= 86400
+    t = t-86400;
+elseif t<= -86000
+    t = t+86400;
+end
+
+phi_m    = phi_i + 0.064*cos((lambda_i-1.617)*pi); % Multiply by pi to remove semicircle unit
+F        = 1 + 16*(0.53 -E)^3;
+PER      = sum(beta.*phi_m);
+
+if PER < 72000
+    PER = 72000;
+end
+
+x      = 2*pi*(t-50400)/PER;
+AMP    = sum(alpha.*phi_m);
+
+if AMP < 0
+    AMP = 0;
+end
+
+if abs(x) < 1.57
+    delTauG = F*(5*10^-9+AMP*(1-x^2/2+x^4/24)); % sec
+elseif abs(x) >= 1.57
+    delTauG = F*5*10^-9; % sec
+end
+
+##### SOURCE END #####
+--></body></html>

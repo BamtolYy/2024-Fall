@@ -100,7 +100,7 @@ testN = flip([1:500],2);
 figure,
 plot(CN0,[N,1,1])
 xlabel(<span class="string">'C/N0'</span>)
-ylabel(<span class="string">'Number of Samples'</span>)
+ylabel(<span class="string">'Number of Samples(N)'</span>)
 title(<span class="string">'Number of Samples required to Achieve P_D = 0.95 or more'</span>)
 </pre><img vspace="5" hspace="5" src="topPerformAcqHypothesisCalcs_01.png" alt=""> <h2 id="3">Change Ta</h2><pre class="codeinput"><span class="comment">%----- Setup</span>
 clear; clc;
@@ -131,9 +131,15 @@ testTa = flip([0.0001:0.0001:0.1]);
 figure,
 plot(CN0,T)
 xlabel(<span class="string">'C/N0'</span>)
-ylabel(<span class="string">'Accumulation Time '</span>)
+ylabel(<span class="string">'Accumulation Time (s) '</span>)
 title(<span class="string">'Accumulation Time required to achieve P_D = 0.95 or more'</span>)
 
+
+fprintf([<span class="string">'Coherent integration is more efficient than noncoherent integration. \n'</span> <span class="keyword">...</span>
+    <span class="string">'For C/N0 = 30, you require more 99 accumulations for the noncoherent \n'</span> <span class="keyword">...</span>
+    <span class="string">'integration with accumulation time = 0.001 second, which means the total \n'</span> <span class="keyword">...</span>
+    <span class="string">'accumulation time is 0.099 seconds. In contrast, coherernt integration \n'</span> <span class="keyword">...</span>
+    <span class="string">'required only one accumulation for 0.0331 second to achieve PD = 0.95.'</span>])
 
 <span class="comment">%</span>
 <span class="comment">% %----- Visualize the results</span>
@@ -159,7 +165,11 @@ title(<span class="string">'Accumulation Time required to achieve P_D = 0.95 or 
 <span class="comment">% text(lambda0,linemax*1.1, ['\lambda_0 = ' num2str(lambda0) ], ...</span>
 <span class="comment">%     'fontsize',fs);</span>
 <span class="comment">% shg</span>
-</pre><img vspace="5" hspace="5" src="topPerformAcqHypothesisCalcs_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+</pre><pre class="codeoutput">Coherent integration is more efficient than noncoherent integration. 
+For C/N0 = 30, you require more 99 accumulations for the noncoherent 
+integration with accumulation time = 0.001 second, which means the total 
+accumulation time is 0.099 seconds. In contrast, coherernt integration 
+required only one accumulation for 0.0331 second to achieve PD = 0.95.</pre><img vspace="5" hspace="5" src="topPerformAcqHypothesisCalcs_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 % topPerformAcqHypothesisCalcs
 %
@@ -195,7 +205,7 @@ end
 figure,
 plot(CN0,[N,1,1])
 xlabel('C/N0')
-ylabel('Number of Samples')
+ylabel('Number of Samples(N)')
 title('Number of Samples required to Achieve P_D = 0.95 or more')
 
 
@@ -230,9 +240,15 @@ end
 figure,
 plot(CN0,T)
 xlabel('C/N0')
-ylabel('Accumulation Time ')
+ylabel('Accumulation Time (s) ')
 title('Accumulation Time required to achieve P_D = 0.95 or more')
 
+
+fprintf(['Coherent integration is more efficient than noncoherent integration. \n' ...
+    'For C/N0 = 30, you require more 99 accumulations for the noncoherent \n' ...
+    'integration with accumulation time = 0.001 second, which means the total \n' ...
+    'accumulation time is 0.099 seconds. In contrast, coherernt integration \n' ...
+    'required only one accumulation for 0.0331 second to achieve PD = 0.95.'])
 
 % 
 % %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Visualize the results
