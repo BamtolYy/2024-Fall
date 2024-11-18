@@ -18,7 +18,7 @@ sigma2 = 1;
 muI = rho*cos(theta);
 muQ = rho*sin(theta);
 ccoef = 0;
-theta2 = linspace(-pi/2 + 0.01, pi/2 - 0.01, 1000); % Avoid exact asymptotes
+theta2 = linspace(-pi/2 + 0.01, pi/2 - 0.01, 10000); % Avoid exact asymptotes
 ftheta = zeros(length(theta2),1);
 
 for ii = 1:length(theta2)
@@ -34,13 +34,16 @@ histogram(theta_ML);
 figure,
 plot(ftheta)
 
-% Plot the theoretical PDF of theta
-% plot(theta2, ftheta, 'r', 'LineWidth', 2);
-% 
-% % Set plot labels and display the plot
-% xlabel('\theta (radians)');
-% ylabel('Probability Density');
-% title('Comparison of Simulated and Theoretical Distributions of \theta_{ML}');
-% legend('Simulated Histogram', 'Theoretical Distribution');
-% grid on;
-% hold off;
+% Plot Histogram of Simulated Data
+figure;
+histogram(theta_ML, 'Normalization', 'pdf', 'DisplayName', 'Simulated Histogram');
+hold on;
+% Plot Theoretical PDF
+plot(theta2, ftheta, 'r-', 'LineWidth', 2, 'DisplayName', 'Theoretical Distribution');
+
+%% Label Plot
+xlabel('\theta (radians)');
+ylabel('Probability Density');
+title('Comparison of Simulated and Theoretical Distributions of \theta_{ML}');
+legend('show');
+hold off;

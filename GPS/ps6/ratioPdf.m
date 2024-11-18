@@ -8,6 +8,6 @@ d = exp((b^2-c*a^2)/(2*(1-ccoef^2)*a^2));
 xmin = -b/sqrt((1-ccoef^2)*a);
 xmax = b/sqrt((1-ccoef^2)*a);
 phiu = @(u) 1/sqrt(2*pi)*exp(-1/2*u.^2);
-phiy = phiy_upper -phiy_lower;
+phiy = integral(phiu,xmin,xmax);
 pw = b*d/sqrt(2*pi*sigma1*sigma2*a^3)*phiy+sqrt(1-ccoef^2)/...
     (pi*sigma1*sigma2*a^2)*exp(-c/(2*(1-ccoef^2)));
