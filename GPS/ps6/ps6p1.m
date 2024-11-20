@@ -44,5 +44,5 @@ ylabel('$f_{\hat{\theta}_{ML}}(\theta)$','Interpreter','latex')
 xlabel('\theta (radians)')
 title('Comparison of Simuiation and Theoretical Distribution of $\hat{\theta}_{ML}$','Interpreter','Latex')
 legend('Simulation','Theretical Distribution')
-
-var(theta_ML)
+fprintf(['Variance from the Simulation: %f\n'],var(theta_ML))
+fprintf(['CRLB : %f\n'],1/rho^2)
