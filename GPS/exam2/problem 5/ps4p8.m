@@ -84,12 +84,12 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-for prn = 29
-    if prn == 1 || prn == 11 || prn == 18
-        continue;
-    end
+for prn = 22
+    % if prn == 1 || prn == 11 || prn == 18
+    %     continue;
+    % end
     % Approximate Doppler (taken from GRID output for PRN 31)
-    fD = [280000:1000:300000];
+    fD = [50000:1000:100000];
     % The Doppler that acquisition and tracking see is opposite fD due to
     % high-side mixing
     fD_internal = -fD;
@@ -115,6 +115,11 @@ for prn = 29
             % dB
             SkdB = abs(Sk)^2;
             Results(kk,m) = SkdB;
+            noise_range_start = jk+100000;
+            noise_range_end = jk+Nk-1+100000;
+            sigma_IQ_squared = Nk*var(Y(noise_range_start:noise_range_end))/2;
+            sigma_IQ = sqrt(sigma_IQ_squared);
+            CN0(kk,m) = 10*log10((SkdB-2*sigma_IQ^2)/(2*sigma_IQ^2*Ta));
         end
     end
     figure(prn)
@@ -127,10 +132,10 @@ for prn = 29
     [ts_index,fD_index]=ind2sub(size(Results),max_index);
     apparent_doppler_frequency = fD_internal(fD_index);
     start_time = tVec(ts_index)*1e6;
-    sigmaIQ = 145;
-    CN0 =10*log10((max(Results(:))-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta));
+
+
     disp(['PRN ',num2str(prn)])
-    disp(['C/N0 :',num2str(CN0)])
+    disp(['C/N0 :',num2str(CN0(max_index))])
     disp(['Apparent Doppler Frequency: ', num2str(apparent_doppler_frequency), ' Hz']);
     disp(['Approximate Start Time of First Full C/A Code: ', num2str(start_time), ' microseconds']);
 end

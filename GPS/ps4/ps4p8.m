@@ -80,47 +80,69 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-prn = 14;
-% Approximate Doppler (taken from GRID output for PRN 31)
-fD = [-6000:100:6000];
-% The Doppler that acquisition and tracking see is opposite fD due to
-% high-side mixing
-fD_internal = -fD;
-% Time vector covering the accumulation
-tVec = [0:Nk-1]'*T;
-Results = zeros(length(tVec),length(fD_internal));
-for m = 1:length(fD_internal)
-    for kk = 1:length(tVec)
-        jk = round(tVec(kk)*1/T)+1;
-        % Generate the phase argument of the local carrier replica
-        ThetaVec = [2*pi*(fIF + fD_internal(m))*tVec];
-        % Generate the local carrier replica
-        carrierVec = exp(-1i*ThetaVec);
-        % Generate the full local replica, with both code and carrier
-        lVeck = carrierVec.*codeOS(:,prn);
-        % Isolate the kth code interval from the data. xVec here holds the +/-1 and
-        % +/-3-valued data samples from dfDataHead.bin.  The first element in xVec
-        % holds the first sample in dfDataHead.bin.
-        xVeck = Z(jk:jk+Nk-1);
-        % Perform correlation and accumulation
-        Sk = sum(xVeck.*lVeck);
-        % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
-        % dB
-        SkdB = abs(Sk)^2;
-        Results(kk,m) = SkdB;
+for prn = 2
+    % Approximate Doppler (taken from GRID output for PRN 31)
+    fD = [0:100:2000];
+    % The Doppler that acquisition and tracking see is opposite fD due to
+    % high-side mixing
+    fD_internal = -fD;
+    % Time vector covering the accumulation
+    tVec = [0:Nk-1]'*T;
+    Results = zeros(length(tVec),length(fD_internal));
+    sigmaIQ2= zeros(length(tVec),length(fD_internal));
+    for m = 1:length(fD_internal)
+        for kk = 1:length(tVec)
+            jk = round(tVec(kk)*1/T)+1;
+            % Generate the phase argument of the local carrier replica
+            ThetaVec = [2*pi*(fIF + fD_internal(m))*tVec];
+            % Generate the local carrier replica
+            carrierVec = exp(-1i*ThetaVec);
+            % Generate the full local replica, with both code and carrier
+            lVeck = carrierVec.*codeOS(:,prn);
+            % Isolate the kth code interval from the data. xVec here holds the +/-1 and
+            % +/-3-valued data samples from dfDataHead.bin.  The first element in xVec
+            % holds the first sample in dfDataHead.bin.
+            xVeck = Z(jk:jk+Nk-1);
+            % Perform correlation and accumulation
+            Sk = sum(xVeck.*lVeck);
+            % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
+            % dB
+            SkdB = abs(Sk)^2;
+            Results(kk,m) = SkdB;
+            noise_range_start = jk+1000;
+            noise_range_end = jk+Nk-1+1000;
+            % sigma_IQ_squared = Nk*var(Y(noise_range_start:noise_range_end))/2;
+            % sigma_IQ = sqrt(sigma_IQ_squared);
+            % CN0(kk,m) = 10*log10((SkdB-2*sigma_IQ^2)/(2*sigma_IQ^2*Ta));
+        end
     end
+    figure()
+    surf(Results)
+    zlabel('Sk^2')
+    xlabel('Doppler Frequency, fD, (Hz)')
+    ylabel('Start Time (s)')
+    [~,max_index] = max(Results(:));
+    [ts_index,fD_index]=ind2sub(size(Results),max_index);
+    apparent_doppler_frequency = fD_internal(fD_index);
+    start_time = tVec(ts_index)*1e6;
+
+
+    % Find the maximum correlation value
+    [~, max_index] = max(Results(:));
+    [ts_index, fD_index] = ind2sub(size(Results), max_index);
+    apparent_doppler_frequency = fD_internal(fD_index);
+    start_time = tVec(ts_index) * 1e6;
+    noisestart = round(max_index/2);
+    noiseend = round(max_index/2+1000);
+    NoisySk = sqrt(Results(noisestart:noiseend));
+    sigmaIQ2 = var(real(NoisySk))
+    
+    CN0 =10*log10(max(Results(:))-2*sigmaIQ2)/(2*sigmaIQ2*Ta)
+
+
+    CN0(max_index)
+    disp(['Apparent Doppler Frequency: ', num2str(apparent_doppler_frequency), ' Hz']);
+    disp(['Approximate Start Time of First Full C/A Code: ', num2str(start_time), ' microseconds']);
+    disp(['prn:', num2str(prn)])
+    %--------------------------------------------------------------------------
 end
-figure()
-surf(Results)
-zlabel('Sk^2')
-xlabel('Doppler Frequency, fD, (Hz)')
-ylabel('Start Time (s)')
-[~,max_index] = max(Results(:));
-[ts_index,fD_index]=ind2sub(size(Results),max_index);
-apparent_doppler_frequency = fD_internal(fD_index);
-start_time = tVec(ts_index)*1e6;
-sigmaIQ = 32.4;
-CN0 =10*log10(max(Results(:))-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta)
-disp(['Apparent Doppler Frequency: ', num2str(apparent_doppler_frequency), ' Hz']);
-disp(['Approximate Start Time of First Full C/A Code: ', num2str(start_time), ' microseconds']);
-%--------------------------------------------------------------------------
