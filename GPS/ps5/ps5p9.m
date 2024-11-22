@@ -57,42 +57,43 @@ parfor j = 1:length(G2tab)
     GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,0,Nk,Np);
     codeOS(:,j) = GoldSeqOS;
 end
-% 
-fD = [0:10:6000];
+%
+fD = [-3000:200:3000];
 
 tk = [0:Nk-1]'*T;
 
-sigmaIQ =142;
+% Calculate sigma_n^2 from the IQ samples Y
+sigma_n_squared = var(Y());
+sigmaIQ2 = (Nk * sigma_n_squared) / 2;
 
-PF = 0.001;
-threshold = chi2inv(1-PF,2);
 
 
-for mm = 14
 
+for mm =14
+    CN0 = zeros(length(fD),1);
+    Cr = fft(codeOS(:,mm));
     for kk = 1:length(fD)
-        Cr = fft(codeOS(:,mm));
         fi = fD(kk) + fIF;
         xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
         XrTilde = fft(xkTilde);
         Zr = XrTilde.*(conj(Cr));
         zk = ifft(Zr);
-        [maxValue,kmax] = max(abs(zk).^2);
-        Results(kk)  = maxValue;
-        CN0 = 10*log10((maxValue - 2 * sigmaIQ^2) / (2 * sigmaIQ^2 * Ta));
-        % 
-        if CN0 > 47
-            start_time = tk(kmax+1)*10^6;
-            [~,I] = max(Results(:));
-            apparent_fD = fD(I);
-            % CN0 =10*log10(maxValue-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta);
-            disp('-----------------------------------------------------------')
-            disp(['PRN :',num2str(mm)])
-            disp(['Apparent Doppler Frequency: ', num2str(apparent_fD), ' Hz']);
-            disp(['Approximate Start Time from first sample: ', num2str(start_time), ' microseconds']);
-            disp (['C/N0: ', num2str(CN0)])
-            break;
-        end
+        zk2= abs(zk.^2);
+        [maxValue,kmax] = max(zk2);
+        sigmaIQ2 = var(zk(1:kmax-100))/2;
+        CN0(kk) = 10*log10((maxValue-2*sigmaIQ2)/(2*sigmaIQ2*Ta));
+        time(kk) = kmax;
+    end
+[maxCN0,maxfd] = max(CN0(:));
+    if  maxCN0 > 46
+        signalStrenghth(mm)=maxCN0;
+        start_time(mm) = tk(time(maxfd))*10^6;
+        apparent_fD(mm) = fD(maxfd);
+        disp('----------------------------------------------------------')
+        disp(['PRN :',num2str(mm)])
+        disp(['Apparent Doppler Frequency: ', num2str(apparent_fD(mm)), ' Hz']);
+        disp(['Approximate Start Time from first sample: ', num2str(start_time(mm)), ' microseconds']);
+        disp (['C/N0: ', num2str(maxCN0)])
     end
 end
 

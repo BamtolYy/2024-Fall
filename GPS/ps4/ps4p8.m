@@ -80,9 +80,9 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-for prn = 2
+for prn = 1
     % Approximate Doppler (taken from GRID output for PRN 31)
-    fD = [0:100:2000];
+    fD = [-2000:100:2000];
     % The Doppler that acquisition and tracking see is opposite fD due to
     % high-side mixing
     fD_internal = -fD;
@@ -115,7 +115,7 @@ for prn = 2
             % CN0(kk,m) = 10*log10((SkdB-2*sigma_IQ^2)/(2*sigma_IQ^2*Ta));
         end
     end
-    figure()
+    figure,
     surf(Sk2)
     zlabel('Sk^2')
     xlabel('Doppler Frequency, fD, (Hz)')
@@ -124,22 +124,14 @@ for prn = 2
     [ts_index,fD_index]=ind2sub(size(Sk2),max_index);
     apparent_doppler_frequency = fD_internal(fD_index);
     start_time = tVec(ts_index)*1e6;
+    % sigman2 = var(real(Sk(max_index+1000:end)));
+    % Calculate sigma_n^2 from the IQ samples Y
+    % sigma_n_squared = var(Y());
+    % sigmaIQ2 = (Nk * sigma_n_squared) / 2;
+    sigmaIQ2 = var(Sk(1:max_index-100))/2;
+    CN0 =10*log10((max(Sk2(:))-2*sigmaIQ2)/(2*sigmaIQ2*Ta))
 
 
-    % Find the maximum correlation value
-    [~, max_index] = max(Sk2(:));
-    [ts_index, fD_index] = ind2sub(size(Sk2), max_index);
-    apparent_doppler_frequency = fD_internal(fD_index);
-    start_time = tVec(ts_index) * 1e6;
-    noisestart = round(max_index-3000);
-    noiseend = round(max_index-2000);
-    NoisySk = Sk(noisestart:noiseend);
-    sigmaIQ2 = var(real(NoisySk))
-    
-    CN0 =10*log10(max(Sk2(:))-2*sigmaIQ2)/(2*sigmaIQ2*Ta)
-
-
-    CN0(max_index)
     disp(['Apparent Doppler Frequency: ', num2str(apparent_doppler_frequency), ' Hz']);
     disp(['Approximate Start Time of First Full C/A Code: ', num2str(start_time), ' microseconds']);
     disp(['prn:', num2str(prn)])

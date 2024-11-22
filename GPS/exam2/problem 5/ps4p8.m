@@ -97,7 +97,7 @@ for prn = 22
     tVec = [0:Nk-1]'*T;
     Results = zeros(length(tVec),length(fD_internal));
     for m = 1:length(fD_internal)
-        parfor kk = 1:length(tVec)
+        for kk = 1:length(tVec)
             jk = round(tVec(kk)*1/T)+1;
             % Generate the phase argument of the local carrier replica
             ThetaVec = [2*pi*(fIF + fD_internal(m))*tVec];
@@ -110,32 +110,28 @@ for prn = 22
             % holds the first sample in dfDataHead.bin.
             xVeck = Y(jk:jk+Nk-1);
             % Perform correlation and accumulation
-            Sk = sum(xVeck.*lVeck);
+            Sk(kk,m) = sum(xVeck.*lVeck);
             % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
             % dB
-            SkdB = abs(Sk)^2;
-            Results(kk,m) = SkdB;
-            noise_range_start = jk+100000;
-            noise_range_end = jk+Nk-1+100000;
-            sigma_IQ_squared = Nk*var(Y(noise_range_start:noise_range_end))/2;
-            sigma_IQ = sqrt(sigma_IQ_squared);
-            CN0(kk,m) = 10*log10((SkdB-2*sigma_IQ^2)/(2*sigma_IQ^2*Ta));
+            Sk2(kk,m) = abs(Sk(kk,m))^2;
+
         end
     end
     figure(prn)
-    surf(Results)
+    surf(Sk2)
     zlabel('Sk^2')
     xlabel('Doppler Frequency, fD, (Hz)')
     ylabel('Start Time (s)')
     title(['PRN ',num2str(prn)])
-    [~,max_index] = max(Results(:));
-    [ts_index,fD_index]=ind2sub(size(Results),max_index);
+    [~,max_index] = max(Sk2(:));
+    [ts_index,fD_index]=ind2sub(size(Sk2),max_index);
     apparent_doppler_frequency = fD_internal(fD_index);
     start_time = tVec(ts_index)*1e6;
-
+    sigmaIQ2 = var(Sk(1:max_index-100))/2;
+    CN0 =10*log10((max(Sk2(:))-2*sigmaIQ2)/(2*sigmaIQ2*Ta))
 
     disp(['PRN ',num2str(prn)])
-    disp(['C/N0 :',num2str(CN0(max_index))])
+    disp(['C/N0 :',num2str(CN0)])
     disp(['Apparent Doppler Frequency: ', num2str(apparent_doppler_frequency), ' Hz']);
     disp(['Approximate Start Time of First Full C/A Code: ', num2str(start_time), ' microseconds']);
 end
