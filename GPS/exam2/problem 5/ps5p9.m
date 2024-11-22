@@ -32,7 +32,7 @@ T  = 1/fs;                  % Bandpass Sampling time interval in seconds
 delChip = T/Tc;             % Sampling interval in chips
 Np = 2^nStages - 1;         % Period of the sequence in chips
 Ns = length(Y);             % Number of Samples should equal to that of Y(signal)
-Ta = 0.0015;                 % Accumulation time in seconds
+Ta = 0.001;                 % Accumulation time in seconds
 Nk = floor(Ta/T);           % Number of samples in one 1-ms accumulation
 % Generate 37 Seqeuences and Oversample them:
 codeOS = zeros(Nk,37);
@@ -53,34 +53,43 @@ parfor j = 1:length(G2tab)
     codeOS(:,j) = GoldSeqOS;
 end
 %
-
-fD = [-300000:1000:0];
+%%
+fD = [-100000:1000:0];
 tk = [0:Nk-1]'*T;
+threshold = 40;
+NN = 6;
 
-sigmaIQ = 149;
-threshold = 39.5;
-CN0 = zeros(37,1);
+% Calculate sigma_n^2 from the IQ samples Y
+% sigma_n_squared = var(Y());
+% sigmaIQ2 = (Nk * sigma_n_squared) / 2;
+
+
 for mm = 1:37
-    kmax = [];
-    maxValue = [];
-
+    CN0 = zeros(length(fD),1);
+    Cr = fft(codeOS(:,mm));
     for kk = 1:length(fD)
-        Cr = fft(codeOS(:,mm));
-        fi = fD(kk) + fIF;
-        xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
-        XrTilde = fft(xkTilde);
-        Zr = XrTilde.*(conj(Cr));
-        zk = ifft(Zr);
-        [maxValue,kmax] = max(abs(zk).^2);
-        CN0(kk) =10*log10((maxValue-2*sigmaIQ^2)/(2*sigmaIQ^2*Ta));
+        zk2sum = zeros(Nk, 1);
+        for ii = 1:NN
+            jk = (ii-1) * Nk + 1;
+            jk_end = ii * Nk;
+            fi = fD(kk) + fIF;
+            xkTilde = Y(jk:jk_end).*exp(-1i*2*pi*fi*tk);
+            XrTilde = fft(xkTilde);
+            Zr = XrTilde.*(conj(Cr));
+            zk = ifft(Zr);
+
+            zk2sum = zk2sum + abs(zk.^2);
+        end
+        [maxValue,kmax] = max(zk2sum);
+        sigmaIQ2 = var(zk(1:kmax-100))/2;
+        CN0(kk) = 10*log10((maxValue-2*sigmaIQ2)/(2*sigmaIQ2*Ta));
         time(kk) = kmax;
     end
-    [maxCN0,maxTime] = max(CN0(:));
-    
+    [maxCN0,maxfd] = max(CN0(:));
     if  maxCN0 > threshold
         signalStrenghth(mm)=maxCN0;
-        start_time(mm) = tk(kmax)*10^6;
-        apparent_fD(mm) = fD(maxTime);
+        start_time(mm) = tk(time(maxfd))*10^6;
+        apparent_fD(mm) = fD(maxfd);
         disp('----------------------------------------------------------')
         disp(['PRN :',num2str(mm)])
         disp(['Apparent Doppler Frequency: ', num2str(apparent_fD(mm)), ' Hz']);

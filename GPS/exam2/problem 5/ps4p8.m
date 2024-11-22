@@ -84,18 +84,16 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-for prn = 22
-    % if prn == 1 || prn == 11 || prn == 18
-    %     continue;
-    % end
+for prn = 14
     % Approximate Doppler (taken from GRID output for PRN 31)
-    fD = [50000:1000:100000];
+    fD = [-24500:100:-20500];
     % The Doppler that acquisition and tracking see is opposite fD due to
     % high-side mixing
-    fD_internal = -fD;
+    fD_internal = fD;
     % Time vector covering the accumulation
     tVec = [0:Nk-1]'*T;
-    Results = zeros(length(tVec),length(fD_internal));
+    Sk2 = zeros(length(tVec),length(fD_internal));
+    % sigmaIQ2= zeros(length(tVec),length(fD_internal));
     for m = 1:length(fD_internal)
         for kk = 1:length(tVec)
             jk = round(tVec(kk)*1/T)+1;
@@ -114,25 +112,32 @@ for prn = 22
             % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
             % dB
             Sk2(kk,m) = abs(Sk(kk,m))^2;
-
+            % noise_range_start = jk1000;
+            % noise_range_end = jk+Nk-1+1000;
+            % sigma_IQ_squared = Nk*var(Y(noise_range_start:noise_range_end))/2;
+            % sigma_IQ = sqrt(sigma_IQ_squared);
+            % CN0(kk,m) = 10*log10((SkdB-2*sigma_IQ^2)/(2*sigma_IQ^2*Ta));
         end
     end
-    figure(prn)
+    figure,
     surf(Sk2)
     zlabel('Sk^2')
     xlabel('Doppler Frequency, fD, (Hz)')
     ylabel('Start Time (s)')
-    title(['PRN ',num2str(prn)])
     [~,max_index] = max(Sk2(:));
     [ts_index,fD_index]=ind2sub(size(Sk2),max_index);
     apparent_doppler_frequency = fD_internal(fD_index);
     start_time = tVec(ts_index)*1e6;
+    % sigman2 = var(real(Sk(max_index+1000:end)));
+    % Calculate sigma_n^2 from the IQ samples Y
+    % sigma_n_squared = var(Y());
+    % sigmaIQ2 = (Nk * sigma_n_squared) / 2;
     sigmaIQ2 = var(Sk(1:max_index-100))/2;
     CN0 =10*log10((max(Sk2(:))-2*sigmaIQ2)/(2*sigmaIQ2*Ta))
 
-    disp(['PRN ',num2str(prn)])
-    disp(['C/N0 :',num2str(CN0)])
+
     disp(['Apparent Doppler Frequency: ', num2str(apparent_doppler_frequency), ' Hz']);
     disp(['Approximate Start Time of First Full C/A Code: ', num2str(start_time), ' microseconds']);
+    disp(['prn:', num2str(prn)])
+    %--------------------------------------------------------------------------
 end
-%--------------------------------------------------------------------------

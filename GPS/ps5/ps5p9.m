@@ -57,7 +57,8 @@ parfor j = 1:length(G2tab)
     GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,0,Nk,Np);
     codeOS(:,j) = GoldSeqOS;
 end
-%
+
+%%
 fD = [-3000:200:3000];
 
 tk = [0:Nk-1]'*T;
