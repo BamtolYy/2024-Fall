@@ -1,12 +1,14 @@
+close all; clear all; clc;
 %% Parameters
 N = 100;
-Ta = 0.001; 
+Ta = 0.001;
+fs    = 1/Ta;
+t = (0:N-1)*Ta';
 % True Alpha Parameters
-f     = 20;
-rho   = 1;
-theta = pi/4;
-fs    = 2*f;
-T     = 1/fs;
+f     = 200;
+rho   = 58;
+theta = pi/5
+
 
 
 %% Generate Sk
@@ -18,15 +20,21 @@ nk = nI +1i*nQ;
 Sk = rho*exp(1i*(2*pi*f*k*Ta+theta))+nk;
 
 %% Estimate
+% Note the estimator for frequnecy is limited by Ta due to Nyquist
+% Frequency
 
-% frequency
-% FFT of the signal Sk
-Nf = length(Sk);
-S_fft = fft(Sk);
+% Frequency: 
+Skfft = fft(Sk);
+freq = k*fs/N;      % Cycles per length of the signal in seconds
+% plot(freq,abs(Skfft))
+[~,f_ml]=max(abs(Skfft));
+disp(['Maximum likelihood estimation of frequency: ', num2str(freq(f_ml))])
 
-% Frequency vector
-fv = (0:Nf-1) * (fs / Nf);  % Create a frequency vector corresponding to FFT bins
+% Magnitude:
+Skamp = abs(fft(Sk))/N;
+% plot(Skamp)
+disp(['Maximum likelihood estimation of rho: ', num2str(round(max(Skamp)))])
 
-% Find the frequency with the maximum magnitude
-[~, max_idx] = max(abs(S_fft));
-f_ml = fv(max_idx); 
+% Theta:
+
+disp(['Maximum likelihood estimation of theta: ', num2str(angle(Skfft(f_ml)))])
