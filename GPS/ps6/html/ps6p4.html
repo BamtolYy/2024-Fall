@@ -1,0 +1,220 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ps6p4</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-12-01"><meta name="DC.source" content="ps6p4.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">b)</a></li><li><a href="#3">c)</a></li><li><a href="#4">d)</a></li><li><a href="#5">e)</a></li></ul></div><pre class="codeinput">close <span class="string">all</span>; clear <span class="string">all</span>; clc;
+</pre><h2 id="2">b)</h2><pre class="codeinput">Bn = 10;    <span class="comment">% Hz</span>
+
+<span class="comment">% 1st Order</span>
+k1 = 4*Bn;
+H1 = tf(k1,[1 k1]);
+<span class="comment">% 2nd Order</span>
+k2 = 8/3*Bn;
+a2 = k2/2;
+H2 = tf([k2 a2*k2],[1 k2 k2*a2]);
+<span class="comment">% 3rd Order</span>
+a3 = 1.2*Bn;
+b3 = a3^2/2;
+k3 = 2*a3;
+H3 = tf([k3 k3*a3 k3*b3],[1 k3 k3*a3 k3*b3]);
+</pre><h2 id="3">c)</h2><pre class="codeinput">t = linspace(0,1,1000);
+ustep = ones(length(t),1);
+ustep(1:100) = 0;
+slope = 1;
+uramp = zeros(length(t),1);
+uramp(101:length(t)) = slope*t(1:length(t)-100);
+uquad = zeros(length(t),1);
+uquad(101:length(t)) = t(1:length(t)-100).^2;
+<span class="comment">% 1st Order</span>
+y1step = lsim(H1,ustep,t);
+y1ramp = lsim(H1,uramp,t);
+y1quad = lsim(H1,uquad,t);
+
+
+<span class="comment">% 2nd Order</span>
+y2step = lsim(H2,ustep,t);
+y2ramp = lsim(H2,uramp,t);
+y2quad = lsim(H2,uquad,t);
+
+
+<span class="comment">% 3rd Order</span>
+y3step = lsim(H3,ustep,t);
+y3ramp = lsim(H3,uramp,t);
+y3quad = lsim(H3,uquad,t);
+
+<span class="comment">% Compare Results</span>
+figure(1)
+plot(t,ustep,<span class="string">'--'</span>,t,y1step,t,y2step,t,y3step);
+ylabel(<span class="string">'Output y(t)'</span>);
+xlabel(<span class="string">'Time (seconds)'</span>);
+legend(<span class="string">'Reference Input'</span>,<span class="string">'1st Order Loop Filter'</span>,<span class="string">'2nd Order Loop Filter'</span>,<span class="string">'3rd Order Loop Filter'</span>,<span class="string">'Location'</span>,<span class="string">'southeast'</span>)
+title(<span class="string">'Step Response of Loop Filters'</span>)
+figure(2)
+plot(t,uramp,<span class="string">'--'</span>,t,y1ramp,t,y2ramp,t,y3ramp);
+ylabel(<span class="string">'Output y(t)'</span>);
+xlabel(<span class="string">'Time (seconds)'</span>);
+legend(<span class="string">'Reference Input'</span>,<span class="string">'1st Order Loop Filter'</span>,<span class="string">'2nd Order Loop Filter'</span>,<span class="string">'3rd Order Loop Filter'</span>,<span class="string">'Location'</span>,<span class="string">'northwest'</span>)
+title(<span class="string">'Ramp Response of Loop Filters'</span>)
+xlim([0 0.8])
+figure(3)
+plot(t,uquad,<span class="string">'--'</span>,t,y1quad,t,y2quad,t,y3quad);
+ylabel(<span class="string">'Output y(t)'</span>);
+xlabel(<span class="string">'Time (seconds)'</span>);
+legend(<span class="string">'Reference Input'</span>,<span class="string">'1st Order Loop Filter'</span>,<span class="string">'2nd Order Loop Filter'</span>,<span class="string">'3rd Order Loop Filter'</span>,<span class="string">'Location'</span>,<span class="string">'northwest'</span>)
+title(<span class="string">'Parabolic Response of Loop Filters'</span>)
+xlim([0 0.5])
+</pre><img vspace="5" hspace="5" src="ps6p4_01.png" alt=""> <img vspace="5" hspace="5" src="ps6p4_02.png" alt=""> <img vspace="5" hspace="5" src="ps6p4_03.png" alt=""> <h2 id="4">d)</h2><pre class="codeinput">disp([<span class="string">'Ramp input Steady State Error for 1st order loop filter:'</span>, num2str(abs(y1ramp(872)-uramp(872)))])
+disp([<span class="string">'Parabolic input Steady State Error for 2nd order loop filter:'</span>, num2str(abs(y2quad(900)-uquad(900)))])
+</pre><pre class="codeoutput">Ramp input Steady State Error for 1st order loop filter:0.025
+Parabolic input Steady State Error for 2nd order loop filter:0.005625
+</pre><h2 id="5">e)</h2><pre class="codeinput">figure(4)
+opts = bodeoptions;
+opts.XLimMode = <span class="string">'manual'</span>;
+opts.XLim = {[1 6*10^1]};
+bodeplot(H1,H2,H3,opts)
+legend(<span class="string">'1st Order Loop Filter'</span>,<span class="string">'2nd Order Loop Filter'</span>,<span class="string">'3rd Order Loop Filter'</span>)
+</pre><img vspace="5" hspace="5" src="ps6p4_04.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+close all; clear all; clc;
+%% b)
+Bn = 10;    % Hz
+
+% 1st Order
+k1 = 4*Bn;
+H1 = tf(k1,[1 k1]);
+% 2nd Order
+k2 = 8/3*Bn;
+a2 = k2/2;
+H2 = tf([k2 a2*k2],[1 k2 k2*a2]);
+% 3rd Order
+a3 = 1.2*Bn;
+b3 = a3^2/2;
+k3 = 2*a3;
+H3 = tf([k3 k3*a3 k3*b3],[1 k3 k3*a3 k3*b3]);
+
+%% c)
+t = linspace(0,1,1000);
+ustep = ones(length(t),1);
+ustep(1:100) = 0;
+slope = 1;
+uramp = zeros(length(t),1);
+uramp(101:length(t)) = slope*t(1:length(t)-100);
+uquad = zeros(length(t),1);
+uquad(101:length(t)) = t(1:length(t)-100).^2;
+% 1st Order
+y1step = lsim(H1,ustep,t);
+y1ramp = lsim(H1,uramp,t);
+y1quad = lsim(H1,uquad,t);
+
+
+% 2nd Order
+y2step = lsim(H2,ustep,t);
+y2ramp = lsim(H2,uramp,t);
+y2quad = lsim(H2,uquad,t);
+
+
+% 3rd Order
+y3step = lsim(H3,ustep,t);
+y3ramp = lsim(H3,uramp,t);
+y3quad = lsim(H3,uquad,t);
+
+% Compare Results
+figure(1)
+plot(t,ustep,'REPLACE_WITH_DASH_DASH',t,y1step,t,y2step,t,y3step);
+ylabel('Output y(t)');
+xlabel('Time (seconds)');
+legend('Reference Input','1st Order Loop Filter','2nd Order Loop Filter','3rd Order Loop Filter','Location','southeast')
+title('Step Response of Loop Filters')
+figure(2)
+plot(t,uramp,'REPLACE_WITH_DASH_DASH',t,y1ramp,t,y2ramp,t,y3ramp);
+ylabel('Output y(t)');
+xlabel('Time (seconds)');
+legend('Reference Input','1st Order Loop Filter','2nd Order Loop Filter','3rd Order Loop Filter','Location','northwest')
+title('Ramp Response of Loop Filters')
+xlim([0 0.8])
+figure(3)
+plot(t,uquad,'REPLACE_WITH_DASH_DASH',t,y1quad,t,y2quad,t,y3quad);
+ylabel('Output y(t)');
+xlabel('Time (seconds)');
+legend('Reference Input','1st Order Loop Filter','2nd Order Loop Filter','3rd Order Loop Filter','Location','northwest')
+title('Parabolic Response of Loop Filters')
+xlim([0 0.5])
+%% d)
+disp(['Ramp input Steady State Error for 1st order loop filter:', num2str(abs(y1ramp(872)-uramp(872)))])
+disp(['Parabolic input Steady State Error for 2nd order loop filter:', num2str(abs(y2quad(900)-uquad(900)))])
+
+%% e)
+figure(4)
+opts = bodeoptions;
+opts.XLimMode = 'manual';
+opts.XLim = {[1 6*10^1]};
+bodeplot(H1,H2,H3,opts)
+legend('1st Order Loop Filter','2nd Order Loop Filter','3rd Order Loop Filter')
+
+##### SOURCE END #####
+--></body></html>

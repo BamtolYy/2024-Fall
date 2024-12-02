@@ -1,0 +1,325 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ps6p5</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-12-01"><meta name="DC.source" content="ps6p5.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Set up and Discretize filter loops at different orders</a></li><li><a href="#3">Plot step response at different dicretization intervals</a></li><li><a href="#4">Plot ramp response at different dicretization intervals</a></li></ul></div><pre class="codeinput">close <span class="string">all</span>; clear <span class="string">all</span>; clc;
+</pre><h2 id="2">Set up and Discretize filter loops at different orders</h2><pre class="codeinput">Bn   = 10;    <span class="comment">% Hz</span>
+T    = [1,10,20,40]./1000;
+
+<span class="keyword">for</span> ii = 1:length(T)
+    t = [0:T(ii):1];
+    ustep = ones(length(t),1);
+
+    slope = 1;
+    uramp = zeros(length(t),1);
+    uramp = 1/2*slope*t';
+    u = [ustep,uramp];
+
+    Az   = tf([1 1],[2 0],T(ii));
+    NCO  = tf(1,[1 0]);
+    NCOd = c2d(NCO,T(ii));
+    <span class="comment">% 1st Order</span>
+    k1 = 4*Bn;
+    D1 = tf(k1,1);
+    Dd1 = c2d(D1,T(ii));
+    H1 = feedback(Az*NCOd*Dd1,1);
+    <span class="comment">% 2nd Order</span>
+    k2 = 8/3*Bn;
+    a2 = k2/2;
+    D2 = tf(k2*[1 a2],[1 0]);
+    Dd2 = c2d(D2,T(ii));
+    H2 = feedback(Az*NCOd*Dd2,1);
+    <span class="comment">% 3rd Order</span>
+    a3 = 1.2*Bn;
+    b3 = a3^2/2;
+    k3 = 2*a3;
+    D3 = tf(k3*[1 a3 b3],[1 0 0]);
+    Dd3 = c2d(D3,T(ii));
+    H3 = feedback(Az*NCOd*Dd3,1);
+    figure,
+    opts = bodeoptions;
+    opts.XLimMode = <span class="string">'manual'</span>;
+    opts.XLim = {[1 6*10^1]};
+    bodeplot(H1,H2,H3,opts)
+    title([<span class="string">'Frequnecy Response with Discretization Interval of '</span>,num2str(T(ii)*1000), <span class="string">' ms'</span>])
+    legend(<span class="string">'1st Order Loop Filter'</span>,<span class="string">'2nd Order Loop Filter'</span>,<span class="string">'3rd Order Loop Filter'</span>,<span class="string">'Location'</span>,<span class="string">'southwest'</span>)
+    <span class="keyword">switch</span> ii
+        <span class="keyword">case</span> 1
+            ystep1(:,1)=lsim(H1,u(:,1),t);
+            ystep1(:,2)=lsim(H2,u(:,1),t);
+            ystep1(:,3)=lsim(H3,u(:,1),t);
+            yramp1(:,1)=lsim(H1,u(:,2),t);
+            yramp1(:,2)=lsim(H2,u(:,2),t);
+            yramp1(:,3)=lsim(H3,u(:,2),t);
+        <span class="keyword">case</span> 2
+            ystep10(:,1)=lsim(H1,u(:,1),t);
+            ystep10(:,2)=lsim(H2,u(:,1),t);
+            ystep10(:,3)=lsim(H3,u(:,1),t);
+            yramp10(:,1)=lsim(H1,u(:,2),t);
+            yramp10(:,2)=lsim(H2,u(:,2),t);
+            yramp10(:,3)=lsim(H3,u(:,2),t);
+        <span class="keyword">case</span> 3
+            ystep20(:,1)=lsim(H1,u(:,1),t);
+            ystep20(:,2)=lsim(H2,u(:,1),t);
+            ystep20(:,3)=lsim(H3,u(:,1),t);
+            yramp20(:,1)=lsim(H1,u(:,2),t);
+            yramp20(:,2)=lsim(H2,u(:,2),t);
+            yramp20(:,3)=lsim(H3,u(:,2),t);
+        <span class="keyword">case</span> 4
+            ystep40(:,1)=lsim(H1,u(:,1),t);
+            ystep40(:,2)=lsim(H2,u(:,1),t);
+            ystep40(:,3)=lsim(H3,u(:,1),t);
+            yramp40(:,1)=lsim(H1,u(:,2),t);
+            yramp40(:,2)=lsim(H2,u(:,2),t);
+            yramp40(:,3)=lsim(H3,u(:,2),t);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="ps6p5_01.png" alt=""> <img vspace="5" hspace="5" src="ps6p5_02.png" alt=""> <img vspace="5" hspace="5" src="ps6p5_03.png" alt=""> <img vspace="5" hspace="5" src="ps6p5_04.png" alt=""> <h2 id="3">Plot step response at different dicretization intervals</h2><pre class="codeinput">t1=0:T(1):1;
+t10=0:T(2):1;
+t20=0:T(3):1;
+t40=0:T(4):1;
+
+figure
+title([<span class="string">'Step Response of First Order Loop Filter with Varying Discretization'</span>])
+hold <span class="string">on</span>,
+plot(t40,ustep,<span class="string">'--'</span>,t1,ystep1(:,1),t10,ystep10(:,1),t20,ystep20(:,1),t40,ystep40(:,1))
+legend(<span class="string">'Reference Input'</span>,<span class="string">'1 ms'</span>,<span class="string">'10 ms'</span>,<span class="string">'20 ms'</span>, <span class="string">'40 ms'</span>)
+xlabel(<span class="string">'Time (second)'</span>)
+ylabel(<span class="string">'y(t)'</span>)
+
+figure
+title([<span class="string">'Step Response of 2nd Order Loop Filter with Varying Discretization'</span>])
+hold <span class="string">on</span>,
+plot(t40,ustep,<span class="string">'--'</span>,t1,ystep1(:,2),t10,ystep10(:,2),t20,ystep20(:,2),t40,ystep40(:,2))
+legend(<span class="string">'Reference Input'</span>,<span class="string">'1 ms'</span>,<span class="string">'10 ms'</span>,<span class="string">'20 ms'</span>, <span class="string">'40 ms'</span>)
+xlabel(<span class="string">'Time (second)'</span>)
+ylabel(<span class="string">'y(t)'</span>)
+
+figure
+title([<span class="string">'Step Response of 3rd Order Loop Filter with Varying Discretization'</span>])
+hold <span class="string">on</span>,
+plot(t40,ustep,<span class="string">'--'</span>,t1,ystep1(:,3),t10,ystep10(:,3),t20,ystep20(:,3),t40,ystep40(:,3))
+legend(<span class="string">'Reference Input'</span>,<span class="string">'1 ms'</span>,<span class="string">'10 ms'</span>,<span class="string">'20 ms'</span>, <span class="string">'40 ms'</span>)
+xlabel(<span class="string">'Time (second)'</span>)
+ylabel(<span class="string">'y(t)'</span>)
+</pre><img vspace="5" hspace="5" src="ps6p5_05.png" alt=""> <img vspace="5" hspace="5" src="ps6p5_06.png" alt=""> <img vspace="5" hspace="5" src="ps6p5_07.png" alt=""> <h2 id="4">Plot ramp response at different dicretization intervals</h2><pre class="codeinput">figure
+title([<span class="string">'Ramp Response of First Order Loop Filter with Varying Discretization'</span>])
+hold <span class="string">on</span>,
+plot(t40,uramp,<span class="string">'--'</span>,t1,yramp1(:,1),t10,yramp10(:,1),t20,yramp20(:,1),t40,yramp40(:,1))
+legend(<span class="string">'Reference Input'</span>,<span class="string">'1 ms'</span>,<span class="string">'10 ms'</span>,<span class="string">'20 ms'</span>, <span class="string">'40 ms'</span>)
+xlabel(<span class="string">'Time (second)'</span>)
+ylabel(<span class="string">'y(t)'</span>)
+
+figure
+title([<span class="string">'Ramp Response of 2nd Order Loop Filter with Varying Discretization'</span>])
+hold <span class="string">on</span>,
+plot(t40,uramp,<span class="string">'--'</span>,t1,yramp1(:,2),t10,yramp10(:,2),t20,yramp20(:,2),t40,yramp40(:,2))
+legend(<span class="string">'Reference Input'</span>,<span class="string">'1 ms'</span>,<span class="string">'10 ms'</span>,<span class="string">'20 ms'</span>, <span class="string">'40 ms'</span>)
+xlabel(<span class="string">'Time (second)'</span>)
+ylabel(<span class="string">'y(t)'</span>)
+
+figure
+title([<span class="string">'Ramp Response of 3rd Order Loop Filter with Varying Discretization'</span>])
+hold <span class="string">on</span>,
+plot(t40,uramp,<span class="string">'--'</span>,t1,yramp1(:,3),t10,yramp10(:,3),t20,yramp20(:,3),t40,yramp40(:,3))
+legend(<span class="string">'Reference Input'</span>,<span class="string">'1 ms'</span>,<span class="string">'10 ms'</span>,<span class="string">'20 ms'</span>, <span class="string">'40 ms'</span>)
+xlabel(<span class="string">'Time (second)'</span>)
+ylabel(<span class="string">'y(t)'</span>)
+</pre><img vspace="5" hspace="5" src="ps6p5_08.png" alt=""> <img vspace="5" hspace="5" src="ps6p5_09.png" alt=""> <img vspace="5" hspace="5" src="ps6p5_10.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+close all; clear all; clc;
+%% Set up and Discretize filter loops at different orders
+Bn   = 10;    % Hz
+T    = [1,10,20,40]./1000;
+
+for ii = 1:length(T)
+    t = [0:T(ii):1];
+    ustep = ones(length(t),1);
+
+    slope = 1;
+    uramp = zeros(length(t),1);
+    uramp = 1/2*slope*t';
+    u = [ustep,uramp];
+
+    Az   = tf([1 1],[2 0],T(ii));
+    NCO  = tf(1,[1 0]);
+    NCOd = c2d(NCO,T(ii));
+    % 1st Order
+    k1 = 4*Bn;
+    D1 = tf(k1,1);
+    Dd1 = c2d(D1,T(ii));
+    H1 = feedback(Az*NCOd*Dd1,1);
+    % 2nd Order
+    k2 = 8/3*Bn;
+    a2 = k2/2;
+    D2 = tf(k2*[1 a2],[1 0]);
+    Dd2 = c2d(D2,T(ii));
+    H2 = feedback(Az*NCOd*Dd2,1);
+    % 3rd Order
+    a3 = 1.2*Bn;
+    b3 = a3^2/2;
+    k3 = 2*a3;
+    D3 = tf(k3*[1 a3 b3],[1 0 0]);
+    Dd3 = c2d(D3,T(ii));
+    H3 = feedback(Az*NCOd*Dd3,1);
+    figure,
+    opts = bodeoptions;
+    opts.XLimMode = 'manual';
+    opts.XLim = {[1 6*10^1]};
+    bodeplot(H1,H2,H3,opts)
+    title(['Frequnecy Response with Discretization Interval of ',num2str(T(ii)*1000), ' ms'])
+    legend('1st Order Loop Filter','2nd Order Loop Filter','3rd Order Loop Filter','Location','southwest')
+    switch ii
+        case 1
+            ystep1(:,1)=lsim(H1,u(:,1),t);
+            ystep1(:,2)=lsim(H2,u(:,1),t);
+            ystep1(:,3)=lsim(H3,u(:,1),t);
+            yramp1(:,1)=lsim(H1,u(:,2),t);
+            yramp1(:,2)=lsim(H2,u(:,2),t);
+            yramp1(:,3)=lsim(H3,u(:,2),t);
+        case 2
+            ystep10(:,1)=lsim(H1,u(:,1),t);
+            ystep10(:,2)=lsim(H2,u(:,1),t);
+            ystep10(:,3)=lsim(H3,u(:,1),t);
+            yramp10(:,1)=lsim(H1,u(:,2),t);
+            yramp10(:,2)=lsim(H2,u(:,2),t);
+            yramp10(:,3)=lsim(H3,u(:,2),t);
+        case 3
+            ystep20(:,1)=lsim(H1,u(:,1),t);
+            ystep20(:,2)=lsim(H2,u(:,1),t);
+            ystep20(:,3)=lsim(H3,u(:,1),t);
+            yramp20(:,1)=lsim(H1,u(:,2),t);
+            yramp20(:,2)=lsim(H2,u(:,2),t);
+            yramp20(:,3)=lsim(H3,u(:,2),t);
+        case 4
+            ystep40(:,1)=lsim(H1,u(:,1),t);
+            ystep40(:,2)=lsim(H2,u(:,1),t);
+            ystep40(:,3)=lsim(H3,u(:,1),t);
+            yramp40(:,1)=lsim(H1,u(:,2),t);
+            yramp40(:,2)=lsim(H2,u(:,2),t);
+            yramp40(:,3)=lsim(H3,u(:,2),t);
+    end
+end
+
+%% Plot step response at different dicretization intervals
+t1=0:T(1):1;
+t10=0:T(2):1;
+t20=0:T(3):1;
+t40=0:T(4):1;
+
+figure
+title(['Step Response of First Order Loop Filter with Varying Discretization'])
+hold on,
+plot(t40,ustep,'REPLACE_WITH_DASH_DASH',t1,ystep1(:,1),t10,ystep10(:,1),t20,ystep20(:,1),t40,ystep40(:,1))
+legend('Reference Input','1 ms','10 ms','20 ms', '40 ms')
+xlabel('Time (second)')
+ylabel('y(t)')
+
+figure
+title(['Step Response of 2nd Order Loop Filter with Varying Discretization'])
+hold on,
+plot(t40,ustep,'REPLACE_WITH_DASH_DASH',t1,ystep1(:,2),t10,ystep10(:,2),t20,ystep20(:,2),t40,ystep40(:,2))
+legend('Reference Input','1 ms','10 ms','20 ms', '40 ms')
+xlabel('Time (second)')
+ylabel('y(t)')
+
+figure
+title(['Step Response of 3rd Order Loop Filter with Varying Discretization'])
+hold on,
+plot(t40,ustep,'REPLACE_WITH_DASH_DASH',t1,ystep1(:,3),t10,ystep10(:,3),t20,ystep20(:,3),t40,ystep40(:,3))
+legend('Reference Input','1 ms','10 ms','20 ms', '40 ms')
+xlabel('Time (second)')
+ylabel('y(t)')
+
+%% Plot ramp response at different dicretization intervals
+
+figure
+title(['Ramp Response of First Order Loop Filter with Varying Discretization'])
+hold on,
+plot(t40,uramp,'REPLACE_WITH_DASH_DASH',t1,yramp1(:,1),t10,yramp10(:,1),t20,yramp20(:,1),t40,yramp40(:,1))
+legend('Reference Input','1 ms','10 ms','20 ms', '40 ms')
+xlabel('Time (second)')
+ylabel('y(t)')
+
+figure
+title(['Ramp Response of 2nd Order Loop Filter with Varying Discretization'])
+hold on,
+plot(t40,uramp,'REPLACE_WITH_DASH_DASH',t1,yramp1(:,2),t10,yramp10(:,2),t20,yramp20(:,2),t40,yramp40(:,2))
+legend('Reference Input','1 ms','10 ms','20 ms', '40 ms')
+xlabel('Time (second)')
+ylabel('y(t)')
+
+figure
+title(['Ramp Response of 3rd Order Loop Filter with Varying Discretization'])
+hold on,
+plot(t40,uramp,'REPLACE_WITH_DASH_DASH',t1,yramp1(:,3),t10,yramp10(:,3),t20,yramp20(:,3),t40,yramp40(:,3))
+legend('Reference Input','1 ms','10 ms','20 ms', '40 ms')
+xlabel('Time (second)')
+ylabel('y(t)')
+##### SOURCE END #####
+--></body></html>

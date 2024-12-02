@@ -44,20 +44,20 @@ y3quad = lsim(H3,uquad,t);
 % Compare Results
 figure(1)
 plot(t,ustep,'--',t,y1step,t,y2step,t,y3step);
-ylabel('Output Y(s)');
+ylabel('Output y(t)');
 xlabel('Time (seconds)');
 legend('Reference Input','1st Order Loop Filter','2nd Order Loop Filter','3rd Order Loop Filter','Location','southeast')
 title('Step Response of Loop Filters')
 figure(2)
 plot(t,uramp,'--',t,y1ramp,t,y2ramp,t,y3ramp);
-ylabel('Output Y(s)');
+ylabel('Output y(t)');
 xlabel('Time (seconds)');
 legend('Reference Input','1st Order Loop Filter','2nd Order Loop Filter','3rd Order Loop Filter','Location','northwest')
 title('Ramp Response of Loop Filters')
 xlim([0 0.8])
 figure(3)
 plot(t,uquad,'--',t,y1quad,t,y2quad,t,y3quad);
-ylabel('Output Y(s)');
+ylabel('Output y(t)');
 xlabel('Time (seconds)');
 legend('Reference Input','1st Order Loop Filter','2nd Order Loop Filter','3rd Order Loop Filter','Location','northwest')
 title('Parabolic Response of Loop Filters')
@@ -68,6 +68,8 @@ disp(['Parabolic input Steady State Error for 2nd order loop filter:', num2str(a
 
 %% e)
 figure(4)
-bode(H1,H2,H3)
-hold on,
+opts = bodeoptions;
+opts.XLimMode = 'manual';
+opts.XLim = {[1 6*10^1]};
+bodeplot(H1,H2,H3,opts)
 legend('1st Order Loop Filter','2nd Order Loop Filter','3rd Order Loop Filter')
