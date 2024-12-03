@@ -7,7 +7,8 @@
 %       1. Dimensions start from the nose
 %       2. At sea level
 
-
+alpha= 2
+V =1
 %% Find CP for the individual components
 if alpha == 0
     CP = 1;
@@ -15,6 +16,7 @@ else
     % CP of Nosecone for Conical Xn
     L = 1.2;                %  m; Length of the nose
     Xn = 0.4666*L;
+    Xn = 0.8+6+(1-0.466)*1.2
 
     % CP of Conical transition XT
     Xp = 7.2;               % m; Nose to d1
@@ -28,7 +30,8 @@ else
     cr = 0.8;               % m; Fin root
     ct = 0.7;               % m; Fin tip
     XR = (cr-ct)/2;         % m; Fin root beginning to fin tip beginning
-    XF = XB+XR/3*(cr+2*ct)/(cr+ct)+1/6*((cr+ct)-(cr*ct)/(cr+ct));
+    XF = XR/3*(cr+2*ct)/(cr+ct)+1/6*((cr+ct)-(cr*ct)/(cr+ct));
+    XF = 0.8+1.2-XF;
 
     %% Find normal force coefficient at each component CP
     % Nosecone
@@ -37,7 +40,7 @@ else
     % Finset
     f= 1;
     R = d1/2;
-    dBig = 0.8;
+    dBig = 0.8*sqrt(2);
     s = (dBig - d1)/2;
     theta = 0;
     l = s/cos(theta);
@@ -50,15 +53,15 @@ else
     CNaCB = 8/(pi*d1^2)*(S2-S1);
 
 
-    %% Find Normal forces at each component CP
-    rho = 1.225; % kg/m^3
-    q = 0.5*rho*V^2;
-    A = pi/4*d1^2;
-    Nc = q*A*alpha*CNaN;
-    Nf = q*A*alpha*CNaF;
-    NCB = q*A*alpha*CNaCB;
+    % %% Find Normal forces at each component CP
+    % rho = 1.225; % kg/m^3
+    % q = 0.5*rho*V^2;
+    % A = pi/4*d1^2;
+    % Nc = q*A*alpha*CNaN;
+    % Nf = q*A*alpha*CNaF;
+    % NCB = q*A*alpha*CNaCB;
 
-
-    CP = (Nc*Xn + Nf*XF + NCB*XT)/(Nc+Nf+NCB)
-    % Cp = (CNaN*Xn+CNaCB*XT+CNaF*XF)/(CNaN+CNaCB+CNaF)
+    rocket_length = 1.2+6+0.8;
+    % CP = (CNaN*Xn + CNaF*XF + NCB*XT)/(Nc+Nf+NCB)
+    Cp = (CNaN*(Xn)+CNaF*(XF)+)/(CNaN+CNaF+CNaCB)
 end
