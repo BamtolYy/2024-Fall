@@ -23,7 +23,7 @@ slope = 1;
 uramp = zeros(length(t),1);
 uramp(101:length(t)) = slope*t(1:length(t)-100);
 uquad = zeros(length(t),1);
-uquad(101:length(t)) = t(1:length(t)-100).^2;
+uquad(101:length(t)) = 1/2*t(1:length(t)-100).^2;
 % 1st Order
 y1step = lsim(H1,ustep,t);
 y1ramp = lsim(H1,uramp,t);

@@ -1,0 +1,454 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ps6p3</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-12-02"><meta name="DC.source" content="ps6p3.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">a) Generate 5ms worth of signal and its replica</a></li><li><a href="#3">b) Compute Rtilde_xl(m)</a></li><li><a href="#4">c) Nearest-Sample Estimator</a></li><li><a href="#5">d) Least Squares Estimator</a></li><li><a href="#6">e) Repeat 1000 times</a></li><li><a href="#7">f) CRLB</a></li><li><a href="#8">g) New CRLB</a></li></ul></div><pre class="codeinput">close <span class="string">all</span>; clear <span class="string">all</span>; clc;
+</pre><h2 id="2">a) Generate 5ms worth of signal and its replica</h2><pre class="codeinput"><span class="comment">% ----Genererate Code</span>
+<span class="comment">% LFSR Parameters:</span>
+nStages      = 10;
+ciVec1       = [10, 3]';
+ciVec2       = [10, 9, 8, 6, 3, 2,]';
+a0Vec1       = ones(nStages,1);
+a0Vec2       = ones(nStages,1);
+<span class="comment">% Oversampling Parameters:</span>
+fs = 40e6/7;                <span class="comment">% Sampling Rate</span>
+Tc = 1e-3/1023;             <span class="comment">% Chip interval in seconds</span>
+T  = 1/fs;                  <span class="comment">% Sampling time interval in seconds</span>
+delChip = T/Tc;             <span class="comment">% Sampling interval in chips</span>
+Np = 2^nStages - 1;         <span class="comment">% Period of the sequence in chips</span>
+Ns = ceil(0.005/T);         <span class="comment">% Number of Samples</span>
+codeOS = zeros(Ns,1);
+G2tab = [2,6];
+<span class="keyword">for</span> j = 1
+    [GoldSeq] = generateGoldLfsrSequenceCA(nStages,ciVec1,ciVec2,a0Vec1,<span class="keyword">...</span>
+        a0Vec2,G2tab(j,:));
+    <span class="comment">% Make code +1/-1 not +1/0</span>
+    GoldSeq = 2*GoldSeq - 1;
+    <span class="comment">% Oversample Code: It makes sense to oversample code, since the code</span>
+    <span class="comment">% embedded within the signal is sampled at a higher rate than its chip</span>
+    <span class="comment">% rate. Assuming that the code I generate is sampled at the chip rate,</span>
+    <span class="comment">% oversampling my code I generated at the rate the signal is sampled</span>
+    <span class="comment">% will allow my code to correlate with the code embedded in the signal</span>
+    GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,0,Ns,Np);
+    codeOS(:,j) = GoldSeqOS;
+<span class="keyword">end</span>
+
+<span class="comment">% ----Generate Noise</span>
+sigman = sqrt(1/2);
+a      = sigman.*randn(Ns,1);
+b      = sigman.*randn(Ns,1);
+nj     = a +1i*b;
+
+<span class="comment">% ----x(j)</span>
+CN0   = 10^(45/10);
+A     = sqrt(4*sigman^2*T*CN0);
+<span class="comment">% Delay code by 1e-3 seconds</span>
+ts    = 1e-3;                           <span class="comment">% True delay in seconds</span>
+shift = floor(ts/T);
+xj    = A*circshift(codeOS,shift) + nj;
+
+<span class="comment">% ----l(j)</span>
+delt_s        = 0.25e-6;
+shiftReplica = floor((ts + delt_s)/T);            <span class="comment">% Estimate Delay in seconds</span>
+lj           = circshift(codeOS,shiftReplica);
+</pre><h2 id="3">b) Compute Rtilde_xl(m)</h2><pre class="codeinput">m        =  -10:1:10;
+Rxltilde = zeros(length(m),1);
+jk = 1024;
+<span class="keyword">for</span> ii = 1:length(m)
+    Nk       = floor(Np*4/delChip);
+    Rxltilde(ii) = 1/Nk*sum(xj(jk:jk+Nk-1).*lj(jk-m(ii):jk+Nk-1-m(ii)));
+<span class="keyword">end</span>
+</pre><h2 id="4">c) Nearest-Sample Estimator</h2><pre class="codeinput">[~,mIndex] = max(abs(Rxltilde));
+delt_ns  = -m(mIndex)*T;
+error_ts = abs(delt_ns - delt_s);
+disp([<span class="string">'3c) and 3d)'</span>])
+fprintf(<span class="string">'Coarse %ct_s estimate error: %g %cs. \n'</span>,948-32,error_ts*1e6, 956 )
+</pre><pre class="codeoutput">3c) and 3d)
+Coarse &#916;t_s estimate error: 0.075 &#956;s. 
+</pre><h2 id="5">d) Least Squares Estimator</h2><pre class="codeinput">dt           = linspace(-T,T,1024);
+normRxltilde = zeros(length(m),1);
+Rc           = zeros(length(m),length(dt));
+<span class="keyword">for</span> kk = 1:length(m)
+    <span class="keyword">for</span> jj = 1:length(dt)
+        Rc(kk,jj) = 1-abs(m(kk)*T-m(mIndex)*T-dt(jj))/Tc;
+    <span class="keyword">end</span>
+    normRxltilde(kk)=abs(Rxltilde(kk))/abs(Rxltilde(mIndex));
+<span class="keyword">end</span>
+
+MSE = zeros(length(dt),1);
+<span class="keyword">for</span> aa  = 1:length(dt)
+    MSE(aa) = 1/21*sum(abs(normRxltilde-Rc(:,aa)).^2);
+<span class="keyword">end</span>
+
+[~,minIndex] = min(MSE);
+dt_r  = dt(minIndex);
+dt_ls = -m(mIndex)*T +dt_r;
+error_tls = abs(dt_ls-delt_s);
+
+fprintf(<span class="string">'Finer %ct_s estimate error: %g %cs. \n'</span>,948-32,error_tls*1e6, 956 )
+disp([<span class="string">'-----------------------------------------------------------------'</span>])
+</pre><pre class="codeoutput">Finer &#916;t_s estimate error: 0.00865103 &#956;s. 
+-----------------------------------------------------------------
+</pre><h2 id="6">e) Repeat 1000 times</h2><pre class="codeinput">disp([<span class="string">'3e)'</span>])
+ensemble = 1000;
+<span class="keyword">for</span> pp = 1:ensemble
+    <span class="comment">% ----Generate Noise</span>
+    sigman = sqrt(1/2);
+    a      = sigman.*randn(Ns,1);
+    b      = sigman.*randn(Ns,1);
+    nj     = a +1i*b;
+
+    <span class="comment">% ----x(j)</span>
+    CN0   = 10^(45/10);
+    A     = sqrt(4*sigman^2*T*CN0);
+    <span class="comment">% Delay code by 1e-3 seconds</span>
+    ts    = 1e-3;                           <span class="comment">% True delay in seconds</span>
+    shift = floor(ts/T);
+    xj    = A*circshift(codeOS,shift) + nj;
+
+    <span class="comment">% ----l(j)</span>
+    delt_s        = 0.25e-6;
+    shiftReplica = floor((ts + delt_s)/T);            <span class="comment">% Estimate Delay in samples</span>
+    lj           = circshift(codeOS,shiftReplica);
+    m        =  -10:1:10;
+    Rxltilde = zeros(length(m),1);
+    jk = 1024;
+    <span class="keyword">for</span> ii = 1:length(m)
+        Nk       = floor(Np*4/delChip);
+        Rxltilde(ii) = 1/Nk*sum(xj(jk:jk+Nk-1).*lj(jk-m(ii):jk+Nk-1-m(ii)));
+    <span class="keyword">end</span>
+    [~,mIndex] = max(abs(Rxltilde));
+    delt_ns  = -m(mIndex)*T;
+    sampleEstimatorError(pp) = abs(delt_ns - delt_s);
+    dt           = linspace(-T,T,1024);
+    normRxltilde = zeros(length(m),1);
+    Rc           = zeros(length(m),length(dt));
+    <span class="keyword">for</span> kk = 1:length(m)
+        <span class="keyword">for</span> jj = 1:length(dt)
+            Rc(kk,jj) = 1-abs(m(kk)*T-m(mIndex)*T-dt(jj))/Tc;
+        <span class="keyword">end</span>
+        normRxltilde(kk)=abs(Rxltilde(kk))/abs(Rxltilde(mIndex));
+    <span class="keyword">end</span>
+
+    MSE = zeros(length(dt),1);
+    <span class="keyword">for</span> aa  = 1:length(dt)
+        MSE(aa) = 1/21*sum(abs(normRxltilde-Rc(:,aa)).^2);
+    <span class="keyword">end</span>
+
+    [~,minIndex] = min(MSE);
+    dt_r  = dt(minIndex);
+    dt_ls = -m(mIndex)*T +dt_r;
+    leastSquaresEstimatorError(pp) = abs(dt_ls-delt_s);
+<span class="keyword">end</span>
+
+<span class="comment">% Calculate mean squared error</span>
+sigmahat_ns2 = mean(sampleEstimatorError.^2);
+sigmahat_ls2 = mean(leastSquaresEstimatorError.^2);
+RMSE_ns = sqrt(sigmahat_ns2) * physconst(<span class="string">'LightSpeed'</span>);
+RMSE_ls = sqrt(sigmahat_ls2) * physconst(<span class="string">'LightSpeed'</span>);
+
+fprintf(<span class="string">'RMSE (Sample-Level Estimator): %g meters\n'</span>, RMSE_ns);
+fprintf(<span class="string">'RMSE (Least-Squares Estimator): %g meters\n'</span>, RMSE_ls);
+
+fprintf([<span class="string">'The difference between the two is significant. They differ by more\n'</span> <span class="keyword">...</span>
+    <span class="string">'than 17 meters.\n'</span>])
+disp([<span class="string">'-----------------------------------------------------------------'</span>])
+</pre><pre class="codeoutput">3e)
+RMSE (Sample-Level Estimator): 22.4844 meters
+RMSE (Least-Squares Estimator): 5.36545 meters
+The difference between the two is significant. They differ by more
+than 17 meters.
+-----------------------------------------------------------------
+</pre><h2 id="7">f) CRLB</h2><pre class="codeinput">disp([<span class="string">'3f)'</span>])
+Ta = Nk*T;
+betams2 = 1.275*10^(13);       <span class="comment">% (rad/s)^2</span>
+CRLB = (2*betams2*Ta*CN0)^(-1);
+RMSE_distance = sqrt(CRLB)*physconst(<span class="string">'LightSpeed'</span>);
+fprintf(<span class="string">'CRLB: %g meters\n'</span>, CRLB);
+fprintf(<span class="string">'RMSE distance L1: %g meters\n'</span>, RMSE_distance);
+fprintf([<span class="string">'The RMSE from the least squares estimator is very close to the RMSE distance.\n'</span> <span class="keyword">...</span>
+    <span class="string">'It is only about 0.2 meters greater than RMSE distance.'</span> <span class="keyword">...</span>
+    <span class="string">'In contrast, the sample-level \nestimator is much greater than '</span> <span class="keyword">...</span>
+    <span class="string">'the RMSE distance.\n'</span>])
+disp([<span class="string">'-----------------------------------------------------------------'</span>])
+</pre><pre class="codeoutput">3f)
+CRLB: 3.10029e-16 meters
+RMSE distance L1: 5.27864 meters
+The RMSE from the least squares estimator is very close to the RMSE distance.
+It is only about 0.2 meters greater than RMSE distance.In contrast, the sample-level 
+estimator is much greater than the RMSE distance.
+-----------------------------------------------------------------
+</pre><h2 id="8">g) New CRLB</h2><pre class="codeinput">disp([<span class="string">'3g)'</span>])
+betams2New = (2*pi*fs)^2/12;    <span class="comment">% (rad/s)^2</span>
+CRLBNew = (2*betams2New*Ta*CN0)^(-1);
+RMSE_distanceNew = sqrt(CRLBNew)*physconst(<span class="string">'LightSpeed'</span>);
+fprintf(<span class="string">'New CRLB: %g meters\n'</span>, CRLBNew);
+fprintf(<span class="string">'New RMSE distance: %g meters\n'</span>, RMSE_distanceNew);
+fprintf([<span class="string">'This new signal has much lower CRLB than the L1 signal. '</span> <span class="keyword">...</span>
+    <span class="string">'It is about 3 to 4 meters \nless than that of L1 signal. This means '</span> <span class="keyword">...</span>
+    <span class="string">'it can provide better position estimates, \nsince the theoretical lower'</span> <span class="keyword">...</span>
+    <span class="string">'limit of the variance is smaller. However, it may be more suseptible\n'</span> <span class="keyword">...</span>
+    <span class="string">'to noise because the bandwidth is increased.\n'</span>])
+disp([<span class="string">'-----------------------------------------------------------------'</span>])
+</pre><pre class="codeoutput">3g)
+New CRLB: 3.67968e-17 meters
+New RMSE distance: 1.81855 meters
+This new signal has much lower CRLB than the L1 signal. It is about 3 to 4 meters 
+less than that of L1 signal. This means it can provide better position estimates, 
+since the theoretical lowerlimit of the variance is smaller. However, it may be more suseptible
+to noise because the bandwidth is increased.
+-----------------------------------------------------------------
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+close all; clear all; clc;
+%% a) Generate 5ms worth of signal and its replica
+
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHGenererate Code
+% LFSR Parameters:
+nStages      = 10;
+ciVec1       = [10, 3]';
+ciVec2       = [10, 9, 8, 6, 3, 2,]';
+a0Vec1       = ones(nStages,1);
+a0Vec2       = ones(nStages,1);
+% Oversampling Parameters:
+fs = 40e6/7;                % Sampling Rate
+Tc = 1e-3/1023;             % Chip interval in seconds
+T  = 1/fs;                  % Sampling time interval in seconds
+delChip = T/Tc;             % Sampling interval in chips
+Np = 2^nStages - 1;         % Period of the sequence in chips
+Ns = ceil(0.005/T);         % Number of Samples
+codeOS = zeros(Ns,1);
+G2tab = [2,6];
+for j = 1
+    [GoldSeq] = generateGoldLfsrSequenceCA(nStages,ciVec1,ciVec2,a0Vec1,...
+        a0Vec2,G2tab(j,:));
+    % Make code +1/-1 not +1/0
+    GoldSeq = 2*GoldSeq - 1;
+    % Oversample Code: It makes sense to oversample code, since the code
+    % embedded within the signal is sampled at a higher rate than its chip
+    % rate. Assuming that the code I generate is sampled at the chip rate,
+    % oversampling my code I generated at the rate the signal is sampled
+    % will allow my code to correlate with the code embedded in the signal
+    GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,0,Ns,Np);
+    codeOS(:,j) = GoldSeqOS;
+end
+
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHGenerate Noise
+sigman = sqrt(1/2);
+a      = sigman.*randn(Ns,1);
+b      = sigman.*randn(Ns,1);
+nj     = a +1i*b;
+
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHx(j)
+CN0   = 10^(45/10);
+A     = sqrt(4*sigman^2*T*CN0);
+% Delay code by 1e-3 seconds
+ts    = 1e-3;                           % True delay in seconds
+shift = floor(ts/T);
+xj    = A*circshift(codeOS,shift) + nj;
+
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHl(j)
+delt_s        = 0.25e-6;
+shiftReplica = floor((ts + delt_s)/T);            % Estimate Delay in seconds
+lj           = circshift(codeOS,shiftReplica);
+
+%% b) Compute Rtilde_xl(m)
+m        =  -10:1:10;
+Rxltilde = zeros(length(m),1);
+jk = 1024;
+for ii = 1:length(m)
+    Nk       = floor(Np*4/delChip);
+    Rxltilde(ii) = 1/Nk*sum(xj(jk:jk+Nk-1).*lj(jk-m(ii):jk+Nk-1-m(ii)));
+end
+
+%% c) Nearest-Sample Estimator
+
+[~,mIndex] = max(abs(Rxltilde));
+delt_ns  = -m(mIndex)*T;
+error_ts = abs(delt_ns - delt_s);
+disp(['3c) and 3d)'])
+fprintf('Coarse %ct_s estimate error: %g %cs. \n',948-32,error_ts*1e6, 956 )
+
+%% d) Least Squares Estimator
+dt           = linspace(-T,T,1024);
+normRxltilde = zeros(length(m),1);
+Rc           = zeros(length(m),length(dt));
+for kk = 1:length(m)
+    for jj = 1:length(dt)
+        Rc(kk,jj) = 1-abs(m(kk)*T-m(mIndex)*T-dt(jj))/Tc;
+    end
+    normRxltilde(kk)=abs(Rxltilde(kk))/abs(Rxltilde(mIndex));
+end
+
+MSE = zeros(length(dt),1);
+for aa  = 1:length(dt)
+    MSE(aa) = 1/21*sum(abs(normRxltilde-Rc(:,aa)).^2);
+end
+
+[~,minIndex] = min(MSE);
+dt_r  = dt(minIndex);
+dt_ls = -m(mIndex)*T +dt_r;
+error_tls = abs(dt_ls-delt_s);
+
+fprintf('Finer %ct_s estimate error: %g %cs. \n',948-32,error_tls*1e6, 956 )
+disp(['REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-'])
+%% e) Repeat 1000 times
+disp(['3e)'])
+ensemble = 1000;
+for pp = 1:ensemble
+    % REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHGenerate Noise
+    sigman = sqrt(1/2);
+    a      = sigman.*randn(Ns,1);
+    b      = sigman.*randn(Ns,1);
+    nj     = a +1i*b;
+
+    % REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHx(j)
+    CN0   = 10^(45/10);
+    A     = sqrt(4*sigman^2*T*CN0);
+    % Delay code by 1e-3 seconds
+    ts    = 1e-3;                           % True delay in seconds
+    shift = floor(ts/T);
+    xj    = A*circshift(codeOS,shift) + nj;
+
+    % REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHl(j)
+    delt_s        = 0.25e-6;
+    shiftReplica = floor((ts + delt_s)/T);            % Estimate Delay in samples
+    lj           = circshift(codeOS,shiftReplica);
+    m        =  -10:1:10;
+    Rxltilde = zeros(length(m),1);
+    jk = 1024;
+    for ii = 1:length(m)
+        Nk       = floor(Np*4/delChip);
+        Rxltilde(ii) = 1/Nk*sum(xj(jk:jk+Nk-1).*lj(jk-m(ii):jk+Nk-1-m(ii)));
+    end
+    [~,mIndex] = max(abs(Rxltilde));
+    delt_ns  = -m(mIndex)*T;
+    sampleEstimatorError(pp) = abs(delt_ns - delt_s);
+    dt           = linspace(-T,T,1024);
+    normRxltilde = zeros(length(m),1);
+    Rc           = zeros(length(m),length(dt));
+    for kk = 1:length(m)
+        for jj = 1:length(dt)
+            Rc(kk,jj) = 1-abs(m(kk)*T-m(mIndex)*T-dt(jj))/Tc;
+        end
+        normRxltilde(kk)=abs(Rxltilde(kk))/abs(Rxltilde(mIndex));
+    end
+
+    MSE = zeros(length(dt),1);
+    for aa  = 1:length(dt)
+        MSE(aa) = 1/21*sum(abs(normRxltilde-Rc(:,aa)).^2);
+    end
+
+    [~,minIndex] = min(MSE);
+    dt_r  = dt(minIndex);
+    dt_ls = -m(mIndex)*T +dt_r;
+    leastSquaresEstimatorError(pp) = abs(dt_ls-delt_s);
+end
+
+% Calculate mean squared error
+sigmahat_ns2 = mean(sampleEstimatorError.^2);
+sigmahat_ls2 = mean(leastSquaresEstimatorError.^2);
+RMSE_ns = sqrt(sigmahat_ns2) * physconst('LightSpeed');
+RMSE_ls = sqrt(sigmahat_ls2) * physconst('LightSpeed');
+
+fprintf('RMSE (Sample-Level Estimator): %g meters\n', RMSE_ns);
+fprintf('RMSE (Least-Squares Estimator): %g meters\n', RMSE_ls);
+
+fprintf(['The difference between the two is significant. They differ by more\n' ...
+    'than 17 meters.\n'])
+disp(['REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-'])
+%% f) CRLB
+disp(['3f)'])
+Ta = Nk*T;
+betams2 = 1.275*10^(13);       % (rad/s)^2
+CRLB = (2*betams2*Ta*CN0)^(-1);
+RMSE_distance = sqrt(CRLB)*physconst('LightSpeed');
+fprintf('CRLB: %g meters\n', CRLB);
+fprintf('RMSE distance L1: %g meters\n', RMSE_distance);
+fprintf(['The RMSE from the least squares estimator is very close to the RMSE distance.\n' ...
+    'It is only about 0.2 meters greater than RMSE distance.' ...
+    'In contrast, the sample-level \nestimator is much greater than ' ...
+    'the RMSE distance.\n'])
+disp(['REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-'])
+
+%% g) New CRLB
+disp(['3g)'])
+betams2New = (2*pi*fs)^2/12;    % (rad/s)^2
+CRLBNew = (2*betams2New*Ta*CN0)^(-1);
+RMSE_distanceNew = sqrt(CRLBNew)*physconst('LightSpeed');
+fprintf('New CRLB: %g meters\n', CRLBNew);
+fprintf('New RMSE distance: %g meters\n', RMSE_distanceNew);
+fprintf(['This new signal has much lower CRLB than the L1 signal. ' ...
+    'It is about 3 to 4 meters \nless than that of L1 signal. This means ' ...
+    'it can provide better position estimates, \nsince the theoretical lower' ...
+    'limit of the variance is smaller. However, it may be more suseptible\n' ...
+    'to noise because the bandwidth is increased.\n'])
+disp(['REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-'])
+
+##### SOURCE END #####
+--></body></html>

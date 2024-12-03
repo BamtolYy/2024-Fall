@@ -6,8 +6,8 @@ fs    = 1/Ta;
 t = (0:N-1)*Ta';
 % True Alpha Parameters
 f     = 200;
-rho   = 58;
-theta = pi/5
+rho   = 4;
+theta = pi/2
 
 
 

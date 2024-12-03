@@ -161,7 +161,7 @@ Ta = Nk*T;
 betams2 = 1.275*10^(13);       % (rad/s)^2
 CRLB = (2*betams2*Ta*CN0)^(-1);
 RMSE_distance = sqrt(CRLB)*physconst('LightSpeed');
-fprintf('CRLB: %g meters\n', CRLB);
+fprintf('CRLB: %g seconds\n', CRLB);
 fprintf('RMSE distance L1: %g meters\n', RMSE_distance);
 fprintf(['The RMSE from the least squares estimator is very close to the RMSE distance.\n' ...
     'It is only about 0.2 meters greater than RMSE distance.' ...
@@ -174,7 +174,7 @@ disp(['3g)'])
 betams2New = (2*pi*fs)^2/12;    % (rad/s)^2
 CRLBNew = (2*betams2New*Ta*CN0)^(-1);
 RMSE_distanceNew = sqrt(CRLBNew)*physconst('LightSpeed');
-fprintf('New CRLB: %g meters\n', CRLBNew);
+fprintf('New CRLB: %g seconds\n', CRLBNew);
 fprintf('New RMSE distance: %g meters\n', RMSE_distanceNew);
 fprintf(['This new signal has much lower CRLB than the L1 signal. ' ...
     'It is about 3 to 4 meters \nless than that of L1 signal. This means ' ...
