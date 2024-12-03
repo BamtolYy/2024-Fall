@@ -1,4 +1,20 @@
 close all; clear all; clc;
+%% Generate Continuous Filters
+Bn = 10;    % Hz
+
+% 1st Order
+k1real = 4*Bn;
+H1real = tf(k1real,[1 k1real]);
+% 2nd Order
+k2real = 8/3*Bn;
+a2real = k2real/2;
+H2real = tf([k2real a2real*k2real],[1 k2real k2real*a2real]);
+% 3rd Order
+a3real = 1.2*Bn;
+b3real = a3real^2/2;
+k3real = 2*a3real;
+H3real = tf([k3real k3real*a3real k3real*b3real],[1 k3real k3real*a3real k3real*b3real]);
+
 %% Set up and Discretize filter loops at different orders
 Bn   = 10;    % Hz
 T    = [1,10,20,40]./1000;
@@ -37,8 +53,10 @@ for ii = 1:length(T)
     opts.XLimMode = 'manual';
     opts.XLim = {[1 6*10^1]};
     bodeplot(H1,H2,H3,opts)
+    hold on
+    bode(H1real,'b--',H2real,'r--',H3real,'y--')
     title(['Frequnecy Response with Discretization Interval of ',num2str(T(ii)*1000), ' ms'])
-    legend('1st Order Loop Filter','2nd Order Loop Filter','3rd Order Loop Filter','Location','southwest')
+    legend('1st Order Loop Filter','2nd Order Loop Filter','3rd Order Loop Filter','1st order Cont.','2nd order Cont.','3rd order Cont.','Location','southwest')
     switch ii
         case 1
             ystep1(:,1)=lsim(H1,u(:,1),t);
@@ -196,7 +214,7 @@ disp(['             |    1 ms     |     10 ms     |     20 ms     |     40 ms   
 disp(['First Order:    ', num2str(Bn_act1(1)),'Hz       ', num2str(Bn_act10(1)),'Hz       ',num2str(Bn_act20(1)),'Hz       ',num2str(Bn_act40(1)),'Hz    '])
 disp(['Second Order:   ', num2str(Bn_act1(2)),'Hz       ', num2str(Bn_act10(2)),'Hz     ',num2str(Bn_act20(2)),'Hz       ',num2str(Bn_act40(2)),'Hz    '])
 disp(['Third Order:    ', num2str(Bn_act1(3)),'Hz       ', num2str(Bn_act10(3)),'Hz     ',num2str(Bn_act20(3)),'Hz       ',num2str(Bn_act40(3)),'Hz    '])
-disp('----------------------------------------------------------------------')
+disp('\n----------------------------------------------------------------------')
 
 %% What is the code doing and why does it accurately estimates the actual bandwidth?
 
@@ -207,123 +225,509 @@ fprintf(['We are essentially integrating power of the signal over all the freque
     'takes the powers of the actual signal and integrating them over the effective frequencies as the definition \n' ...
     'of the Noise bandwidth states. The normalization ensures that the bandwidth is normalized to the DC gain of the system, and \n' ...
     'eliminate any DC gain effect of the system at 0 frequency (Isolate noise effect only in the frequnecy response).'])
-disp('----------------------------------------------------------------------')
+disp('\n----------------------------------------------------------------------')
 
 %% Explain foh and tustin method
 fprintf(['The first order hold method uses "triangular pulse" as opposed to "rectangular pulse" in the zero order hold discretization method.\n' ...
     'It will not give a constant value from one sample to another as in the zoh method, foh will give a linear value from one sample to another.\n' ...
     'The tustin method is a bilinear transformation that maps the function in s-plane to z plane using z = exp(sT), where T is the discretization interval.'])
-disp('----------------------------------------------------------------------')
+disp('\n----------------------------------------------------------------------')
 
 %% Experiment with foh
-% 20ms
-for jj =1 : 3
-    Azfoh   = tf([1 1],[2 0],T(3));
-    NCOdfoh = c2d(NCO,T(3),'foh');
-    Ddfoh = c2d(D1,T(3),'foh');
+% First order
+figure
+for jj =1 : 4
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'foh');
+    Ddfoh = c2d(D1,T(jj),'foh');
     Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh,1);
-    waliasfoh = pi/T(3);
+    waliasfoh = pi/T(jj);
     wvecfoh = [0:10000]'*(waliasfoh/10000);
     [magvecfoh,phsvecfoh] = bode(Hfoh,wvecfoh);
+    mag1(:,jj) = magvecfoh;
+    pha1(:,jj) = phsvecfoh;
     magvecfoh = magvecfoh(:);
-    Bn_act20foh(jj) = sum(magvecfoh.^2)*mean(diff(wvecfoh))/(2*pi*(magvecfoh(1,1)^2));
+    Bn_actfoh(jj) = sum(magvecfoh.^2)*mean(diff(wvecfoh))/(2*pi*(magvecfoh(1,1)^2));
+    if jj <4
+        opts = bodeoptions;
+        opts.XLimMode = 'manual';
+        opts.XLim = {[1 6*10^1]};
+        bodeplot(Hfoh,opts)
+        hold on
+    elseif jj == 4
+        bode(Hfoh)
+        hold on
+        bode(H1real,'r--')
+        legend('1 ms','10 ms','20 ms','40 ms', 'Continous','Location','southwest')
+        sgtitle('1st Order Filter FOH Method')
+    end
 end
-% 10ms
-for jj =1 : 3
-    Azfoh   = tf([1 1],[2 0],T(2));
-    NCOdfoh = c2d(NCO,T(2),'foh');
-    Ddfoh = c2d(D1,T(2),'foh');
-    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh,1);
-    waliasfoh = pi/T(2);
+
+% 2nd order
+figure
+for jj =1 : 4
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'foh');
+    Dd2foh = c2d(D2,T(jj),'foh');
+    Hfoh2 = feedback(Azfoh*NCOdfoh*Dd2foh,1);
+    waliasfoh = pi/T(jj);
     wvecfoh = [0:10000]'*(waliasfoh/10000);
-    [magvecfoh,phsvecfoh] = bode(Hfoh,wvecfoh);
+    [magvecfoh,phsvecfoh] = bode(Hfoh2,wvecfoh);
+    mag2(:,jj) = magvecfoh;
+    pha2(:,jj) = phsvecfoh;
     magvecfoh = magvecfoh(:);
-    Bn_act10foh(jj) = sum(magvecfoh.^2)*mean(diff(wvecfoh))/(2*pi*(magvecfoh(1,1)^2));
+    Bn_actfoh2(jj) = sum(magvecfoh.^2)*mean(diff(wvecfoh))/(2*pi*(magvecfoh(1,1)^2));
+    if jj <4
+        opts = bodeoptions;
+        opts.XLimMode = 'manual';
+        opts.XLim = {[1 6*10^1]};
+        bodeplot(Hfoh2,opts)
+        hold on
+    elseif jj == 4
+        bode(Hfoh2)
+        hold on
+        bode(H2real,'r--')
+        legend('1 ms','10 ms','20 ms','40 ms', 'Continous','Location','southwest')
+        sgtitle('2nd Order Filter FOH Method')
+    end
 end
-% 1 ms
-for jj =1 : 3
-    Azfoh   = tf([1 1],[2 0],T(1));
-    NCOdfoh = c2d(NCO,T(1),'foh');
-    Ddfoh = c2d(D1,T(1),'foh');
-    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh,1);
-    waliasfoh = pi/T(1);
+
+% 3rd order
+figure
+for jj =1 : 4
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'foh');
+    Dd3foh = c2d(D3,T(jj),'foh');
+    Hfoh3 = feedback(Azfoh*NCOdfoh*Dd3foh,1);
+    waliasfoh = pi/T(jj);
     wvecfoh = [0:10000]'*(waliasfoh/10000);
-    [magvecfoh,phsvecfoh] = bode(Hfoh,wvecfoh);
+    [magvecfoh,phsvecfoh] = bode(Hfoh3,wvecfoh);
+    mag3(:,jj) = magvecfoh;
+    pha3(:,jj) = phsvecfoh;
     magvecfoh = magvecfoh(:);
-    Bn_act1foh(jj) = sum(magvecfoh.^2)*mean(diff(wvecfoh))/(2*pi*(magvecfoh(1,1)^2));
+    Bn_actfoh3(jj) = sum(magvecfoh.^2)*mean(diff(wvecfoh))/(2*pi*(magvecfoh(1,1)^2));
+    if jj <4
+        opts = bodeoptions;
+        opts.XLimMode = 'manual';
+        opts.XLim = {[1 6*10^1]};
+        bodeplot(Hfoh3,opts)
+        hold on
+    elseif jj == 4
+        bode(Hfoh3)
+        hold on
+        bode(H3real,'r--')
+        legend('1 ms','10 ms','20 ms','40 ms', 'Continous','Location','southwest')
+        sgtitle('3rd Order Filter FOH Method')
+    end
 end
-% 40 ms
-for jj =1 : 3
-    Azfoh   = tf([1 1],[2 0],T(4));
-    NCOdfoh = c2d(NCO,T(4),'foh');
-    Ddfoh = c2d(D1,T(4),'foh');
-    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh,1);
-    waliasfoh = pi/T(4);
-    wvecfoh = [0:10000]'*(waliasfoh/10000);
-    [magvecfoh,phsvecfoh] = bode(Hfoh,wvecfoh);
-    magvecfoh = magvecfoh(:);
-    Bn_act40foh(jj) = sum(magvecfoh.^2)*mean(diff(wvecfoh))/(2*pi*(magvecfoh(1,1)^2));
-end
+disp('----------------------------------------------------------------------')
+
 fprintf(['Actual Loop Noise Bandwidths from First order discretization method\n'])
 disp(['             |    1 ms     |     10 ms     |     20 ms     |     40 ms     |'])
-disp(['First Order:    ', num2str(Bn_act1foh(1)),'Hz       ', num2str(Bn_act10foh(1)),'Hz        ',num2str(Bn_act20foh(1)),'Hz       ',num2str(Bn_act40foh(1)),'Hz    '])
-disp(['Second Order:   ', num2str(Bn_act1foh(2)),'Hz       ', num2str(Bn_act10foh(2)),'Hz        ',num2str(Bn_act20foh(2)),'Hz       ',num2str(Bn_act40foh(2)),'Hz    '])
-disp(['Third Order:    ', num2str(Bn_act1foh(3)),'Hz       ', num2str(Bn_act10foh(3)),'Hz        ',num2str(Bn_act20foh(3)),'Hz       ',num2str(Bn_act40foh(3)),'Hz    '])
-disp('----------------------------------------------------------------------')
+disp(['First Order:    ', num2str(Bn_actfoh(1)),'Hz       ', num2str(Bn_actfoh(2)),'Hz        ',num2str(Bn_actfoh(3)),'Hz       ',num2str(Bn_actfoh(4)),'Hz    '])
+disp(['Second Order:   ', num2str(Bn_actfoh2(1)),'Hz       ', num2str(Bn_actfoh2(2)),'Hz        ',num2str(Bn_actfoh2(3)),'Hz       ',num2str(Bn_actfoh2(4)),'Hz    '])
+disp(['Third Order:    ', num2str(Bn_actfoh3(1)),'Hz       ', num2str(Bn_actfoh3(2)),'Hz        ',num2str(Bn_actfoh3(3)),'Hz       ',num2str(Bn_actfoh3(4)),'Hz    '])
+disp('\n----------------------------------------------------------------------')
 
 %% Experiment with Tustin
 
-% 20ms
-for jj =1 : 3
-    Azfoh   = tf([1 1],[2 0],T(3));
-    NCOdfoh = c2d(NCO,T(3),'tustin');
-    Ddfoh = c2d(D1,T(3),'tustin');
-    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh,1);
-    waliasfoh = pi/T(3);
+% 1st order
+figure
+for jj =1 : 4
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'tustin');
+    Ddfoh = c2d(D1,T(jj),'tustin');
+    Htustin = feedback(Azfoh*NCOdfoh*Ddfoh,1);
+    waliasfoh = pi/T(jj);
     wvecfoh = [0:10000]'*(waliasfoh/10000);
-    [magvecfoh,phsvecfoh] = bode(Hfoh,wvecfoh);
-    magvecfoh = magvecfoh(:);
-    Bn_act20tustin(jj) = sum(magvecfoh.^2)*mean(diff(wvecfoh))/(2*pi*(magvecfoh(1,1)^2));
-end
-% 10ms
-for jj =1 : 3
-    Azfoh   = tf([1 1],[2 0],T(2));
-    NCOdfoh = c2d(NCO,T(2),'tustin');
-    Ddfoh = c2d(D1,T(2),'tustin');
-    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh,1);
-    waliasfoh = pi/T(2);
-    wvecfoh = [0:10000]'*(waliasfoh/10000);
-    [magvecfoh,phsvecfoh] = bode(Hfoh,wvecfoh);
-    magvecfoh = magvecfoh(:);
-    Bn_act10tustin(jj) = sum(magvecfoh.^2)*mean(diff(wvecfoh))/(2*pi*(magvecfoh(1,1)^2));
-end
-% 1 ms
-for jj =1 : 3
-    Azfoh   = tf([1 1],[2 0],T(1));
-    NCOdfoh = c2d(NCO,T(1),'tustin');
-    Ddfoh = c2d(D1,T(1),'tustin');
-    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh,1);
-    waliasfoh = pi/T(1);
-    wvecfoh = [0:10000]'*(waliasfoh/10000);
-    [magvecfoh,phsvecfoh] = bode(Hfoh,wvecfoh);
-    magvecfoh = magvecfoh(:);
-    Bn_act1tustin(jj) = sum(magvecfoh.^2)*mean(diff(wvecfoh))/(2*pi*(magvecfoh(1,1)^2));
-end
-% 40 ms
-for jj =1 : 3
-    Aztustin   = tf([1 1],[2 0],T(4));
-    NCOdtustin = c2d(NCO,T(4),'tustin');
-    Ddtustin = c2d(D1,T(4),'tustin');
-    Htustin = feedback(Aztustin*NCOdtustin*Ddtustin,1);
-    waliastustin = pi/T(4);
-    wvectustin = [0:10000]'*(waliastustin/10000);
-    [magvectustin,phsvectustin] = bode(Htustin,wvectustin);
+    [magvectustin,phsvectustin] = bode(Htustin,wvecfoh);
     magvectustin = magvectustin(:);
-    Bn_act40tustin(jj) = sum(magvectustin.^2)*mean(diff(wvectustin))/(2*pi*(magvectustin(1,1)^2));
+    Bn_acttustin(jj) = sum(magvectustin.^2)*mean(diff(wvecfoh))/(2*pi*(magvectustin(1,1)^2));
+    if jj <4
+        opts = bodeoptions;
+        opts.XLimMode = 'manual';
+        opts.XLim = {[1 6*10^1]};
+        bodeplot(Htustin,opts)
+
+        hold on
+    elseif jj == 4
+        bode(Htustin)
+        hold on
+        bode(H1real,'r--')
+        legend('1 ms','10 ms','20 ms','40 ms', 'Continous','Location','southwest')
+        sgtitle('1st Order Filter Tustin Method')
+    end
 end
-fprintf(['Actual Loop Noise Bandwidths from First order discretization method\n'])
+
+% 2nd order
+figure
+for jj =1 : 4
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'tustin');
+    Ddfoh2 = c2d(D2,T(jj),'tustin');
+    Htustin2 = feedback(Azfoh*NCOdfoh*Ddfoh2,1);
+    waliasfoh = pi/T(jj);
+    wvecfoh = [0:10000]'*(waliasfoh/10000);
+    [magvectustin,phsvectustin] = bode(Htustin2,wvecfoh);
+    magvectustin2 = magvectustin(:);
+    Bn_acttustin2(jj) = sum(magvectustin2.^2)*mean(diff(wvecfoh))/(2*pi*(magvectustin2(1,1)^2));
+    if jj <4
+        opts = bodeoptions;
+        opts.XLimMode = 'manual';
+        opts.XLim = {[1 6*10^1]};
+        bodeplot(Htustin2,opts)
+        hold on
+    elseif jj == 4
+        bode(Htustin2)
+        hold on
+        bode(H2real,'r--')
+        legend('1 ms','10 ms','20 ms','40 ms', 'Continous','Location','southwest')
+        sgtitle('2nd Order Filter Tustin Method')
+    end
+end
+
+% 3rd order
+figure
+for jj =1 : 4
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'tustin','');
+    Ddfoh3 = c2d(D3,T(jj),'tustin');
+    Htustin3 = feedback(Azfoh*NCOdfoh*Ddfoh3,1);
+    waliasfoh = pi/T(jj);
+    wvecfoh = [0:10000]'*(waliasfoh/10000);
+    [magvectustin,phsvectustin] = bode(Htustin3,wvecfoh);
+    magvectustin3 = magvectustin(:);
+    Bn_acttustin3(jj) = sum(magvectustin3.^2)*mean(diff(wvecfoh))/(2*pi*(magvectustin3(1,1)^2));
+    if jj <4
+        opts = bodeoptions;
+        opts.XLimMode = 'manual';
+        opts.XLim = {[1 6*10^1]};
+        bodeplot(Htustin3,opts)
+        hold on
+    elseif jj == 4
+        bode(Htustin3)
+        hold on
+        bode(H3real,'r--')
+        legend('1 ms','10 ms','20 ms','40 ms', 'Continous','Location','southwest')
+        sgtitle('3rd Order Filter Tustin Method')
+    end
+end
+
+fprintf(['Actual Loop Noise Bandwidths from Tustin discretization method\n'])
 disp(['             |    1 ms     |     10 ms     |     20 ms     |     40 ms     |'])
-disp(['First Order:    ', num2str(Bn_act1tustin(1)),'Hz       ', num2str(Bn_act10tustin(1)),'Hz        ',num2str(Bn_act20tustin(1)),'Hz       ',num2str(Bn_act40foh(1)),'Hz    '])
-disp(['Second Order:   ', num2str(Bn_act1tustin(2)),'Hz       ', num2str(Bn_act10tustin(2)),'Hz        ',num2str(Bn_act20tustin(2)),'Hz       ',num2str(Bn_act40foh(2)),'Hz    '])
-disp(['Third Order:    ', num2str(Bn_act1tustin(3)),'Hz       ', num2str(Bn_act10tustin(3)),'Hz        ',num2str(Bn_act20tustin(3)),'Hz       ',num2str(Bn_act40foh(3)),'Hz    '])
-disp('----------------------------------------------------------------------')
+disp(['First Order:    ', num2str(Bn_acttustin(1)),'Hz       ', num2str(Bn_acttustin(2)),'Hz        ',num2str(Bn_acttustin(3)),'Hz       ',num2str(Bn_actfoh(4)),'Hz    '])
+disp(['Second Order:   ', num2str(Bn_acttustin2(1)),'Hz       ', num2str(Bn_acttustin2(2)),'Hz        ',num2str(Bn_acttustin2(3)),'Hz       ',num2str(Bn_actfoh(4)),'Hz    '])
+disp(['Third Order:    ', num2str(Bn_acttustin3(1)),'Hz       ', num2str(Bn_acttustin3(2)),'Hz        ',num2str(Bn_acttustin3(3)),'Hz       ',num2str(Bn_actfoh(4)),'Hz    '])
+disp('\n----------------------------------------------------------------------')
+
+%% Step Response of foh and Tustin
+% FOH
+figure
+for jj =1 : 4
+    t=0:T(jj):1;
+    ustep = ones(length(t),1);
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'foh');
+    Ddfoh = c2d(D1,T(jj),'foh');
+    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh,1);
+    if jj <4
+        yfohstep = lsim(Hfoh,ustep,t);
+        plot(t,yfohstep)
+        hold on
+    elseif jj == 4
+        yfohstep = lsim(Hfoh,ustep,t);
+        plot(t,yfohstep)
+        ylabel('Output y(t)')
+        xlabel('Time (s)')
+        hold on
+        plot(t,ustep,'--')
+        legend('1 ms','10 ms','20 ms','40 ms','Reference','Location','northeast')
+        title('1st Order Filter FOH Method')
+    end
+end
+
+% 2nd order
+figure
+for jj =1 : 4
+    t=0:T(jj):1;
+    ustep = ones(length(t),1);
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'foh');
+    Ddfoh2 = c2d(D2,T(jj),'foh');
+    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh2,1);
+    if jj <4
+        yfohstep = lsim(Hfoh,ustep,t);
+        plot(t,yfohstep)
+        hold on
+    elseif jj == 4
+        yfohstep = lsim(Hfoh,ustep,t);
+        plot(t,yfohstep)
+        ylabel('Output y(t)')
+        xlabel('Time (s)')
+        hold on
+        plot(t,ustep,'--')
+        legend('1 ms','10 ms','20 ms','40 ms','Reference','Location','northeast')
+        title('2nd Order Filter FOH Method')
+    end
+end
+
+% 3rd order
+figure
+for jj =1 : 4
+    t=0:T(jj):1;
+    ustep = ones(length(t),1);
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'foh');
+    Ddfoh3 = c2d(D3,T(jj),'foh');
+    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh3,1);
+    if jj <4
+        yfohstep = lsim(Hfoh,ustep,t);
+        plot(t,yfohstep)
+        hold on
+    elseif jj == 4
+        yfohstep = lsim(Hfoh,ustep,t);
+        plot(t,yfohstep)
+        ylabel('Output y(t)')
+        xlabel('Time (s)')
+        hold on
+        plot(t,ustep,'--')
+        legend('1 ms','10 ms','20 ms','40 ms','Reference','Location','northeast')
+        title('3rd Order Filter FOH Method')
+    end
+end
+
+% Tustin
+figure
+for jj =1 : 4
+    t=0:T(jj):1;
+    ustep = ones(length(t),1);
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'tustin');
+    Ddfoh = c2d(D1,T(jj),'tustin');
+    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh,1);
+    if jj <4
+        yfohstep = lsim(Hfoh,ustep,t);
+        plot(t,yfohstep)
+        hold on
+    elseif jj == 4
+        yfohstep = lsim(Hfoh,ustep,t);
+        plot(t,yfohstep)
+        ylabel('Output y(t)')
+        xlabel('Time (s)')
+        hold on
+        plot(t,ustep,'--')
+        legend('1 ms','10 ms','20 ms','40 ms','Reference','Location','northeast')
+        title('1st Order Filter Tustin Method')
+    end
+end
+
+% 2nd order
+figure
+for jj =1 : 4
+    t=0:T(jj):1;
+    ustep = ones(length(t),1);
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'tustin');
+    Ddfoh2 = c2d(D2,T(jj),'tustin');
+    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh2,1);
+    if jj <4
+        yfohstep = lsim(Hfoh,ustep,t);
+        plot(t,yfohstep)
+        hold on
+    elseif jj == 4
+        yfohstep = lsim(Hfoh,ustep,t);
+        plot(t,yfohstep)
+        ylabel('Output y(t)')
+        xlabel('Time (s)')
+        hold on
+        plot(t,ustep,'--')
+        legend('1 ms','10 ms','20 ms','40 ms','Reference','Location','northeast')
+        title('2nd Order Filter Tustin Method')
+    end
+end
+
+% 3rd order
+figure
+for jj =1 : 4
+    t=0:T(jj):1;
+    ustep = ones(length(t),1);
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'tustin');
+    Ddfoh3 = c2d(D3,T(jj),'tustin');
+    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh3,1);
+    if jj <4
+        yfohstep = lsim(Hfoh,ustep,t);
+        plot(t,yfohstep)
+        hold on
+    elseif jj == 4
+        yfohstep = lsim(Hfoh,ustep,t);
+        plot(t,yfohstep)
+        ylabel('Output y(t)')
+        xlabel('Time (s)')
+        hold on
+        plot(t,ustep,'--')
+        legend('1 ms','10 ms','20 ms','40 ms','Reference','Location','northeast')
+        title('3rd Order Filter Tustin Method')
+    end
+end
+
+%% Ramp Response of foh and tustin
+% FOH
+figure
+for jj =1 : 4
+    t=0:T(jj):1;
+    uramp = slope*t';
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'foh');
+    Ddfoh = c2d(D1,T(jj),'foh');
+    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh,1);
+    if jj <4
+        yfohstep = lsim(Hfoh,uramp,t);
+        plot(t,yfohstep)
+        hold on
+    elseif jj == 4
+        yfohstep = lsim(Hfoh,uramp,t);
+        plot(t,yfohstep)
+        ylabel('Output y(t)')
+        xlabel('Time (s)')
+        hold on
+        plot(t,uramp,'--')
+        legend('1 ms','10 ms','20 ms','40 ms','Reference','Location','northeast')
+        title('1st Order Filter FOH Method')
+    end
+end
+
+% 2nd order
+figure
+for jj =1 : 4
+    t=0:T(jj):1;
+    uramp = slope*t';
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'foh');
+    Ddfoh2 = c2d(D2,T(jj),'foh');
+    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh2,1);
+    if jj <4
+        yfohstep = lsim(Hfoh,uramp,t);
+        plot(t,yfohstep)
+        hold on
+    elseif jj == 4
+        yfohstep = lsim(Hfoh,uramp,t);
+        plot(t,yfohstep)
+        ylabel('Output y(t)')
+        xlabel('Time (s)')
+        hold on
+        plot(t,uramp,'--')
+        legend('1 ms','10 ms','20 ms','40 ms','Reference','Location','northeast')
+        title('2nd Order Filter FOH Method')
+    end
+end
+
+% 3rd order
+figure
+for jj =1 : 4
+    t=0:T(jj):1;
+    uramp = slope*t';
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'foh');
+    Ddfoh3 = c2d(D3,T(jj),'foh');
+    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh3,1);
+    if jj <4
+        yfohstep = lsim(Hfoh,uramp,t);
+        plot(t,yfohstep)
+        hold on
+    elseif jj == 4
+        yfohstep = lsim(Hfoh,uramp,t);
+        plot(t,yfohstep)
+        ylabel('Output y(t)')
+        xlabel('Time (s)')
+        hold on
+        plot(t,uramp,'--')
+        legend('1 ms','10 ms','20 ms','40 ms','Reference','Location','northeast')
+        title('3rd Order Filter FOH Method')
+    end
+end
+
+% Tustin
+figure
+for jj =1 : 4
+    t=0:T(jj):1;
+    uramp = slope*t';
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'tustin');
+    Ddfoh = c2d(D1,T(jj),'tustin');
+    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh,1);
+    if jj <4
+        yfohstep = lsim(Hfoh,uramp,t);
+        plot(t,yfohstep)
+        hold on
+    elseif jj == 4
+        yfohstep = lsim(Hfoh,uramp,t);
+        plot(t,yfohstep)
+        ylabel('Output y(t)')
+        xlabel('Time (s)')
+        hold on
+        plot(t,uramp,'--')
+        legend('1 ms','10 ms','20 ms','40 ms','Reference','Location','northeast')
+        title('1st Order Filter Tustin Method')
+    end
+end
+
+% 2nd order
+figure
+for jj =1 : 4
+    t=0:T(jj):1;
+    uramp = slope*t';
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'tustin');
+    Ddfoh2 = c2d(D2,T(jj),'tustin');
+    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh2,1);
+    if jj <4
+        yfohstep = lsim(Hfoh,uramp,t);
+        plot(t,yfohstep)
+        hold on
+    elseif jj == 4
+        yfohstep = lsim(Hfoh,uramp,t);
+        plot(t,yfohstep)
+        ylabel('Output y(t)')
+        xlabel('Time (s)')
+        hold on
+        plot(t,uramp,'--')
+        legend('1 ms','10 ms','20 ms','40 ms','Reference','Location','northeast')
+        title('2nd Order Filter Tustin Method')
+    end
+end
+
+% 3rd order
+figure
+for jj =1 : 4
+    t=0:T(jj):1;
+    uramp = slope*t';
+    Azfoh   = tf([1 1],[2 0],T(jj));
+    NCOdfoh = c2d(NCO,T(jj),'tustin');
+    Ddfoh3 = c2d(D3,T(jj),'tustin');
+    Hfoh = feedback(Azfoh*NCOdfoh*Ddfoh3,1);
+    if jj <4
+        yfohstep = lsim(Hfoh,uramp,t);
+        plot(t,yfohstep)
+        hold on
+    elseif jj == 4
+        yfohstep = lsim(Hfoh,uramp,t);
+        plot(t,yfohstep)
+        ylabel('Output y(t)')
+        xlabel('Time (s)')
+        hold on
+        plot(t,uramp,'--')
+        legend('1 ms','10 ms','20 ms','40 ms','Location','northeast')
+        title('3rd Order Filter Tustin Method')
+    end
+end
+fprintf(['Both discretization methods provide better frequency and step \n' ...
+    'responses that more accurately tracks the continous system. Their \n' ...
+    'actual bandwidth is much closer to Bn, the target bandwidth than that\n' ...
+    'of zero order hold discretization method.\n' ...
+    'A loop filter designed in the z-domain could not have an arbitrarily\n' ...
+    'high BnT. It will have limits, since poles outside the unit circle\]n' ...
+    'will be unstable. However, the maximum of BnT could be higher with \n' ...
+    'z-domain design, since z-domain design is free of discretization discrepancy\n' ...
+    'from continous to discretization. A designer can fine tune the controller to \n' ...
+    'have a better BnT than BnT from the rule of thumb'])

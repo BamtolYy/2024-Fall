@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>ps6p4</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-12-01"><meta name="DC.source" content="ps6p4.m"><style type="text/css">
+      --><title>ps6p4</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-12-03"><meta name="DC.source" content="ps6p4.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -89,7 +89,7 @@ slope = 1;
 uramp = zeros(length(t),1);
 uramp(101:length(t)) = slope*t(1:length(t)-100);
 uquad = zeros(length(t),1);
-uquad(101:length(t)) = t(1:length(t)-100).^2;
+uquad(101:length(t)) = 1/2*t(1:length(t)-100).^2;
 <span class="comment">% 1st Order</span>
 y1step = lsim(H1,ustep,t);
 y1ramp = lsim(H1,uramp,t);
@@ -131,7 +131,7 @@ xlim([0 0.5])
 </pre><img vspace="5" hspace="5" src="ps6p4_01.png" alt=""> <img vspace="5" hspace="5" src="ps6p4_02.png" alt=""> <img vspace="5" hspace="5" src="ps6p4_03.png" alt=""> <h2 id="4">d)</h2><pre class="codeinput">disp([<span class="string">'Ramp input Steady State Error for 1st order loop filter:'</span>, num2str(abs(y1ramp(872)-uramp(872)))])
 disp([<span class="string">'Parabolic input Steady State Error for 2nd order loop filter:'</span>, num2str(abs(y2quad(900)-uquad(900)))])
 </pre><pre class="codeoutput">Ramp input Steady State Error for 1st order loop filter:0.025
-Parabolic input Steady State Error for 2nd order loop filter:0.005625
+Parabolic input Steady State Error for 2nd order loop filter:0.0028125
 </pre><h2 id="5">e)</h2><pre class="codeinput">figure(4)
 opts = bodeoptions;
 opts.XLimMode = <span class="string">'manual'</span>;
@@ -165,7 +165,7 @@ slope = 1;
 uramp = zeros(length(t),1);
 uramp(101:length(t)) = slope*t(1:length(t)-100);
 uquad = zeros(length(t),1);
-uquad(101:length(t)) = t(1:length(t)-100).^2;
+uquad(101:length(t)) = 1/2*t(1:length(t)-100).^2;
 % 1st Order
 y1step = lsim(H1,ustep,t);
 y1ramp = lsim(H1,uramp,t);
