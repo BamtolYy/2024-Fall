@@ -32,25 +32,25 @@ function [Ad,Bd,Cd,Dd,Bn_act] = configureLoopFilter(Bn_target,Ta,loopOrder)
 
 Az   = tf([1 1],[2 0],Ta);
 NCO  = tf(1,[1 0]);
-NCOd = c2d(NCO,Ta);
+NCOd = c2d(NCO,Ta,'tustin');
 switch loopOrder
     case 1
         k = 4*Bn_target;
         Ds = tf(k,1);
-        Dz = c2d(Ds,Ta);
+        Dz = c2d(Ds,Ta,'tustin');
         Hz = feedback(Az*NCOd*Dz,1);
     case 2
         k = 8/3*Bn_target;
         a= k/2;
         Ds = tf(k*[1 a],[1 0]);
-        Dz = c2d(Ds,Ta);
+        Dz = c2d(Ds,Ta,'tustin');
         Hz = feedback(Az*NCOd*Dz,1);
     case 3
         a = 1.2*Bn_target;
         b = a^2/2;
         k = 2*a;
         Ds = tf(k*[1 a b],[1 0 0]);
-        Dz = c2d(Ds,Ta);
+        Dz = c2d(Ds,Ta,'tustin');
         Hz = feedback(Az*NCOd*Dz,1);
 end
 

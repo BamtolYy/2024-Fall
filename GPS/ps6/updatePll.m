@@ -36,6 +36,7 @@ function [xkp1,vk] = updatePll(s)
 %+==============================================================================+
 
 e = atan2(s.Qp,s.Ip);
+e
 
 xkp1 = s.Ad*s.xk +s.Bd*e;
 vk   = s.Cd*s.xk+s.Dd*e;

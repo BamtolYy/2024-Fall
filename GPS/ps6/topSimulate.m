@@ -4,14 +4,14 @@ Ta = 10/1000;       % seconds
 Bn = 10;            % Hz
 %% b)
 %---- Define Loop Filter
-loopOrder = 3;
+loopOrder = 2;
 [s.Ad,s.Bd,s.Cd,s.Dd,Bn_act] = configureLoopFilter(Bn,Ta,loopOrder);
 Bn_act
 %---- Generate Ficticious Phase Time History
 fs = 10000;                 % Hz; Ficticious Sampling rate of signal
 T  = 1/fs;                  % seconds; Sampling Interval
 t = (0:T:60)';
-PhaseHist = 0.001*t;         % Raw Phase History
+PhaseHist = pi/10*ones(length(t),1);         % Raw Phase History
 % Average over subinterval Ta
 N_Ta    = floor(Ta/T);        % Number of samples in an accumulation
 N_sub   = floor(length(t)/N_Ta);     % Number of subintervals in the signal
@@ -29,10 +29,11 @@ for ii = 1:N_sub
     [xkp1,vk] = updatePll(s);
     s.xk = xkp1;
     vkk(ii)=vk;
+    xkk(ii,:)=s.xk;
     thetahat(ii+1) = thetahat(ii)+vk*Ta;
 end
 t2 = (0:Ta:60)';
-plot(t,PhaseHist,t2,thetahat)
+plot(t,PhaseHist,t2,thetahat,'--')
 legend('True','Estimate')
 
 
