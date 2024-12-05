@@ -23,16 +23,16 @@ W = Q./I;
 
 % Simulate
 for ii = 1:length(theta2)
-a(ii) = sqrt(W(ii)^2+1);
-b(ii) = rho*W(ii)*sin(theta)+rho*cos(theta);
-c(ii) = rho^2;
-d(ii) = exp((b(ii)^2-c(ii)*a(ii)^2)/(2*a(ii)^2));
-phiu = @(u) 1/sqrt(2*pi)*exp(-1/2*u.^2);
-xmin = -b(ii)/a(ii);
-xmax = b(ii)/a(ii);
-phiy = integral(phiu,xmin,xmax);
-pw(ii)   = b(ii)*d(ii)/(sqrt(2*pi)*a(ii)^3)*phiy+1/(pi*a(ii)^2)*exp(-c(ii)/2);
-ftheta(ii) = pw(ii)*(1+W(ii)^2);
+    a(ii) = sqrt(W(ii)^2+1);
+    b(ii) = rho*W(ii)*sin(theta)+rho*cos(theta);
+    c(ii) = rho^2;
+    d(ii) = exp((b(ii)^2-c(ii)*a(ii)^2)/(2*a(ii)^2));
+    phiu = @(u) 1/sqrt(2*pi)*exp(-1/2*u.^2);
+    xmin = -b(ii)/a(ii);
+    xmax = b(ii)/a(ii);
+    phiy = integral(phiu,xmin,xmax);
+    pw(ii)   = b(ii)*d(ii)/(sqrt(2*pi)*a(ii)^3)*phiy+1/(pi*a(ii)^2)*exp(-c(ii)/2);
+    ftheta(ii) = pw(ii)*(1+W(ii)^2);
 end
 
 %% Plot the Comparison

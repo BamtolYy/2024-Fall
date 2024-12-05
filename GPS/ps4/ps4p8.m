@@ -128,6 +128,7 @@ for prn = 2
     % Calculate sigma_n^2 from the IQ samples Y
     % sigma_n_squared = var(Y());
     % sigmaIQ2 = (Nk * sigma_n_squared) / 2;
+    
     sigmaIQ2 = var(Sk(1:max_index-100))/2;
     CN0 =10*log10((max(Sk2(:))-2*sigmaIQ2)/(2*sigmaIQ2*Ta))
 

@@ -17,7 +17,7 @@ delChip = T/Tc;             % Sampling interval in chips
 Np = 2^nStages - 1;         % Period of the sequence in chips
 Ns = ceil(0.005/T);         % Number of Samples
 ts    = 1e-3;               % True delay in seconds
-delOffset = ts/Tc;          % Offset number in chips
+delOffset = -ts/Tc;          % Offset number in chips
 xj = zeros(Ns,1);
 lj = zeros(Ns,1);
 % Signal Parameters
@@ -46,7 +46,7 @@ xj    = A*xj +nj;
 
 % ----l(j)
 delt_s        = 0.25e-6;                    % seconds
-delOffSetReplica  = (ts + delt_s)/Tc;            % Estimate Delay in chips
+delOffSetReplica  = -(ts + delt_s)/Tc;            % Estimate Delay in chips
 GoldSeq       = [];
 for j = 1
     [GoldSeq] = generateGoldLfsrSequenceCA(nStages,ciVec1,ciVec2,a0Vec1,...
@@ -80,7 +80,6 @@ delt_ns  = m(mIndex)*T;
 error_ts = abs(delt_ns - delt_s);
 disp(['3c) and 3d)'])
 fprintf('Coarse %ct_s estimate error: %g %cs. \n',948-32,error_ts*1e6, 956 )
-
 %% d) Least Squares Estimator
 dt           = linspace(-T,T,1024);
 normRxltilde = zeros(length(m),1);
@@ -146,9 +145,6 @@ for pp = 1:ensemble
         GoldSeqOS = oversampleSpreadingCode(GoldSeq,delChip,delOffSetReplica,Ns,Np);
         lj(:,j) = GoldSeqOS;
     end
-
-
-
     m        =  -10:1:10;
     Rxltilde = zeros(length(m),1);
     jk = 1024;

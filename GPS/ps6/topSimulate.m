@@ -4,39 +4,50 @@ Ta = 10/1000;       % seconds
 Bn = 10;            % Hz
 %% b)
 %---- Define Loop Filter
-loopOrder = 2;
+loopOrder = 3;
 [s.Ad,s.Bd,s.Cd,s.Dd,Bn_act] = configureLoopFilter(Bn,Ta,loopOrder);
-Bn_act
 %---- Generate Ficticious Phase Time History
 fs = 10000;                 % Hz; Ficticious Sampling rate of signal
 T  = 1/fs;                  % seconds; Sampling Interval
-t = (0:T:60)';
-PhaseHist = pi/10*ones(length(t),1);         % Raw Phase History
+t = (0:T:5)';
+fd = 1;
+PhaseHist = 2*pi*fd*t;         % Raw Phase History
+
 % Average over subinterval Ta
-N_Ta    = floor(Ta/T);        % Number of samples in an accumulation
-N_sub   = floor(length(t)/N_Ta);     % Number of subintervals in the signal
+Nk    = floor(Ta/T);        % Number of samples in an accumulation
+N_sub   = floor(length(t)/Nk);     % Number of subintervals in the signal
 xk0     = zeros(loopOrder-1,1);
-s.xk    = xk0; 
-thetahat = zeros(N_sub,1);
+s.xk    = xk0;
+thetahat = zeros(length(t),1);
+deltaThetak = 0;
+s.Ip = cos(deltaThetak);
+s.Qp = sin(deltaThetak);
 for ii = 1:N_sub
-    start = (ii-1)*N_Ta+1;
-    endpt = ii*N_Ta;
-    phase_segment = PhaseHist(start:endpt);
-    avg = mean(phase_segment);
-    s.Ip =cos(avg);
-    s.Qp =sin(avg);
-    % Update PLL
+    start = (ii-1)*Nk+1;
+    endpt = ii*Nk;
     [xkp1,vk] = updatePll(s);
-    s.xk = xkp1;
-    vkk(ii)=vk;
-    xkk(ii,:)=s.xk;
-    thetahat(ii+1) = thetahat(ii)+vk*Ta;
+    s.xk=xkp1;
+    if ii == 1
+         thetahat(start:endpt)=thetahat(start)+vk*[0:T:Ta-T];
+    else
+    thetahat(start:endpt)=thetahat(start-1)+vk*[0:T:Ta-T];
+    deltaTheta = PhaseHist(start:endpt)-thetahat(start:endpt);
+    deltaThetak = mean(deltaTheta);
+    s.Ip = cos(deltaThetak);
+    s.Qp = sin(deltaThetak);
+    end
 end
-t2 = (0:Ta:60)';
-plot(t,PhaseHist,t2,thetahat,'--')
+figure,
+plot(t,PhaseHist,t(1:end-1),thetahat(1:end-1),'--')
 legend('True','Estimate')
+xlabel('Time (seconds')
+ylabel('\theta')
+title('Phase Detection without Noise')
 
 
 
+%% c)
+clear all; close all; clc;
+PhaseHist = 2*pi*fd*t;         % Raw Phase History
 
 
