@@ -70,7 +70,7 @@ sigmaIQ2 = (Nk * sigma_n_squared) / 2;
 
 
 
-for mm =14
+for mm =31
     CN0 = zeros(length(fD),1);
     Cr = fft(codeOS(:,mm));
     for kk = 1:length(fD)
@@ -81,11 +81,14 @@ for mm =14
         zk = ifft(Zr);
         zk2= abs(zk.^2);
         [maxValue,kmax] = max(zk2);
-        sigmaIQ2 = var(zk(1:kmax-100))/2;
+        [row,col] = ind2sub(size(zk2),kmax);
+        NoisyZk2  = zk2;
+        NoisyZk2(row,col)  = 0; 
+        sigmaIQ2 = mean(NoisyZk2)/2;
         CN0(kk) = 10*log10((maxValue-2*sigmaIQ2)/(2*sigmaIQ2*Ta));
         time(kk) = kmax;
     end
-[maxCN0,maxfd] = max(CN0(:));
+    [maxCN0,maxfd] = max(CN0(:));
     if  maxCN0 > 46
         signalStrenghth(mm)=maxCN0;
         start_time(mm) = tk(time(maxfd))*10^6;

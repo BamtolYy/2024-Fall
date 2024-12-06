@@ -80,9 +80,9 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-for prn = 2
+for prn = 30
     % Approximate Doppler (taken from GRID output for PRN 31)
-    fD = [-2000:100:2000];
+    fD = [-3000:100:3000];
     % The Doppler that acquisition and tracking see is opposite fD due to
     % high-side mixing
     fD_internal = -fD;
@@ -125,14 +125,25 @@ for prn = 2
     apparent_doppler_frequency = fD_internal(fD_index);
     start_time = tVec(ts_index)*1e6;
     % sigman2 = var(real(Sk(max_index+1000:end)));
-    % Calculate sigma_n^2 from the IQ samples Y
-    % sigma_n_squared = var(Y());
-    % sigmaIQ2 = (Nk * sigma_n_squared) / 2;
+
+    %----Calculate sigmaIQ^2 from Sk2
+    % Define the size of the exclusion region
+    region_size = 10;
+    % Get the size of the matrix
+    [num_rows, num_cols] = size(Sk2);
+    % Find the indices of the maximum value
     [row,col] = ind2sub(size(Sk2),max_index);
-    NoisySk = Sk2;
-    for 
-    if 
-    sigmaIQ2 = ;
+    % Define the rows and columns to delete
+    row_min = max(row - region_size, 1); % Ensure no rows < 1
+    row_max = min(row + region_size, num_rows); % Ensure no rows > num_rows
+    col_min = max(col - region_size, 1); % Ensure no cols < 1
+    col_max = min(col + region_size, num_cols); % Ensure no cols > num_cols
+    NoisySk2 = Sk2;
+    % Delete the rows and columns
+    NoisySk2(row_min:row_max, :) = []; % Remove specified rows
+    NoisySk2(:, col_min:col_max) = []; % Remove specified columns
+    
+    sigmaIQ2 = mean(NoisySk2(:))/2;
     CN0 =10*log10((max(Sk2(:))-2*sigmaIQ2)/(2*sigmaIQ2*Ta))
 
 
