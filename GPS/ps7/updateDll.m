@@ -1,11 +1,8 @@
 function [vTotal] = updateDll(s)
 % updateDll : Perform a single update step of a carrier-aided first-order code
-tracking loop.
-%
-%
+%             tracking loop.
 %
 % INPUTS
-%
 %
 % s ------------- A structure with the following fields:
 %   
@@ -47,8 +44,6 @@ tracking loop.
 %
 %       Tc --------- Spreading code chip interval, in seconds.
 %
-%
-%
 % OUTPUTS
 %       vTotal ------ The code tracking loop’s estimate of the code phase rate at
 %                     sample time tk, in sec/sec. vTotal is equal to the code
@@ -60,3 +55,14 @@ tracking loop.
 %
 %
 %+==============================================================================+
+
+% Configure Loop
+loopOrder = 1;
+[Ad,Bd,Cd,Dd,Bn_act] = configureLoopFilter(Bn_target,Tc,loopOrder)
+
+% Determine Error
+C = Tc/2*1/(IsqQsqAvg-2*sigmaIQ^2);
+e = C*((Ie-Il)*Ip+(Qe-Ql)*Qp);
+
+vk     = Cd*s.xk+Dd*e;
+vTotal = vk+s.vp;

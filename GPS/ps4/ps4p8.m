@@ -82,7 +82,7 @@ end
 %--------------------------------------------------------------------------
 for prn = 2
     % Approximate Doppler (taken from GRID output for PRN 31)
-    fD = [-2000:500:2000];
+    fD = [-2000:100:2000];
     % The Doppler that acquisition and tracking see is opposite fD due to
     % high-side mixing
     fD_internal = -fD;
@@ -128,8 +128,11 @@ for prn = 2
     % Calculate sigma_n^2 from the IQ samples Y
     % sigma_n_squared = var(Y());
     % sigmaIQ2 = (Nk * sigma_n_squared) / 2;
-    
-    sigmaIQ2 = var(Sk(1:max_index-100))/2;
+    [row,col] = ind2sub(size(Sk2),max_index);
+    NoisySk = Sk2;
+    for 
+    if 
+    sigmaIQ2 = ;
     CN0 =10*log10((max(Sk2(:))-2*sigmaIQ2)/(2*sigmaIQ2*Ta))
 
 
