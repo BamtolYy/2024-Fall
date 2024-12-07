@@ -59,37 +59,44 @@ parfor j = 1:length(G2tab)
 end
 
 %%
-fD = [-3000:200:3000];
-
+fD = [0:100:40000];
 tk = [0:Nk-1]'*T;
-
-% Calculate sigma_n^2 from the IQ samples Y
-sigma_n_squared = var(Y());
-sigmaIQ2 = (Nk * sigma_n_squared) / 2;
-
+threshold = 36.5;
+NC = 1;% Noncoherent sum number
+time = zeros(length(fD),1);
 
 
-
-for mm =31
+for mm = 14
     CN0 = zeros(length(fD),1);
     Cr = fft(codeOS(:,mm));
     for kk = 1:length(fD)
-        fi = fD(kk) + fIF;
-        xkTilde = Y(1:Nk).*exp(-1i*2*pi*fi*tk);
-        XrTilde = fft(xkTilde);
-        Zr = XrTilde.*(conj(Cr));
-        zk = ifft(Zr);
-        zk2= abs(zk.^2);
-        [maxValue,kmax] = max(zk2);
-        [row,col] = ind2sub(size(zk2),kmax);
-        NoisyZk2  = zk2;
-        NoisyZk2(row,col)  = 0; 
-        sigmaIQ2 = mean(NoisyZk2)/2;
+        zk2sum = zeros(Nk, 1);
+        for ii = 1:NC
+            jk = (ii-1) * Nk + 1;
+            jk_end = ii * Nk;
+            fi = fD(kk) + fIF;
+            xkTilde = Y(jk:jk_end).*exp(-1i*2*pi*fi*tk);
+            XrTilde = fft(xkTilde);
+            Zr = XrTilde.*(conj(Cr));
+            zk = ifft(Zr);
+            zk2sum = zk2sum + abs(zk.^2);
+        end
+        [maxValue,kmax] = max(zk2sum);
+        %---- Calculate sigmaIQ^2 from Sk2
+        % Define the size of the exclusion region
+        region_size = 100;
+        % Define the rows and columns to delete
+        row_min = max(kmax - region_size, 1); % Ensure no rows < 1
+        row_max = min(kmax + region_size, Nk); % Ensure no rows > num_rows
+        NoisyZk2 = zk2sum;
+        % Delete the rows and columns
+        NoisyZk2(row_min:row_max) = []; % Remove specified rows
+        sigmaIQ2 = mean(NoisyZk2(:))/2;
         CN0(kk) = 10*log10((maxValue-2*sigmaIQ2)/(2*sigmaIQ2*Ta));
         time(kk) = kmax;
     end
     [maxCN0,maxfd] = max(CN0(:));
-    if  maxCN0 > 46
+    if  maxCN0 > threshold
         signalStrenghth(mm)=maxCN0;
         start_time(mm) = tk(time(maxfd))*10^6;
         apparent_fD(mm) = fD(maxfd);
@@ -100,4 +107,3 @@ for mm =31
         disp (['C/N0: ', num2str(maxCN0)])
     end
 end
-

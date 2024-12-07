@@ -54,22 +54,20 @@ parfor j = 1:length(G2tab)
 end
 %
 %%
-fD = [-100000:1000:0];
+
+fD = [-40000:100:0];
 tk = [0:Nk-1]'*T;
-threshold = 40;
-NN = 6;
-
-% Calculate sigma_n^2 from the IQ samples Y
-% sigma_n_squared = var(Y());
-% sigmaIQ2 = (Nk * sigma_n_squared) / 2;
+threshold = 36.5;
+NC = 15;% Noncoherent sum number
+time = zeros(length(fD),1);
 
 
-for mm = 1:37
+for mm = 14
     CN0 = zeros(length(fD),1);
     Cr = fft(codeOS(:,mm));
     for kk = 1:length(fD)
         zk2sum = zeros(Nk, 1);
-        for ii = 1:NN
+        for ii = 1:NC
             jk = (ii-1) * Nk + 1;
             jk_end = ii * Nk;
             fi = fD(kk) + fIF;
@@ -77,11 +75,19 @@ for mm = 1:37
             XrTilde = fft(xkTilde);
             Zr = XrTilde.*(conj(Cr));
             zk = ifft(Zr);
-
             zk2sum = zk2sum + abs(zk.^2);
         end
         [maxValue,kmax] = max(zk2sum);
-        sigmaIQ2 = var(zk(1:kmax-100))/2;
+        %---- Calculate sigmaIQ^2 from Sk2
+        % Define the size of the exclusion region
+        region_size = 100;
+        % Define the rows and columns to delete
+        row_min = max(kmax - region_size, 1); % Ensure no rows < 1
+        row_max = min(kmax + region_size, Nk); % Ensure no rows > num_rows
+        NoisyZk2 = zk2sum;
+        % Delete the rows and columns
+        NoisyZk2(row_min:row_max) = []; % Remove specified rows
+        sigmaIQ2 = mean(NoisyZk2(:))/2;
         CN0(kk) = 10*log10((maxValue-2*sigmaIQ2)/(2*sigmaIQ2*Ta));
         time(kk) = kmax;
     end
