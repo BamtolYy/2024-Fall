@@ -1,10 +1,10 @@
+function [ts,fD] = acquisition(prn,fDRange,NC,Ta)
 %% Load Data from dfDataHead.bin
 % Use the document fftAcqTheory.pdf found on Canvas as your guide.
 % Recall that you studied the GP2015 front end in Problem Set 4. The GP2015
 % produces digitized data with an intermediate frequency
 % fIF = 1.405396825396879 MHz and a sampling rate Ns = 40e6/7 samples per
 % second. In the absence of Doppler, there would be Ns/1000 = 40000/7 ≈ 5714 samples per GPS L1 C/A code.
-clear; clc;
 %----- Setup
 Tfull = 0.5;                % Time interval of data to load
 fs = 40e6/7;                % Sampling frequency (Hz)
@@ -37,7 +37,6 @@ T  = 1/fs;                  % Bandpass Sampling time interval in seconds
 delChip = T/Tc;             % Sampling interval in chips
 Np = 2^nStages - 1;         % Period of the sequence in chips
 Ns = length(Y);             % Number of Samples should equal to that of Y(signal)
-Ta = 0.001;                 % Accumulation time in seconds
 Nk = floor(Ta/T);           % Number of samples in one 1-ms accumulation
 % Generate 37 Seqeuences and Oversample them:
 codeOS = zeros(Nk,37);
@@ -59,22 +58,21 @@ parfor j = 1:length(G2tab)
 end
 
 %%
-fD = [-5000:100:5000];
 tk = [0:Nk-1]'*T;
 threshold = 37;
-NC = 10;% Noncoherent sum number
-time = zeros(length(fD),1);
+
+time = zeros(length(fDRange),1);
 
 
-for mm = 1:37
-    CN0 = zeros(length(fD),1);
+for mm = prn
+    CN0 = zeros(length(fDRange),1);
     Cr = fft(codeOS(:,mm));
-    for kk = 1:length(fD)
+    for kk = 1:length(fDRange)
         zk2sum = zeros(Nk, 1);
         for ii = 1:NC
             jk = (ii-1) * Nk + 1;
             jk_end = ii * Nk;
-            fi = -fD(kk) + fIF;
+            fi = -fDRange(kk) + fIF;
             xkTilde = Y(jk:jk_end).*exp(-1i*2*pi*fi*tk);
             XrTilde = fft(xkTilde);
             Zr = XrTilde.*(conj(Cr));
@@ -98,12 +96,19 @@ for mm = 1:37
     [maxCN0,maxfd] = max(CN0(:));
     if  maxCN0 > threshold
         signalStrenghth(mm)=maxCN0;
-        start_time(mm) = tk(time(maxfd))*10^6;
-        apparent_fD(mm) = fD(maxfd);
+        start_time(mm) = tk(time(maxfd));
+        start_time(mm) = (start_time(mm)-floor(start_time(mm)/(Tc*1023))*Tc*1023)*1e6; % us
+        apparent_fD(mm) = fDRange(maxfd);
         disp('----------------------------------------------------------')
         disp(['PRN :',num2str(mm)])
         disp(['Apparent Doppler Frequency: ', num2str(apparent_fD(mm)), ' Hz']);
         disp(['Approximate Start Time from first sample: ', num2str(start_time(mm)), ' microseconds']);
         disp (['C/N0: ', num2str(maxCN0)])
+        ts =  start_time(mm);
+        fD = apparent_fD(mm);
+    else
+        ts = NaN;
+        fD = NaN;
     end
 end
+
