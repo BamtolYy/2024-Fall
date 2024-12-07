@@ -84,14 +84,16 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-for prn = 14
+NC = 8;% Noncoherent sum number
+for prn = 27
     % Approximate Doppler (taken from GRID output for PRN 31)
-    fD = [-24500:100:-20500];
+    fD = [-30000:100:-20000];
     % The Doppler that acquisition and tracking see is opposite fD due to
     % high-side mixing
     fD_internal = fD;
     % Time vector covering the accumulation
     tVec = [0:Nk-1]'*T;
+    Sk = zeros(length(tVec),length(fD_internal));
     Sk2 = zeros(length(tVec),length(fD_internal));
     % sigmaIQ2= zeros(length(tVec),length(fD_internal));
     for m = 1:length(fD_internal)
@@ -103,20 +105,18 @@ for prn = 14
             carrierVec = exp(-1i*ThetaVec);
             % Generate the full local replica, with both code and carrier
             lVeck = carrierVec.*codeOS(:,prn);
-            % Isolate the kth code interval from the data. xVec here holds the +/-1 and
-            % +/-3-valued data samples from dfDataHead.bin.  The first element in xVec
-            % holds the first sample in dfDataHead.bin.
-            xVeck = Y(jk:jk+Nk-1);
-            % Perform correlation and accumulation
-            Sk(kk,m) = sum(xVeck.*lVeck);
-            % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
-            % dB
-            Sk2(kk,m) = abs(Sk(kk,m))^2;
-            % noise_range_start = jk1000;
-            % noise_range_end = jk+Nk-1+1000;
-            % sigma_IQ_squared = Nk*var(Y(noise_range_start:noise_range_end))/2;
-            % sigma_IQ = sqrt(sigma_IQ_squared);
-            % CN0(kk,m) = 10*log10((SkdB-2*sigma_IQ^2)/(2*sigma_IQ^2*Ta));
+            for nn = 1: NC
+                % Isolate the kth code interval from the data. xVec here holds the +/-1 and
+                % +/-3-valued data samples from dfDataHead.bin.  The first element in xVec
+                % holds the first sample in dfDataHead.bin.
+                xVeck = Y((nn-1)*Nk+jk:(nn-1)*Nk+jk+Nk-1);
+                % Perform correlation and accumulation
+                Sk(kk,m) = sum(xVeck.*lVeck);
+
+                % Examine the squared magnitude of Sk in dB.  This should be close to 68.29
+                % dB
+                Sk2(kk,m) = Sk2(kk,m)+abs(Sk(kk,m))^2;
+            end
         end
     end
     figure,
@@ -128,11 +128,26 @@ for prn = 14
     [ts_index,fD_index]=ind2sub(size(Sk2),max_index);
     apparent_doppler_frequency = fD_internal(fD_index);
     start_time = tVec(ts_index)*1e6;
-    % sigman2 = var(real(Sk(max_index+1000:end)));
-    % Calculate sigma_n^2 from the IQ samples Y
-    % sigma_n_squared = var(Y());
-    % sigmaIQ2 = (Nk * sigma_n_squared) / 2;
-    sigmaIQ2 = var(Sk(1:max_index-100))/2;
+
+    %---- Calculate sigmaIQ^2 from Sk2
+    % Define the size of the exclusion region
+    region_size = 2;
+    % Get the size of the matrix
+    [num_rows, num_cols] = size(Sk2);
+    % Find the indices of the maximum value
+    [row,col] = ind2sub(size(Sk2),max_index);
+    % Define the rows and columns to delete
+    row_min = max(row - region_size, 1); % Ensure no rows < 1
+    row_max = min(row + region_size, num_rows); % Ensure no rows > num_rows
+    col_min = max(col - region_size, 1); % Ensure no cols < 1
+    col_max = min(col + region_size, num_cols); % Ensure no cols > num_cols
+    NoisySk2 = Sk2;
+    % Delete the rows and columns
+    NoisySk2(row_min:row_max, :) = []; % Remove specified rows
+    NoisySk2(:, col_min:col_max) = []; % Remove specified columns
+    sigmaIQ2 = mean(NoisySk2(:))/2;
+
+    %---- Calculate C/N0
     CN0 =10*log10((max(Sk2(:))-2*sigmaIQ2)/(2*sigmaIQ2*Ta))
 
 

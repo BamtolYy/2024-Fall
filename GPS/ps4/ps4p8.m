@@ -124,9 +124,8 @@ for prn = 30
     [ts_index,fD_index]=ind2sub(size(Sk2),max_index);
     apparent_doppler_frequency = fD_internal(fD_index);
     start_time = tVec(ts_index)*1e6;
-    % sigman2 = var(real(Sk(max_index+1000:end)));
 
-    %----Calculate sigmaIQ^2 from Sk2
+    %---- Calculate sigmaIQ^2 from Sk2
     % Define the size of the exclusion region
     region_size = 10;
     % Get the size of the matrix
@@ -142,8 +141,9 @@ for prn = 30
     % Delete the rows and columns
     NoisySk2(row_min:row_max, :) = []; % Remove specified rows
     NoisySk2(:, col_min:col_max) = []; % Remove specified columns
-    
     sigmaIQ2 = mean(NoisySk2(:))/2;
+
+    %---- Calculate C/N0
     CN0 =10*log10((max(Sk2(:))-2*sigmaIQ2)/(2*sigmaIQ2*Ta))
 
 
