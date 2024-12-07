@@ -55,14 +55,14 @@ end
 %
 %%
 
-fD = [-40000:100:0];
+fD = [-40000:100:40000];
 tk = [0:Nk-1]'*T;
-threshold = 36.5;
-NC = 15;% Noncoherent sum number
+threshold = 35;
+NC = 9;% Noncoherent sum number
 time = zeros(length(fD),1);
 
 
-for mm = 14
+for mm = 1:37
     CN0 = zeros(length(fD),1);
     Cr = fft(codeOS(:,mm));
     for kk = 1:length(fD)

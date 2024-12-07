@@ -84,10 +84,10 @@ end
 % % Because the crosscorrelation of the two lfsr seqeunce has the expected
 % % crosscorrelation values, they do make up gold codes.
 %--------------------------------------------------------------------------
-NC = 11;% Noncoherent sum number
-for prn = 27
+NC = 10;% Noncoherent sum number
+for prn = 23
     % Approximate Doppler (taken from GRID output for PRN 31)
-    fD = [-5000:100:0];
+    fD = [-40000:100:-36000];
     % The Doppler that acquisition and tracking see is opposite fD due to
     % high-side mixing
     fD_internal = fD;
