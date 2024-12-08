@@ -58,7 +58,7 @@ function [vTotal] = updateDll(s)
 
 % Configure Loop
 loopOrder = 1;
-[Ad,Bd,Cd,Dd,Bn_act] = configureLoopFilter(Bn_target,Tc,loopOrder)
+[Ad,Bd,Cd,Dd,Bn_act] = configureLoopFilter(Bn_target,Tc,loopOrder);
 
 % Determine Error
 C = Tc/2*1/(IsqQsqAvg-2*sigmaIQ^2);

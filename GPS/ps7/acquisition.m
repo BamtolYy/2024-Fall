@@ -1,25 +1,4 @@
-function [ts,fD] = acquisition(prn,fDRange,NC,Ta)
-%% Load Data from dfDataHead.bin
-% Use the document fftAcqTheory.pdf found on Canvas as your guide.
-% Recall that you studied the GP2015 front end in Problem Set 4. The GP2015
-% produces digitized data with an intermediate frequency
-% fIF = 1.405396825396879 MHz and a sampling rate Ns = 40e6/7 samples per
-% second. In the absence of Doppler, there would be Ns/1000 = 40000/7 ≈ 5714 samples per GPS L1 C/A code.
-%----- Setup
-Tfull = 0.5;                % Time interval of data to load
-fs = 40e6/7;                % Sampling frequency (Hz)
-N = fs*Tfull;
-N = floor(N/16)*16;         % Number of data samples to load
-nfft = 2^10;                % Size of FFT used in power spectrum estimation
-fIF  =  1.405396825396879e6; % Hz
-%----- Load data
-fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps5\dfDataHead.bin"], 'r','l');
-[Y,count] = binloadSamples(fid,N,'dual');
-Y = Y(:,1);
-if(count ~= N)
-    error('Insufficient data');
-end
-
+function [ts,fD,peakSk2,sigmaIQ2] = acquisition(Y,prn,fDRange,NC,Ta,fs,fIF)
 %% Genererate Code
 %---- Generate all possible PRN (37 SVIDs or PRN Sign No.)
 % LFSR Parameters:
@@ -59,7 +38,7 @@ end
 
 %%
 tk = [0:Nk-1]'*T;
-threshold = 37;
+threshold = 39.5;
 
 time = zeros(length(fDRange),1);
 
@@ -82,7 +61,7 @@ for mm = prn
         [maxValue,kmax] = max(zk2sum);
         %---- Calculate sigmaIQ^2 from Sk2
         % Define the size of the exclusion region
-        region_size = 100;
+        region_size = 10;
         % Define the rows and columns to delete
         row_min = max(kmax - region_size, 1); % Ensure no rows < 1
         row_max = min(kmax + region_size, Nk); % Ensure no rows > num_rows
@@ -106,9 +85,11 @@ for mm = prn
         disp (['C/N0: ', num2str(maxCN0)])
         ts =  start_time(mm);
         fD = apparent_fD(mm);
+        peakSk2 = maxValue;
     else
         ts = NaN;
         fD = NaN;
+        peakSk2=NaN;
     end
 end
 
