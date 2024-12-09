@@ -17,7 +17,7 @@ fIF  =  1.405396825396879e6; % Hz
 fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps5\dfDataHead.bin"], 'r','l');
 [Y,count] = binloadSamples(fid,N,'dual');
 
-Y = Y(floor(fs*3/16)*16:end,1);
+Y = Y(floor(fs*8/16)*16:end,1);
 if(count ~= N)
     error('Insufficient data');
 end
@@ -48,7 +48,7 @@ fprintf('                    Fine Search\n')
 disp('----------------------------------------------------------')
 
 prnFine =  find(~isnan(coarsefD));
-Ta =0.01;
+Ta =0.001;
 NC = 1;
 tsFine = zeros(length(prnFine));
 fDFine = zeros(length(prnFine));
@@ -67,35 +67,53 @@ end
 thetaHat = 0;
 
 %% (d) Initialize Moving Window Average
-g = 1;
+g = 1;                      % PRN
 s.IsqQsqAvg = peakSk2(g);
 s.Ip = real(sqrt(peakSk2(g)));
 s.Qp = imag(sqrt(peakSk2(g)));
-s.sigmaIQ2 = sigmaIQ2(g);
+s.sigmaIQ = sqrt(sigmaIQ2(g));
 %% (e)
 loopOrder = 3;
 Bn_target = 10;
-[s.Ad,s.Bd,s.Cd,s.Dd,Bn_act] = configureLoopFilter(Bn_target,Ta,loopOrder);
+s.Ta = Ta;
+s.Tc = 1e-3/1023;             % Chip interval in seconds
+[s.Ad,s.Bd,s.Cd,s.Dd,Bn_act] = configureLoopFilter(Bn_target,s.Ta,loopOrder);
 
 
 %% (f) x_k=0 calculation
-vkTarget=2*pi*fDFine(g);
+vk=2*pi*fDFine(g);
 [V,D] = eig(s.Ad);
-k    = vkTarget/V(:,1)/s.Cd;
+k    = vk/V(:,1)/s.Cd;
 s.xk = k*V(:,1);
-[xkp1,vk] = updatePll(s);
 
-%% (g) Correlate
-teml = 0.5; % Chips
-Nk = floor(Ta * fs); % number of samples in an accumulation
-    start = 1;
-    endpt = Nk;
-[Se_k, Sp_k, Sl_k] = performCorrelations(Y(start:end), fs, fIF, ts, vk, thetaHat, teml, g, Ta);
-%%(h)
+NumberofAccumulation = Tfull/Ta;
+ts = tsFine(g);
+for pp = 1 : NumberofAccumulation
+    %% (g) Correlate
+    teml = 0.5;                 % Chips
+    Nk = floor(Ta * fs);        % number of samples in an accumulation
+    start = (pp-1)*Nk+1;
+    endpt = pp*Nk;
+    [Se_k, Sp_k, Sl_k] = performCorrelations(Y(start:endpt), fs, fIF, ts(start), vk, thetaHat(start), teml, g, Ta);
 
-%% (i)
-%%(j)
-%%(k)
+    %% (h) Update Moving Window AVerage
+    s.Ip = real(Sp_k);
+    s.Qp = imag(Sp_k);
+    s.Ie = real(Se_k);
+    s.Qe = imag(Se_k);
+    s.Il = real(Sl_k);
+    s.Ql = imag(Sl_k);
 
-[vTotal] = updateDll(s);
-ts(start:endpt) = ts(start) -vTotal*[0:Ta:Ta-1];
+    %% (i)
+    [xkp1,s.vp] = updatePll(s);
+    [vTotal] = updateDll(s);
+
+    %% (j) Update Beat Carrier Phase Estimate
+    if pp == 1
+        thetaHat(start:endpt)=thetaHat(start)+vk*[0:T:Ta-T];
+    else
+        thetaHat(start:endpt)=thetaHat(start-1)+vk*[0:T:Ta-T];
+    end
+    %% (k)
+    ts(start:endpt) = ts(start) -vTotal*[0:T:Ta-T];
+end

@@ -17,16 +17,17 @@ function [Se_k, Sp_k, Sl_k] = performCorrelations(Y, fs, fIF, ts, vk, thetaHat, 
 
 % Sampling time vector
 Nk = floor(Ta * fs); % Number of samples in one accumulation interval
-tVec = (0:Nk-1) / fs; % Time vector for accumulation interval
-
 % Generate Early, Prompt, and Late C/A Code
-[codeEarly, codePrompt, codeLate] = generateEarlyPromptLateCodes(prn, ts, -teml/2, fs, Nk);
+[codeEarly, codePrompt, codeLate] = generateEarlyPromptLateCodes(prn, ts, teml, fs, Nk);
 
 % Generate Carrier Replica
-carrierReplica = exp(-1i * (2*pi*fIF*tVec + vk*tVec + thetaHat));
-
+ThetaVec = [2*pi*fIF + thetaHat];
+carrierVec = exp(-1i*ThetaVec);
+lvecEarly  = carrierVec' .* codeEarly;
+lvecPrompt = carrierVec' .* codePrompt;
+lvecLate   = carrierVec' .* codeLate;
 % Perform Correlations
-Se_k = sum(Y(1:Nk) .* (carrierReplica .* codeEarly'));   % Early
-Sp_k = sum(Y(1:Nk) .* (carrierReplica .* codePrompt')); % Prompt
-Sl_k = sum(Y(1:Nk) .* (carrierReplica .* codeLate'));   % Late
+Se_k = sum(Y .* lvecEarly);   % Early
+Sp_k = sum(Y .* lvecPrompt); % Prompt
+Sl_k = sum(Y .* lvecLate);   % Late
 end

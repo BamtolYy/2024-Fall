@@ -6,7 +6,7 @@
 % second. In the absence of Doppler, there would be Ns/1000 = 40000/7 ≈ 5714 samples per GPS L1 C/A code.
 clear; clc;
 %----- Setup
-Tfull = 0.5;                % Time interval of data to load
+Tfull = 10;                % Time interval of data to load
 fs = 40e6/7;                % Sampling frequency (Hz)
 N = fs*Tfull;
 N = floor(N/16)*16;         % Number of data samples to load
@@ -15,7 +15,7 @@ fIF  =  1.405396825396879e6; % Hz
 %----- Load data
 fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps5\dfDataHead.bin"], 'r','l');
 [Y,count] = binloadSamples(fid,N,'dual');
-Y = Y(:,1);
+Y = Y(floor(fs*3/16)*16:end,1);
 if(count ~= N)
     error('Insufficient data');
 end
@@ -59,33 +59,10 @@ parfor j = 1:length(G2tab)
 end
 
 %--------------------------------------------------------------------------
-% % Check if two lfsr m-sequence are truly Golden
-% X1 = generateLfsrSequence(nStages,ciVec1,a0Vec1);
-% X2 = generateLfsrSequence(nStages,ciVec2,a0Vec1);
-% X1 = 2*X1 - 1;
-% X2 = 2*X2 - 1;
-% % Calculate t(n)
-% if mod(nStages, 2) == 1  % n is odd
-%     t_n = 1 + 2^((nStages + 1) / 2);
-% else  % n is even
-%     t_n = 1 + 2^((nStages + 2) / 2);
-% end
-% % Define preferred correlation values
-% preferredCorrelations = [-t_n, -1, t_n - 2]
-% [R12,iiVecSeq] = ccorr(X1,X2);
-% figure;clf;
-% plot(iiVecSeq,R12);
-% title(['Potential X1 and X2 crosscorrelation'])
-% ylabel('R_{X1,X2}');
-% xlabel('Lag (samples)');
-% grid on;
-% % Because the crosscorrelation of the two lfsr seqeunce has the expected
-% % crosscorrelation values, they do make up gold codes.
-%--------------------------------------------------------------------------
-NC = 4;% Noncoherent sum number
-for prn = 20
+NC = 1;% Noncoherent sum number
+for prn = 14
     % Approximate Doppler (taken from GRID output for PRN 31)
-    fD = [0:100:2000];
+    fD = [-3000:100:0];
     % The Doppler that acquisition and tracking see is opposite fD due to
     % high-side mixing
     fD_internal = -fD;
@@ -143,10 +120,10 @@ for prn = 20
     % Delete the rows and columns
     NoisySk2(row_min:row_max, :) = []; % Remove specified rows
     NoisySk2(:, col_min:col_max) = []; % Remove specified columns
-    sigmaIQ2 = mean(NoisySk2(:))/2;
+    sigmaIQ2 = mean(NoisySk2(:))/2/NC;
 
     %---- Calculate C/N0
-    CN0 =10*log10((max(Sk2(:))-2*sigmaIQ2)/(2*sigmaIQ2*Ta))
+    CN0 =10*log10((max(Sk2(:))/NC-2*sigmaIQ2)/(2*sigmaIQ2*Ta))
 
 
     disp(['Apparent Doppler Frequency: ', num2str(apparent_doppler_frequency), ' Hz']);

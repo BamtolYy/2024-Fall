@@ -58,11 +58,13 @@ function [vTotal] = updateDll(s)
 
 % Configure Loop
 loopOrder = 1;
-[Ad,Bd,Cd,Dd,Bn_act] = configureLoopFilter(Bn_target,Tc,loopOrder);
+[Ad,Bd,Cd,Dd,Bn_act] = configureLoopFilter(0.1,s.Ta,loopOrder);
 
 % Determine Error
-C = Tc/2*1/(IsqQsqAvg-2*sigmaIQ^2);
-e = C*((Ie-Il)*Ip+(Qe-Ql)*Qp);
-
-vk     = Cd*s.xk+Dd*e;
+C = s.Tc/2*1/(s.IsqQsqAvg-2*s.sigmaIQ^2);
+e = C*((s.Ie-s.Il)*s.Ip+(s.Qe-s.Ql)*s.Qp);
+if isempty(Cd) 
+    Cd =[0 0];
+end
+vk     = Cd*s.xk + Dd*e;
 vTotal = vk+s.vp;

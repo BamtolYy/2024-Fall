@@ -58,7 +58,7 @@ for mm = prn
             zk = ifft(Zr);
             zk2sum = zk2sum + abs(zk.^2);
         end
-        [maxValue,kmax] = max(zk2sum);
+        [maxValue,kmax] = max(zk2sum/NC);
         %---- Calculate sigmaIQ^2 from Sk2
         % Define the size of the exclusion region
         region_size = 10;
@@ -68,7 +68,7 @@ for mm = prn
         NoisyZk2 = zk2sum;
         % Delete the rows and columns
         NoisyZk2(row_min:row_max) = []; % Remove specified rows
-        sigmaIQ2 = mean(NoisyZk2(:))/2;
+        sigmaIQ2 = mean(NoisyZk2(:)/NC)/2;
         CN0(kk) = 10*log10((maxValue-2*sigmaIQ2)/(2*sigmaIQ2*Ta));
         time(kk) = kmax;
     end
@@ -83,7 +83,7 @@ for mm = prn
         disp(['Apparent Doppler Frequency: ', num2str(apparent_fD(mm)), ' Hz']);
         disp(['Approximate Start Time from first sample: ', num2str(start_time(mm)), ' microseconds']);
         disp (['C/N0: ', num2str(maxCN0)])
-        ts =  start_time(mm);
+        ts =  start_time(mm)/1e6;
         fD = apparent_fD(mm);
         peakSk2 = maxValue;
     else

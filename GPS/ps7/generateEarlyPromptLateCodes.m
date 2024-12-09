@@ -32,12 +32,12 @@ function [codeEarly, codePrompt, codeLate] = generateEarlyPromptLateCodes(prn, t
     delChip = 1 / (fs * Tc);
 
     % Compute offsets for Early, Prompt, and Late codes
-    delOffsetPrompt = -(ts / Tc); % Start time in chips
+    delOffsetPrompt = ts / Tc; % Start time in chips
     delOffsetEarly = delOffsetPrompt - teml / 2; % Early code offset
     delOffsetLate = delOffsetPrompt + teml / 2; % Late code offset
 
     % Generate Oversampled Codes
-    codePrompt = oversampleSpreadingCode(goldCode, delChip, delOffsetPrompt, Nk, length(goldCode));
-    codeEarly = oversampleSpreadingCode(goldCode, delChip, delOffsetEarly, Nk, length(goldCode));
-    codeLate = oversampleSpreadingCode(goldCode, delChip, delOffsetLate, Nk, length(goldCode));
+    codePrompt = oversampleSpreadingCode(goldCode, delChip, -delOffsetPrompt, Nk, length(goldCode));
+    codeEarly = oversampleSpreadingCode(goldCode, delChip, -delOffsetEarly, Nk, length(goldCode));
+    codeLate = oversampleSpreadingCode(goldCode, delChip,-delOffsetLate, Nk, length(goldCode));
 end
