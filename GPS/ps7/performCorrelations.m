@@ -14,12 +14,13 @@ function [Se_k, Sp_k, Sl_k] = performCorrelations(Y, fs, fIF, ts, vTheta, thetaH
 % Se_k ------- Early accumulation.
 % Sp_k ------- Prompt accumulation.
 % Sl_k ------- Late accumulation.
+
 temlt = teml*1e-3/1023;
-jk = floor(ts*fs);
-jke = floor((ts-temlt)*fs);
-jkl = floor((ts+temlt)*fs);
+jk = round(ts*fs);
+jke = round((ts-temlt)*fs);
+jkl = round((ts+temlt)*fs);
 % Number of samples in one accumulation interval
-Nk = floor(Ta * fs); 
+Nk = round(Ta * fs); 
 
 % Time vector covering the accumulation
 tVec = [jk:jk+Nk-1]'*1/fs;

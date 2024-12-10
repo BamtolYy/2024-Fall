@@ -41,27 +41,27 @@
 % end
 % 
 % disp('----------------------------------------------------------')
-% 
-% %% Fine Search
-% disp('----------------------------------------------------------')
-% fprintf('                    Fine Search\n')
-% disp('----------------------------------------------------------')
-% 
-% prnFine =  find(~isnan(coarsefD));
-% Ta =0.01;
-% NC = 1;
-% tsFine = zeros(length(prnFine));
-% fDFine = zeros(length(prnFine));
-% for h = 1:length(prnFine)
-%     fDmaxFine = coarsefD(prnFine(h))+20;
-%     fDminFine = coarsefD(prnFine(h))-20;
-%     fDRangeFine = [fDminFine:1:fDmaxFine];
-%     [ts, fD, Sk2,noiseVariance] = acquisition(Y,prnFine(h),fDRangeFine,NC,Ta,fs,fIF);
-%     tsFine(h) = ts;
-%     fDFine(h) = fD;
-%     peakSk2(h) = Sk2;
-%     sigmaIQ2(h) = noiseVariance;
-% end
+
+%% Fine Search
+disp('----------------------------------------------------------')
+fprintf('                    Fine Search\n')
+disp('----------------------------------------------------------')
+
+prnFine =  find(~isnan(coarsefD));
+Ta =0.01;
+NC = 1;
+tsFine = zeros(length(prnFine));
+fDFine = zeros(length(prnFine));
+for h = 1
+    fDmaxFine = coarsefD(prnFine(h))+20;
+    fDminFine = coarsefD(prnFine(h))-20;
+    fDRangeFine = [fDminFine:1:fDmaxFine];
+    [ts, fD, Sk2,noiseVariance] = acquisition(Y,prnFine(h),fDRangeFine,NC,Ta,fs,fIF);
+    tsFine(h) = ts;
+    fDFine(h) = fD;
+    peakSk2(h) = Sk2;
+    sigmaIQ2(h) = noiseVariance;
+end
 
 %% (c) Initialize the beat carrier phase estimate
 thetaHat = 0;
