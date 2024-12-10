@@ -66,5 +66,10 @@ e = C*((s.Ie-s.Il)*s.Ip+(s.Qe-s.Ql)*s.Qp);
 if isempty(Cd) 
     Cd =[0 0];
 end
+
+if isempty(Dd) 
+    Dd =0;
+end
+
 vk     = Cd*s.xk + Dd*e;
 vTotal = vk+s.vp;

@@ -1,7 +1,7 @@
 function [prnCodeTable] = generatePrnCodeTable(fs, Ta)
 N = 1023;
 delChip = 1.023e6 / fs;
-Ns = Ta * fs;
+Ns = floor(Ta * fs);
 
 n = 10;
 a0Vec = ones(10, 1);

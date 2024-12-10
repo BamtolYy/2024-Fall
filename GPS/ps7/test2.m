@@ -1,4 +1,4 @@
-% clear; clc;
+ % clear; clc;
 % %% Load Data from dfDataHead.bin
 % % Use the document fftAcqTheory.pdf found on Canvas as your guide.
 % % Recall that you studied the GP2015 front end in Problem Set 4. The GP2015
@@ -6,7 +6,7 @@
 % % fIF = 1.405396825396879 MHz and a sampling rate Ns = 40e6/7 samples per
 % % second. In the absence of Doppler, there would be Ns/1000 = 40000/7 ≈ 5714 samples per GPS L1 C/A code.
 % %----- Setup
-% Tfull = 10;                % Time interval of data to load
+% Tfull = 4;                % Time interval of data to load
 % fs = 40e6/7;                % Sampling frequency (Hz)
 % T = 1/fs;
 % N = fs*Tfull;
@@ -52,10 +52,10 @@
 % NC = 1;
 % tsFine = zeros(length(prnFine));
 % fDFine = zeros(length(prnFine));
-% for h = 1:length(prnFine)
+% for h = 1
 %     fDmaxFine = coarsefD(prnFine(h))+20;
 %     fDminFine = coarsefD(prnFine(h))-20;
-%     fDRangeFine = [fDminFine:1:fDmaxFine];
+%     fDRangeFine = [fDminFine:5:fDmaxFine];
 %     [ts, fD, Sk2,noiseVariance] = acquisition(Y,prnFine(h),fDRangeFine,NC,Ta,fs,fIF);
 %     tsFine(h) = ts;
 %     fDFine(h) = fD;
@@ -63,86 +63,67 @@
 %     sigmaIQ2(h) = noiseVariance;
 % end
 
-%% (c) Initialize the beat carrier phase estimate
-thetaHat = 0;
+%% Open Loop Values
+fc = 1575.42*1e6;
+fDOpenloop = -2208;
+Tcode = 0.001/(1+fDOpenloop/fc);
 
-%% (d) Initialize Moving Window Average
-g = 1;                      % PRN
-s.IsqQsqAvg = peakSk2(g);
-s.Ip = real(sqrt(peakSk2(g)));
-s.Qp = imag(sqrt(peakSk2(g)));
-s.sigmaIQ = sqrt(sigmaIQ2(g));
-%% (e)
+s.IsqQsqAvg = peakSk2;
+s.sigmaIQ = sqrt(sigmaIQ2);
+
+thetaHat  = 0 ;
+
 loopOrder = 3;
 Bn_target = 10;
-s.Ta = Ta;
-s.Tc = 1e-3/1023;             % Chip interval in seconds
-[s.Ad,s.Bd,s.Cd,s.Dd,Bn_act] = configureLoopFilter(Bn_target,s.Ta,loopOrder);
-
-
-%% (f) x_k=0 calculation
-vTheta=2*pi*-fDFine(g);
-% vTheta=2*pi*2208;
+[s.Ad,s.Bd,s.Cd,s.Dd,Bn_act] = configureLoopFilter(Bn_target,Ta,loopOrder);
+vTheta=2*pi*-fDOpenloop;
 [V,D] = eig(s.Ad);
-q    = vTheta/(s.Cd*V(:,1));
+q    = vTheta./(s.Cd*V(:,1));
 s.xk = q*V(:,1);
+teml = 0.5;
 
-NumberofAccumulation = Tfull/Ta;
-%% (g) Correlate
-teml = 0.5;                 % Chips
-tstart = tsFine(g);
+vTheta_history(1) = vTheta;
+Nk = round(Ta/T);
 
+tshat(1) = tsFine(1);
+tshat(2:round(N/Nk))= tshat(1)+[1:round(N/Nk)-1].*Tcode;
 
-for k = 1 : NumberofAccumulation
-    [Se_k, Sp_k, Sl_k] = performCorrelations(Y, fs, fIF, tstart, vTheta, thetaHat, teml, prnFine(g), Ta);
-    %% (h) Update Moving Window AVerage
-    s.Ip = real(Sp_k);
-    s.Qp = imag(Sp_k);
-    s.Ie = real(Se_k);
-    s.Qe = imag(Se_k);
-    s.Il = real(Sl_k);
-    s.Ql = imag(Sl_k);
-    s.IsqQsqAvg = abs(Sp_k)^2;
-
-    %% (i)
-    fc = 1575.42*1e6;
+for k = 2:length(tshat)
+    [Ske,Skp,Skl] = correlate(Y,fIF,tshat(k-1),vTheta,thetaHat,teml,14,T,Ta);
+    s.Ip = real(Skp);
+    s.Qp = imag(Skp);
+    s.Ie = real(Ske);
+    s.Qe = imag(Ske);
+    s.Il = real(Skl);
+    s.Ql = real(Skl);
+    s.IsqQsqAvg = abs(Skp)^2;
     [xkp1,vTheta] = updatePll(s);
     s.vp = -vTheta/(2*pi*fc);
+    s.xk = xkp1;
+    vTheta_history(k) = vTheta;
+    thetaHat = thetaHat+vTheta*Ta;
+    thetaHat = mod(thetaHat,2*pi);
+    s.Ta = Ta;
+    s.Tc = 1e-3 / 1023; % Seconds per chip
     [vTotal] = updateDll(s);
 
-    %% (j) Update Beat Carrier Phase Estimate
-    thetaHat = thetaHat+vTheta*Ta;
-    vTheta_history(k) = vTheta;
-    %% (k)
-    tstart = tstart -vTotal*Ta;
-    Sk2_history(k) = abs(Sp_k^2);
-    Sk_history(k) = Sp_k;
-    Skl_history(k) = abs(Sp_k)^2-abs(Sl_k)^2;
-    % % Plot IQ plane
-    % figure;
-    % plot(real(Sk_history(k)), imag(Sk_history(k)), 'o', 'MarkerSize', 5, 'LineWidth', 1.5);
-    % hold on;
-    % plot([-max(abs(real(Sk_history(k)))) max(abs(real(Sk_history(k))))], [0 0], 'r--'); % Real axis
-    % grid on;
-    % axis equal;
-    % xlabel('Re(S_{p,k})');
-    % ylabel('Im(S_{p,k})');
-    % title('Phasor Plot of S_{p,k}');
-
+    Sk2_history(k) = abs(Skp^2);
+    Sk_history(k) = Skp;
+        plot(real(Sk_history(k)), imag(Sk_history(k)), 'o', 'MarkerSize', 5, 'LineWidth', 1.5);
+    hold on;
+    plot([-max(abs(real(Sk_history))) max(abs(real(Sk_history)))], [0 0], 'r--'); % Real axis
+    grid on;
 end
 figure,
 plot(Sk2_history)
-title('Sk2')
 figure,
 plot(-vTheta_history/(2*pi))
-title('fD')
 figure,
-plot(Skl_history)
-title('Skp-Skl')
+plot(Sk_history)
 
 % Plot IQ plane
 figure;
-plot(real(Sk_history), imag(Sk_history), 'o', 'MarkerSize', 5, 'LineWidth', 1.5);
+plot(real(Sk_history(1:400)), imag(Sk_history(1:400)), 'o', 'MarkerSize', 5, 'LineWidth', 1.5);
 hold on;
 plot([-max(abs(real(Sk_history))) max(abs(real(Sk_history)))], [0 0], 'r--'); % Real axis
 grid on;
