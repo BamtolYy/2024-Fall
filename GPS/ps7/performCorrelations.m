@@ -43,8 +43,8 @@ Se_k = sum(xVecEarly .* lvecEarly);   % Early
 Sp_k = sum(xVecPrompt .* lvecPrompt); % Prompt
 Sl_k = sum(xVecLate .* lvecLate);   % Late
 % disp(['prompt'])
-abs(Sp_k)^2;
-abs(Se_k)^2;
-abs(Sl_k)^2;
+abs(Sp_k)^2
+abs(Se_k)^2
+abs(Sl_k)^2
 
 end

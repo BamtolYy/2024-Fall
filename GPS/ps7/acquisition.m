@@ -60,14 +60,18 @@ for mm = prn
         end
         [maxValue,kmax] = max(zk2sum/NC);
         %---- Calculate sigmaIQ^2 from Sk2
+        Cropsize = 1000;
+        zk2sumCrop = zk2sum(max(kmax-Cropsize,1):min(kmax+Cropsize,Nk));
+        [~,cropMax] = max(zk2sumCrop);
         % Define the size of the exclusion region
-        region_size = 10;
+        region_size = 200;
         % Define the rows and columns to delete
-        row_min = max(kmax - region_size, 1); % Ensure no rows < 1
-        row_max = min(kmax + region_size, Nk); % Ensure no rows > num_rows
-        NoisyZk2 = zk2sum;
+        row_min = max(cropMax - region_size, 1); % Ensure no rows < 1
+        row_max = min(cropMax + region_size, length(zk2sumCrop)); % Ensure no rows > num_rows
+        NoisyZk2 = zk2sumCrop;
         % Delete the rows and columns
         NoisyZk2(row_min:row_max) = []; % Remove specified rows
+
         sigmaIQ2 = mean(NoisyZk2(:)/NC)/2;
         CN0(kk) = 10*log10((maxValue-2*sigmaIQ2)/(2*sigmaIQ2*Ta));
         time(kk) = kmax;
