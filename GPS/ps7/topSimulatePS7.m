@@ -71,6 +71,7 @@ thetaHat = 0;
 %% (d) Initialize Moving Window Average
 g = 1;                      % PRN
 s.IsqQsqAvg = peakSk2(g);
+movingAverage = peakSk2(g);
 s.Ip = real(sqrt(peakSk2(g)));
 s.Qp = imag(sqrt(peakSk2(g)));
 s.sigmaIQ = sqrt(sigmaIQ2(g));
@@ -104,7 +105,7 @@ vTheta_history = zeros(NumberofAccumulation-1,1);
 Sk2_history    = zeros(NumberofAccumulation-1,1);
 Time = [acquisitionStartTime+tsFine(g):Ta:acquisitionStartTime+length(vTheta_history)*Ta]';
 for k = 1 : NumberofAccumulation-1
-    if k == 1634 || k == 1635 || k == 1636
+    if k == 1634 || k == 1635 || k == 1636 || k == 1000 ||k == 500
         disp('wait')
     end
     [Se_k, Sp_k, Sl_k] = performCorrelations(Y, fs, fIF, tstart, vTheta, thetaHat, teml, prnFine(g), Ta);
@@ -115,8 +116,14 @@ for k = 1 : NumberofAccumulation-1
     s.Qe = imag(Se_k);
     s.Il = real(Sl_k);
     s.Ql = imag(Sl_k);
-    s.IsqQsqAvg = abs(Sp_k)^2;
-
+    if k <101
+    movingAverage(k) = abs(Sp_k)^2;
+    s.IsqQsqAvg = mean(movingAverage);
+    else
+    movingAverage = circshift(movingAverage,-1);
+    movingAverage(end) = abs(Sp_k)^2;
+    s.IsqQsqAvg = mean(movingAverage);
+    end
     %% (i)
     fc = 1575.42*1e6;
     [xkp1,vTheta] = updatePll(s);
