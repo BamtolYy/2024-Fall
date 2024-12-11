@@ -41,9 +41,9 @@ function [codeEarly, codePrompt, codeLate] = generateEarlyPromptLateCodes(prn, t
     codeEarly = oversampleSpreadingCode(goldCode, delChip, -delOffsetEarly, Nk, length(goldCode));
     codeLate = oversampleSpreadingCode(goldCode, delChip,-delOffsetLate, Nk, length(goldCode));
 % figure,
-% plot(codePrompt(1:100, 'b'); hold on;
+% plot(codePrompt(1:100), 'b'); hold on;
 % plot(codeEarly(1:100), 'r--'); hold on;
-% plot(codeLate(1:100, 'o');
+% plot(codeLate(1:100), 'o');
 % legend('Prompt', 'Early', 'Late');
 % title('Generated Early, Prompt, Late Codes');
 

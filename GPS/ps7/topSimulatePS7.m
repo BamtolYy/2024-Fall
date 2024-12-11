@@ -19,7 +19,7 @@
 % 
 % [Y,count] = binloadSamples(fid,N,'dual');
 % 
-% Y = Y(round(fs*3):end,1);
+% Y = Y(round(fs*3)+1:end,1);
 % if(count ~= N)
 %     error('Insufficient data');
 % end
@@ -44,26 +44,26 @@
 % 
 % disp('----------------------------------------------------------')
 % 
-% %% Fine Search
-% disp('----------------------------------------------------------')
-% fprintf('                    Fine Search\n')
-% disp('----------------------------------------------------------')
-% 
-% prnFine =  find(~isnan(coarsefD));
-% Ta =0.01;
-% NC = 1;
-% tsFine = zeros(length(prnFine));
-% fDFine = zeros(length(prnFine));
-% for h = 1
-%     fDmaxFine = coarsefD(prnFine(h))+20;
-%     fDminFine = coarsefD(prnFine(h))-20;
-%     fDRangeFine = [fDminFine:1:fDmaxFine];
-%     [ts, fD, Sk2,noiseVariance] = acquisition(Y,prnFine(h),fDRangeFine,NC,Ta,fs,fIF);
-%     tsFine(h) = ts;
-%     fDFine(h) = fD;
-%     peakSk2(h) = Sk2;
-%     sigmaIQ2(h) = noiseVariance;
-% end
+%% Fine Search
+disp('----------------------------------------------------------')
+fprintf('                    Fine Search\n')
+disp('----------------------------------------------------------')
+
+prnFine =  find(~isnan(coarsefD));
+Ta =0.01;
+NC = 1;
+tsFine = zeros(length(prnFine));
+fDFine = zeros(length(prnFine));
+for h = 1
+    fDmaxFine = coarsefD(prnFine(h))+20;
+    fDminFine = coarsefD(prnFine(h))-20;
+    fDRangeFine = [fDminFine:1:fDmaxFine];
+    [ts, fD, Sk2,noiseVariance] = acquisition(Y,prnFine(h),fDRangeFine,NC,Ta,fs,fIF);
+    tsFine(h) = ts;
+    fDFine(h) = fD;
+    peakSk2(h) = Sk2;
+    sigmaIQ2(h) = noiseVariance;
+end
 
 %% (c) Initialize the beat carrier phase estimate
 thetaHat = 0;
@@ -83,23 +83,24 @@ s.Tc = 1e-3/1023;             % Chip interval in seconds
 
 
 %% (f) x_k=0 calculation
+% vTheta=2*pi*-fDFine(g);
 vTheta=2*pi*2208;
-% vTheta=2*pi*2208;
 [V,D] = eig(s.Ad);
 q    = vTheta/(s.Cd*V(:,1));
 s.xk = q*V(:,1);
 
-NumberofAccumulation = Tfull/Ta;
 %% (g) Correlate
 teml = 0.5;                 % Chips
 fc = 1575.42*1e6;
-fDOpenloop = -2208;
-Tcode = 0.001/(1+fDOpenloop/fc);
 tstart = tsFine(g);
-Nk = round(Tfull/Ta);
-tstart(2:round(N/Nk))= tstart(1)+[1:round(N/Nk)-1].*Tcode;
-
-for k = 1 : NumberofAccumulation
+% tstart = 5.19e-4;
+% s.sigmaIQ = sqrt(1.05e5);
+Nk = floor(Ta/T);
+NumberofAccumulation = round(length(Y)/Nk);
+% tstart(2:round(N/Nk))= tstart(1)+[1:round(N/Nk)-1].*Tcode;
+vTheta_history = zeros(NumberofAccumulation-1,1);
+Sk2_history    = zeros(NumberofAccumulation-1,1);
+for k = 1 : NumberofAccumulation-1
     [Se_k, Sp_k, Sl_k] = performCorrelations(Y, fs, fIF, tstart, vTheta, thetaHat, teml, prnFine(g), Ta);
     %% (h) Update Moving Window AVerage
     s.Ip = real(Sp_k);
@@ -120,7 +121,7 @@ for k = 1 : NumberofAccumulation
     thetaHat = thetaHat+vTheta*Ta;
     vTheta_history(k) = vTheta;
     %% (k)
-    % tstart = tstart -vTotal*Ta;
+    tstart = tstart -vTotal*Ta+Ta;
     Sk2_history(k) = abs(Sp_k^2);
     Sk_history(k) = Sp_k;
     Skl_history(k) = abs(Sp_k)^2-abs(Sl_k)^2;

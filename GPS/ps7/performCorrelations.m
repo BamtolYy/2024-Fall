@@ -15,26 +15,38 @@ function [Se_k, Sp_k, Sl_k] = performCorrelations(Y, fs, fIF, ts, vTheta, thetaH
 % Sp_k ------- Prompt accumulation.
 % Sl_k ------- Late accumulation.
 
-temlt = teml*1e-3/1023;
-jk = round(ts*fs);
-jke = round((ts-temlt)*fs);
-jkl = round((ts+temlt)*fs);
+temlt = teml*1e-3/1023/2;
+jk = floor(ts*fs);
+jke = floor((ts-temlt)*fs);
+jkl = floor((ts+temlt)*fs);
 % Number of samples in one accumulation interval
-Nk = round(Ta * fs); 
+Nk = floor(Ta * fs); 
 
 % Time vector covering the accumulation
-tVec = [jk:jk+Nk-1]'*1/fs;
+tVecPrompt = [jk:jk+Nk-1]'*1/fs;
+tVecEarly = [jke:jke+Nk-1]'*1/fs;
+tVecLate = [jkl:jkl+Nk-1]'*1/fs;
 
+% tVecPrompt = [jk:jk+Nk-1]'*1/fs;
+% tVecEarly = [jk:jk+Nk-1]'*1/fs;
+% tVecLate = [jk:jk+Nk-1]'*1/fs;
 
 % Generate Early, Prompt, and Late C/A Code
 [codeEarly, codePrompt, codeLate] = generateEarlyPromptLateCodes(prn, ts, teml, fs, Nk);
 
 % Generate Carrier Replica
-ThetaVec = [2*pi*fIF*tVec + thetaHat+vTheta*[0:Nk-1]'*1/fs];
-carrierVec = exp(-1i*ThetaVec);
-lvecEarly  = carrierVec .* codeEarly;
-lvecPrompt = carrierVec .* codePrompt;
-lvecLate   = carrierVec .* codeLate;
+ThetaVecPrompt = [2*pi*fIF*tVecPrompt + thetaHat+vTheta*[0:Nk-1]'*1/fs];
+ThetaVecEarly = [2*pi*fIF*tVecEarly + thetaHat+vTheta*[0:Nk-1]'*1/fs];
+ThetaVecLate = [2*pi*fIF*tVecLate + thetaHat+vTheta*[0:Nk-1]'*1/fs];
+
+carrierVecPrompt = exp(-1i*ThetaVecPrompt);
+carrierVecEarly = exp(-1i*ThetaVecEarly);
+carrierVecLate = exp(-1i*ThetaVecLate);
+
+lvecPrompt = carrierVecPrompt .* codePrompt;
+lvecEarly  = carrierVecEarly .* codeEarly;
+lvecLate   = carrierVecLate .* codeLate;
+
 % Perform Correlations
 xVecPrompt = Y(jk:jk+Nk-1);
 xVecEarly = Y(jke:jke+Nk-1);
@@ -43,8 +55,8 @@ Se_k = sum(xVecEarly .* lvecEarly);   % Early
 Sp_k = sum(xVecPrompt .* lvecPrompt); % Prompt
 Sl_k = sum(xVecLate .* lvecLate);   % Late
 % disp(['prompt'])
-abs(Sp_k)^2
-abs(Se_k)^2
-abs(Sl_k)^2
+abs(Sp_k)^2;
+abs(Se_k)^2;
+abs(Sl_k)^2;
 
 end

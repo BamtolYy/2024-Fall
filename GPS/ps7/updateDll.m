@@ -67,9 +67,6 @@ if isempty(Cd)
     Cd =[0 0];
 end
 
-if isempty(Dd) 
-    Dd =0;
-end
 
-vk     = Cd*s.xk + Dd*e;
+vk     =  Dd*e;
 vTotal = vk+s.vp;
