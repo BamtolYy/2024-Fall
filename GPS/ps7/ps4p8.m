@@ -13,9 +13,12 @@ N = floor(N/16)*16;         % Number of data samples to load
 nfft = 2^10;                % Size of FFT used in power spectrum estimation
 fIF  =  1.405396825396879e6; % Hz
 %----- Load data
-fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps5\dfDataHead.bin"], 'r','l');
+% fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps5\dfDataHead.bin"], 'r','l');
+fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps7\dfDataHead.bin"], 'r','l');
+
 [Y,count] = binloadSamples(fid,N,'dual');
 Y = Y(floor(fs*3/16)*16:end,1);
+% Y = Y(:,1);
 if(count ~= N)
     error('Insufficient data');
 end
@@ -62,7 +65,7 @@ end
 NC = 1;% Noncoherent sum number
 for prn = 14
     % Approximate Doppler (taken from GRID output for PRN 31)
-    fD = [-3000:100:0];
+    fD = [-2230:10:-2200];
     % The Doppler that acquisition and tracking see is opposite fD due to
     % high-side mixing
     fD_internal = -fD;

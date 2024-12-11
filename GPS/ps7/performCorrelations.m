@@ -16,11 +16,11 @@ function [Se_k, Sp_k, Sl_k] = performCorrelations(Y, fs, fIF, ts, vTheta, thetaH
 % Sl_k ------- Late accumulation.
 
 temlt = teml*1e-3/1023/2;
-jk = floor(ts*fs);
-jke = floor((ts-temlt)*fs);
-jkl = floor((ts+temlt)*fs);
+jk = round(ts*fs);
+jke = round((ts-temlt)*fs);
+jkl = round((ts+temlt)*fs);
 % Number of samples in one accumulation interval
-Nk = floor(Ta * fs); 
+Nk = round(Ta * fs); 
 
 % Time vector covering the accumulation
 tVecPrompt = [jk:jk+Nk-1]'*1/fs;
