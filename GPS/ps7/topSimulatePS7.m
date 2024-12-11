@@ -104,7 +104,7 @@ vTheta_history = zeros(NumberofAccumulation-1,1);
 Sk2_history    = zeros(NumberofAccumulation-1,1);
 Time = [acquisitionStartTime+tsFine(g):Ta:acquisitionStartTime+length(vTheta_history)*Ta]';
 for k = 1 : NumberofAccumulation-1
-    if k == 1000
+    if k == 1634 || k == 1635 || k == 1636
         disp('wait')
     end
     [Se_k, Sp_k, Sl_k] = performCorrelations(Y, fs, fIF, tstart, vTheta, thetaHat, teml, prnFine(g), Ta);
