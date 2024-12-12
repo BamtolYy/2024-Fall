@@ -22,7 +22,7 @@ codeOS = zeros(Nk,37);
 G2tab = [2,6;3,7;4,8;5,9;1,9;2,10;1,8;2,9;3,10;2,3;3,4;5,6;6,7;7,8;...
     8,9;9,10;1,4;2,5;3,6;4,7;5,8;6,9;1,3;4,6;5,7;6,8;7,9;8,10;1,6;2,7;...
     3,8;4,9;5,10;4,10;1,7;2,8;4,10];
-parfor j = 1:length(G2tab)
+for j = 1:length(G2tab)
     [GoldSeq] = generateGoldLfsrSequenceCA(nStages,ciVec1,ciVec2,a0Vec1,...
         a0Vec2,G2tab(j,:));
     % Make code +1/-1 not +1/0
@@ -40,7 +40,6 @@ end
 tk = [0:Nk-1]'*T;
 threshold = 39.5;
 
-time = zeros(length(fDRange),1);
 
 
 for mm = prn
@@ -58,9 +57,9 @@ for mm = prn
             zk = ifft(Zr);
             zk2sum = zk2sum + abs(zk.^2);
         end
-        [maxValue,kmax] = max(zk2sum/NC);
+        [maxValue,kmax] = max(zk2sum/NC/(Ta/0.001));
         %---- Calculate sigmaIQ^2 from Sk2
-        Cropsize = 1000;
+        Cropsize = 2000;
         zk2sumCrop = zk2sum(max(kmax-Cropsize,1):min(kmax+Cropsize,Nk));
         [~,cropMax] = max(zk2sumCrop);
         % Define the size of the exclusion region
@@ -72,7 +71,7 @@ for mm = prn
         % Delete the rows and columns
         NoisyZk2(row_min:row_max) = []; % Remove specified rows
 
-        sigmaIQ2 = mean(NoisyZk2(:)/NC)/2;
+        sigmaIQ2 = mean(NoisyZk2(:)/NC)/2/(Ta/0.001);
         CN0(kk) = 10*log10((maxValue-2*sigmaIQ2)/(2*sigmaIQ2*Ta));
         time(kk) = kmax;
     end
@@ -87,6 +86,7 @@ for mm = prn
         disp(['Apparent Doppler Frequency: ', num2str(apparent_fD(mm)), ' Hz']);
         disp(['Approximate Start Time from first sample: ', num2str(start_time(mm)), ' microseconds']);
         disp (['C/N0: ', num2str(maxCN0)])
+        disp(['SigmaIQ^2: ', num2str(sigmaIQ2)])
         ts =  start_time(mm)/1e6;
         fD = apparent_fD(mm);
         peakSk2 = maxValue;

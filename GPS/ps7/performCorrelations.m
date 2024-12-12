@@ -15,18 +15,18 @@ function [Se_k, Sp_k, Sl_k] = performCorrelations(Y, fs, fIF, ts, vTheta, thetaH
 % Sp_k ------- Prompt accumulation.
 % Sl_k ------- Late accumulation.
 % Number of samples in one accumulation interval
-Nk = round(Ta * fs); 
+Nk = floor(Ta * fs); 
 
-temlt = teml*1e-3/1023/2;
-jk = round(ts*fs);
-jke = round((ts-temlt)*fs);
-jkl = round((ts+temlt)*fs);
+temlt = teml*1e-3/1023;
+jk = floor(ts*fs);
+jke = floor((ts-temlt/2)*fs);
+jkl = floor((ts+temlt/2)*fs);
 
 
 % Time vector covering the accumulation
-tVecPrompt = [jk:jk+Nk-1]'*1/fs;
-tVecEarly = [jke:jke+Nk-1]'*1/fs;
-tVecLate = [jkl:jkl+Nk-1]'*1/fs;
+tVecPrompt = [jk+Nk:jk+2*Nk-1]'*1/fs;
+tVecEarly = [jke+Nk:jke+2*Nk-1]'*1/fs;
+tVecLate = [jkl+Nk:jkl+2*Nk-1]'*1/fs;
 
 % tVecPrompt = [jk:jk+Nk-1]'*1/fs;
 % tVecEarly = [jk:jk+Nk-1]'*1/fs;
@@ -40,6 +40,11 @@ ThetaVecPrompt = [2*pi*fIF*tVecPrompt + thetaHat+vTheta*[0:Nk-1]'*1/fs];
 ThetaVecEarly = [2*pi*fIF*tVecEarly + thetaHat+vTheta*[0:Nk-1]'*1/fs];
 ThetaVecLate = [2*pi*fIF*tVecLate + thetaHat+vTheta*[0:Nk-1]'*1/fs];
 
+% ThetaVecPrompt = [2*pi*fIF*tVecPrompt + vTheta*tVecPrompt];
+% ThetaVecEarly = [2*pi*fIF*tVecEarly + vTheta*tVecEarly];
+% ThetaVecLate = [2*pi*fIF*tVecLate + vTheta*tVecLate];
+
+
 carrierVecPrompt = exp(-1i*ThetaVecPrompt);
 carrierVecEarly = exp(-1i*ThetaVecEarly);
 carrierVecLate = exp(-1i*ThetaVecLate);
@@ -52,8 +57,9 @@ lvecLate   = carrierVecLate .* codeLate;
 xVecPrompt = Y(jk:jk+Nk-1);
 xVecEarly = Y(jke:jke+Nk-1);
 xVecLate = Y(jkl:jkl+Nk-1);
-Se_k = sum(xVecEarly .* lvecEarly);   % Early
+
 Sp_k = sum(xVecPrompt .* lvecPrompt); % Prompt
+Se_k = sum(xVecEarly .* lvecEarly);   % Early
 Sl_k = sum(xVecLate .* lvecLate);   % Late
 % disp(['prompt'])
 abs(Sp_k)^2;

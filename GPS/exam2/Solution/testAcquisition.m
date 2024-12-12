@@ -16,14 +16,17 @@ fIF  =  1.405396825396879e6; % Hz
 %----- Load data
 fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps7\dfDataHead.bin"], 'r','l');
 [Y,count] = binloadSamples(fid,N,'dual');
+X = Y(:,1);
+timeTotal = [0:T:N*T-T]';
+X(:,2) = timeTotal;
+Y = Y(round(fs*3)+1:end,1);
 
-% Y = Y(floor(fs*3/16)*16:end,1);
-Y = Y(:,1);
+% Y = Y(:,1);
 if(count ~= N)
     error('Insufficient data');
 end
 % Coherent integration time. CHANGE THIS.
-Ta = 1e-2;
+Ta = 1e-3;
 % Number of non−coherent integrations. CHANGE THIS.
 N = 8;
 
@@ -46,7 +49,7 @@ Nk = floor(Ta * fs);
 tVec = (0 : 1/(fs) : (Nk-1)/(fs))';
 % Search vector for Doppler.
 dopplerStep = 1/(4*Ta);
-dopplerVec = 1000 : dopplerStep :3000;
+dopplerVec = -3000 : dopplerStep :3000;
 % Search vector for code phase.
 codeStep = 3; % Shift by 3 samples
 codeVec = 0 : (codeStep / (fs)) : 1e-3 - (1 / (fs)); % All possible start times

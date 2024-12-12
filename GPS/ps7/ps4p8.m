@@ -65,7 +65,7 @@ end
 NC = 1;% Noncoherent sum number
 for prn = 14
     % Approximate Doppler (taken from GRID output for PRN 31)
-    fD = [-2230:10:-2200];
+    fD = [-3000:1/(4*Ta):3000];
     % The Doppler that acquisition and tracking see is opposite fD due to
     % high-side mixing
     fD_internal = -fD;

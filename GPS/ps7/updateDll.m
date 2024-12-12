@@ -68,5 +68,5 @@ if isempty(Cd)
 end
 
 
-vk     =  Dd*e;
+vk     = Dd*e;
 vTotal = vk+s.vp;

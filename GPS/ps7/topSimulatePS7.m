@@ -16,10 +16,15 @@ fIF  =  1.405396825396879e6; % Hz
 %----- Load data
 % fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps5\dfDataHead.bin"], 'r','l');
 fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps7\dfDataHead.bin"], 'r','l');
+[Z,count] = binloadSamples(fid,N,'dual');
 
-[Y,count] = binloadSamples(fid,N,'dual');
+% X = Y(:,1);
+timeTotal = [0:T:N*T-T]';
+% X(:,2) = timeTotal;
 acquisitionStartTime = 3;
-Y = Y(round(fs*acquisitionStartTime):end,1);
+Y = Z(round(fs*acquisitionStartTime)+1:end,1);
+% Y = Z(:,1);
+
 if(count ~= N)
     error('Insufficient data');
 end
@@ -29,7 +34,7 @@ fprintf('                    Coarse Search\n')
 disp('----------------------------------------------------------')
 
 % Coarse Search Parameter
-fDRange = [-5000:100:5000];
+fDRange = [-3000:100:3000];
 prn = [1:37];
 NC = 10;                    % Noncoherent sum number
 Ta = 0.001;                 % Accumulation time in seconds
@@ -51,13 +56,13 @@ disp('----------------------------------------------------------')
 
 prnFine =  find(~isnan(coarsefD));
 Ta =0.01;
-NC = 1;
+NC = 4;
 tsFine = zeros(length(prnFine));
 fDFine = zeros(length(prnFine));
 for h = 1
-    fDmaxFine = coarsefD(prnFine(h))+20;
-    fDminFine = coarsefD(prnFine(h))-20;
-    fDRangeFine = [fDminFine:1:fDmaxFine];
+    fDmaxFine = coarsefD(prnFine(h))+10;
+    fDminFine = coarsefD(prnFine(h))-10;
+    fDRangeFine = [fDminFine:1 :fDmaxFine];
     [ts, fD, Sk2,noiseVariance] = acquisition(Y,prnFine(h),fDRangeFine,NC,Ta,fs,fIF);
     tsFine(h) = ts;
     fDFine(h) = fD;
@@ -67,6 +72,7 @@ end
 
 %% (c) Initialize the beat carrier phase estimate
 thetaHat = 0;
+thetaHat_history(1) = thetaHat;
 
 %% (d) Initialize Moving Window Average
 g = 1;                      % PRN index
@@ -87,7 +93,7 @@ s.Tc = 1e-3/1023;             % Chip interval in seconds
 % vTheta=2*pi*-fDFine(g);
 % vTheta=2*pi*2202;
 
-vTheta=2*pi*2208; % prn 14
+vTheta=2*pi*2217; % prn 14
 % vTheta=2*pi*2775.9; % prn 30
 
 [V,D] = eig(s.Ad);
@@ -100,14 +106,14 @@ fc = 1575.42*1e6;
 tstart = tsFine(g);
 % tstart = 5.19e-4;
 % s.sigmaIQ = sqrt(1.05e5);
-Nk = round(Ta/T);
-NumberofAccumulation = round(length(Y)/Nk);
+Nk = floor(Ta/T);
+NumberofAccumulation = floor(length(Y(floor(ts/T):end))/Nk);
 % vTheta_history = zeros(NumberofAccumulation-1,1);
 vTheta_history(1) = vTheta;
 Sk2_history    = zeros(NumberofAccumulation-1,1);
-Time = [acquisitionStartTime+tsFine(g):Ta:acquisitionStartTime+length(vTheta_history)*Ta]';
-for k = 1 : NumberofAccumulation-2
-    if k == 1634 || k == 1635 || k == 1636 || k == 1000 ||k == 500
+
+for k = 1 : NumberofAccumulation-1
+    if k == 1634 || k == 1635 || k == 1636 
         disp('wait')
     end
     [Se_k, Sp_k, Sl_k] = performCorrelations(Y, fs, fIF, tstart, vTheta, thetaHat, teml, prnFine(g), Ta);
@@ -118,13 +124,13 @@ for k = 1 : NumberofAccumulation-2
     s.Qe = imag(Se_k);
     s.Il = real(Sl_k);
     s.Ql = imag(Sl_k);
-    if k <101
-    movingAverage(k+1) = abs(Sp_k)^2;
-    s.IsqQsqAvg = mean(movingAverage);
+    if k <100
+        movingAverage(k+1) = abs(Sp_k)^2;
+        s.IsqQsqAvg = mean(movingAverage);
     else
-    movingAverage = circshift(movingAverage,-1);
-    movingAverage(end) = abs(Sp_k)^2;
-    s.IsqQsqAvg = mean(movingAverage);
+        movingAverage = circshift(movingAverage,-1);
+        movingAverage(end) = abs(Sp_k)^2;
+        s.IsqQsqAvg = mean(movingAverage);
     end
     %% (i)
     fc = 1575.42*1e6;
@@ -140,6 +146,8 @@ for k = 1 : NumberofAccumulation-2
     Sk2_history(k+1) = abs(Sp_k^2);
     Sk_history(k+1) = Sp_k;
     Skl_history(k+1) = abs(Sp_k)^2-abs(Sl_k)^2;
+    thetaHat_history (k+1) = thetaHat;
+    tstart_history(k+1) = tstart;
     % % Plot IQ plane
     % figure;
     % plot(real(Sk_history(k)), imag(Sk_history(k)), 'o', 'MarkerSize', 5, 'LineWidth', 1.5);
@@ -156,6 +164,7 @@ end
 % plot(Sk2_history)
 % title('Sk2')
 figure,
+Time = [acquisitionStartTime+tsFine(g):Ta:acquisitionStartTime+length(vTheta_history)*Ta]';
 plot(-vTheta_history/(2*pi))
 title('fD')
 ylim([-2235 -2205])
