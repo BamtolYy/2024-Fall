@@ -1,4 +1,4 @@
-function [ts,fD,peakSk2,sigmaIQ2] = acquisition(Y,prn,fDRange,NC,Ta,fs,fIF)
+function [ts,fD,peakSk2,sigmaIQ22,sk] = acquisition(Y,prn,fDRange,NC,Ta,fs,fIF)
 %% Genererate Code
 %---- Generate all possible PRN (37 SVIDs or PRN Sign No.)
 % LFSR Parameters:
@@ -37,7 +37,7 @@ for j = 1:length(G2tab)
 end
 
 %%
-tk = [0:Nk-1]'*T;
+
 threshold = 39.5;
 
 
@@ -47,17 +47,23 @@ for mm = prn
     Cr = fft(codeOS(:,mm));
     for kk = 1:length(fDRange)
         zk2sum = zeros(Nk, 1);
+        zksum  = zeros(Nk,1);
         for ii = 1:NC
             jk = (ii-1) * Nk + 1;
             jk_end = ii * Nk;
+            tk = [jk-1:jk_end-1]'*T;
             fi = -fDRange(kk) + fIF;
             xkTilde = Y(jk:jk_end).*exp(-1i*2*pi*fi*tk);
             XrTilde = fft(xkTilde);
             Zr = XrTilde.*(conj(Cr));
             zk = ifft(Zr);
+            zksum = zksum + zk;
             zk2sum = zk2sum + abs(zk.^2);
         end
         [maxValue,kmax] = max(zk2sum/NC/(Ta/0.001));
+        [maxValueZk,kmaxZk] = max(zksum/NC/(Ta/0.001));
+        a(kk) = maxValue;
+        b(kk) = maxValueZk;
         %---- Calculate sigmaIQ^2 from Sk2
         Cropsize = 2000;
         zk2sumCrop = zk2sum(max(kmax-Cropsize,1):min(kmax+Cropsize,Nk));
@@ -71,13 +77,15 @@ for mm = prn
         % Delete the rows and columns
         NoisyZk2(row_min:row_max) = []; % Remove specified rows
 
-        sigmaIQ2 = mean(NoisyZk2(:)/NC)/2/(Ta/0.001);
-        CN0(kk) = 10*log10((maxValue-2*sigmaIQ2)/(2*sigmaIQ2*Ta));
+        sigmaIQ2(kk) = mean(NoisyZk2(:)/NC)/2/(Ta/0.001);
         time(kk) = kmax;
     end
-    [maxCN0,maxfd] = max(CN0(:));
-    if  maxCN0 > threshold
-        signalStrenghth(mm)=maxCN0;
+    [maxZk,maxfd] = max(a);
+    [maxZkb,maxfdb] = max(b);
+    CN0 = 10*log10((maxZk-2*sigmaIQ2(maxfd))/(2*sigmaIQ2(maxfd)*Ta));
+    
+    if  CN0 > threshold
+        signalStrenghth(mm)=CN0;
         start_time(mm) = tk(time(maxfd));
         start_time(mm) = (start_time(mm)-floor(start_time(mm)/(Tc*1023))*Tc*1023)*1e6; % us
         apparent_fD(mm) = fDRange(maxfd);
@@ -85,15 +93,18 @@ for mm = prn
         disp(['PRN :',num2str(mm)])
         disp(['Apparent Doppler Frequency: ', num2str(apparent_fD(mm)), ' Hz']);
         disp(['Approximate Start Time from first sample: ', num2str(start_time(mm)), ' microseconds']);
-        disp (['C/N0: ', num2str(maxCN0)])
-        disp(['SigmaIQ^2: ', num2str(sigmaIQ2)])
+        disp (['C/N0: ', num2str(CN0)])
+        disp(['SigmaIQ^2: ', num2str(sigmaIQ2(maxfd))])
         ts =  start_time(mm)/1e6;
         fD = apparent_fD(mm);
-        peakSk2 = maxValue;
+        peakSk2 = maxZk;
+        sigmaIQ22 = sigmaIQ2(maxfd);
+        sk = maxZkb;
     else
         ts = NaN;
         fD = NaN;
         peakSk2=NaN;
+        sk =NaN;
     end
 end
 
