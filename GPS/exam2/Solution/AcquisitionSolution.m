@@ -17,7 +17,7 @@ fclose(fid);
 % Coherent integration time. CHANGE THIS.
 Ta = 1e-3;
 % Number of non−coherent integrations. CHANGE THIS.
-N = 8;
+N = 1;
 
 % ======================================================================= %
 %                               IQ to IF
@@ -42,7 +42,7 @@ dopplerVec = -3.5e3 : dopplerStep : 3.5e3;
 % Search vector for code phase.
 codeStep = 3; % Shift by 3 samples
 codeVec = 0 : (codeStep / (2 * fsampIQ)) : 1e-3 - (1 / (2 * fsampIQ)); % All possible start times
-for prn = 1 : size(prnCodeTable, 1)
+for prn = 3
     % Initialize to save time.
     M = zeros(length(codeVec), length(dopplerVec));
     disp(['PRN: ' num2str(prn)]);

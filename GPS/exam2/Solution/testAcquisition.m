@@ -6,7 +6,7 @@ clear; clc;
 % fIF = 1.405396825396879 MHz and a sampling rate Ns = 40e6/7 samples per
 % second. In the absence of Doppler, there would be Ns/1000 = 40000/7 ≈ 5714 samples per GPS L1 C/A code.
 %----- Setup
-Tfull = 5;                % Time interval of data to load
+Tfull = 10;                % Time interval of data to load
 fs = 40e6/7;                % Sampling frequency (Hz)
 T = 1/fs;
 N = fs*Tfull;
@@ -17,15 +17,15 @@ fIF  =  1.405396825396879e6; % Hz
 fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps7\dfDataHead.bin"], 'r','l');
 [Y,count] = binloadSamples(fid,N,'dual');
 
-Y = Y(floor(fs*3/16)*16:end,1);
-% Y = Y(:,1);
+% Y = Y(floor(fs*3/16)*16:end,1);
+Y = Y(:,1);
 if(count ~= N)
     error('Insufficient data');
 end
 % Coherent integration time. CHANGE THIS.
 Ta = 1e-2;
 % Number of non−coherent integrations. CHANGE THIS.
-N = 1;
+N = 8;
 
 % ======================================================================= %
 %                               IQ to IF
@@ -46,7 +46,7 @@ Nk = floor(Ta * fs);
 tVec = (0 : 1/(fs) : (Nk-1)/(fs))';
 % Search vector for Doppler.
 dopplerStep = 1/(4*Ta);
-dopplerVec = -2500 : dopplerStep :-2000;
+dopplerVec = 1000 : dopplerStep :3000;
 % Search vector for code phase.
 codeStep = 3; % Shift by 3 samples
 codeVec = 0 : (codeStep / (fs)) : 1e-3 - (1 / (fs)); % All possible start times

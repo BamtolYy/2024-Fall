@@ -6,7 +6,7 @@ clear; clc;
 % fIF = 1.405396825396879 MHz and a sampling rate Ns = 40e6/7 samples per
 % second. In the absence of Doppler, there would be Ns/1000 = 40000/7 ≈ 5714 samples per GPS L1 C/A code.
 %----- Setup
-Tfull = 20;                % Time interval of data to load
+Tfull = 25;                % Time interval of data to load
 fs = 40e6/7;                % Sampling frequency (Hz)
 T = 1/fs;
 N = floor(fs*Tfull);
@@ -69,7 +69,7 @@ end
 thetaHat = 0;
 
 %% (d) Initialize Moving Window Average
-g = 1;                      % PRN
+g = 1;                      % PRN index
 s.IsqQsqAvg = peakSk2(g);
 movingAverage = peakSk2(g);
 s.Ip = real(sqrt(peakSk2(g)));
@@ -85,9 +85,11 @@ s.Tc = 1e-3/1023;             % Chip interval in seconds
 
 %% (f) x_k=0 calculation
 % vTheta=2*pi*-fDFine(g);
-% vTheta=2*pi*2200;
+% vTheta=2*pi*2202;
 
-vTheta=2*pi*2208;
+vTheta=2*pi*2208; % prn 14
+% vTheta=2*pi*2775.9; % prn 30
+
 [V,D] = eig(s.Ad);
 q    = vTheta/(s.Cd*V(:,1));
 s.xk = q*V(:,1);
@@ -97,14 +99,14 @@ teml = 0.5;                 % Chips
 fc = 1575.42*1e6;
 tstart = tsFine(g);
 % tstart = 5.19e-4;
-s.sigmaIQ = sqrt(1.05e5);
+% s.sigmaIQ = sqrt(1.05e5);
 Nk = round(Ta/T);
 NumberofAccumulation = round(length(Y)/Nk);
-vTheta_history = zeros(NumberofAccumulation-1,1);
-% vTheta_history(1) = vTheta;
+% vTheta_history = zeros(NumberofAccumulation-1,1);
+vTheta_history(1) = vTheta;
 Sk2_history    = zeros(NumberofAccumulation-1,1);
 Time = [acquisitionStartTime+tsFine(g):Ta:acquisitionStartTime+length(vTheta_history)*Ta]';
-for k = 1 : NumberofAccumulation-1
+for k = 1 : NumberofAccumulation-2
     if k == 1634 || k == 1635 || k == 1636 || k == 1000 ||k == 500
         disp('wait')
     end
@@ -117,7 +119,7 @@ for k = 1 : NumberofAccumulation-1
     s.Il = real(Sl_k);
     s.Ql = imag(Sl_k);
     if k <101
-    movingAverage(k) = abs(Sp_k)^2;
+    movingAverage(k+1) = abs(Sp_k)^2;
     s.IsqQsqAvg = mean(movingAverage);
     else
     movingAverage = circshift(movingAverage,-1);
@@ -129,15 +131,15 @@ for k = 1 : NumberofAccumulation-1
     [xkp1,vTheta] = updatePll(s);
     s.vp = -vTheta/(2*pi*fc);
     [vTotal] = updateDll(s);
-
+    vTotal_hist(k+1) = vTotal;
     %% (j) Update Beat Carrier Phase Estimate
     thetaHat = thetaHat+vTheta*Ta;
-    vTheta_history(k) = vTheta;
+    vTheta_history(k+1) = vTheta;
     %% (k)
     tstart = tstart -vTotal*Ta+Ta;
-    Sk2_history(k) = abs(Sp_k^2);
-    Sk_history(k) = Sp_k;
-    Skl_history(k) = abs(Sp_k)^2-abs(Sl_k)^2;
+    Sk2_history(k+1) = abs(Sp_k^2);
+    Sk_history(k+1) = Sp_k;
+    Skl_history(k+1) = abs(Sp_k)^2-abs(Sl_k)^2;
     % % Plot IQ plane
     % figure;
     % plot(real(Sk_history(k)), imag(Sk_history(k)), 'o', 'MarkerSize', 5, 'LineWidth', 1.5);
