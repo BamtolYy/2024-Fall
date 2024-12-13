@@ -39,11 +39,13 @@ end
 %%
 
 threshold = 39.5;
+if Ta == 0.01
+    threshold = 35;
+end
 
 
 
 for mm = prn
-    CN0 = zeros(length(fDRange),1);
     Cr = fft(codeOS(:,mm));
     for kk = 1:length(fDRange)
         zk2sum = zeros(Nk, 1);
