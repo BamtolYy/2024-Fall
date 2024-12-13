@@ -1,51 +1,51 @@
-clear; clc;
-%% Load Data from dfDataHead.bin
-% Use the document fftAcqTheory.pdf found on Canvas as your guide.
-% Recall that you studied the GP2015 front end in Problem Set 4. The GP2015
-% produces digitized data with an intermediate frequency
-% fIF = 1.405396825396879 MHz and a sampling rate Ns = 40e6/7 samples per
-% second. In the absence of Doppler, there would be Ns/1000 = 40000/7 ≈ 5714 samples per GPS L1 C/A code.
-%----- Setup
-Tfull = 70;                % Time interval of data to load
-fs = 40e6/7;                % Sampling frequency (Hz)
-T = 1/fs;
-N = floor(fs*Tfull);
-N = floor(N/16)*16;         % Number of data samples to load
-nfft = 2^10;                % Size of FFT used in power spectrum estimation
-fIF  =  1.405396825396879e6; % Hz
-%----- Load data
-% fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps5\dfDataHead.bin"], 'r','l');
-fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps7\dfDataHead.bin"], 'r','l');
-[Z,count] = binloadSamples(fid,N,'dual');
-
-timeTotal = [0:T:N*T-T]';
-acquisitionStartTime = 3;
-% Y = Z(round(fs*acquisitionStartTime)+1:end,1);
-Y = Z(:,1);
-
-if(count ~= N)
-    error('Insufficient data');
-end
-%% Coarse Search
-disp('----------------------------------------------------------')
-fprintf('                    Coarse Search\n')
-disp('----------------------------------------------------------')
-
-% Coarse Search Parameter
-fDRange = [-3000:100:3000];
-prn = [1:37];
-NC = 10;                    % Noncoherent sum number
-Ta = 0.001;                 % Accumulation time in seconds
-coarsets = zeros(1, length(prn));
-coarsefD = zeros(1, length(prn));
-% Estimate
-for m = 1:length(prn)
-    [ts, fD,~,~,~] = acquisition(Y,prn(m),fDRange,NC,Ta,fs,fIF);
-    coarsets(m) = ts;
-    coarsefD(m) = fD;
-end
-
-disp('----------------------------------------------------------')
+% clear; clc;
+% %% Load Data from dfDataHead.bin
+% % Use the document fftAcqTheory.pdf found on Canvas as your guide.
+% % Recall that you studied the GP2015 front end in Problem Set 4. The GP2015
+% % produces digitized data with an intermediate frequency
+% % fIF = 1.405396825396879 MHz and a sampling rate Ns = 40e6/7 samples per
+% % second. In the absence of Doppler, there would be Ns/1000 = 40000/7 ≈ 5714 samples per GPS L1 C/A code.
+% %----- Setup
+% Tfull = 70;                % Time interval of data to load
+% fs = 40e6/7;                % Sampling frequency (Hz)
+% T = 1/fs;
+% N = floor(fs*Tfull);
+% N = floor(N/16)*16;         % Number of data samples to load
+% nfft = 2^10;                % Size of FFT used in power spectrum estimation
+% fIF  =  1.405396825396879e6; % Hz
+% %----- Load data
+% % fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps5\dfDataHead.bin"], 'r','l');
+% fid = fopen(["C:\Users\gsh04\Desktop\2024-Fall\GPS\ps7\dfDataHead.bin"], 'r','l');
+% [Z,count] = binloadSamples(fid,N,'dual');
+% 
+% timeTotal = [0:T:N*T-T]';
+% acquisitionStartTime = 3;
+% % Y = Z(round(fs*acquisitionStartTime)+1:end,1);
+% Y = Z(:,1);
+% 
+% if(count ~= N)
+%     error('Insufficient data');
+% end
+% %% Coarse Search
+% disp('----------------------------------------------------------')
+% fprintf('                    Coarse Search\n')
+% disp('----------------------------------------------------------')
+% 
+% % Coarse Search Parameter
+% fDRange = [-3000:100:3000];
+% prn = [1:37];
+% NC = 10;                    % Noncoherent sum number
+% Ta = 0.001;                 % Accumulation time in seconds
+% coarsets = zeros(1, length(prn));
+% coarsefD = zeros(1, length(prn));
+% % Estimate
+% for m = 1:length(prn)
+%     [ts, fD,~,~,~] = acquisition(Y,prn(m),fDRange,NC,Ta,fs,fIF);
+%     coarsets(m) = ts;
+%     coarsefD(m) = fD;
+% end
+% 
+% disp('----------------------------------------------------------')
 
 %% Fine Search
 disp('----------------------------------------------------------')
@@ -160,12 +160,13 @@ end
 % title('Sk2')
 figure,
 Time = [acquisitionStartTime+tsFine(g):Ta:acquisitionStartTime+length(vTheta_history)*Ta]';
-plot(-vTheta_history/(2*pi))
-title('fD')
-ylim([-2235 -2205])
-% xlim([0 80])
+plot(Time,-vTheta_history/(2*pi))
+title(['fD for PRN: ', num2str(prnFine(g))]);
+% ylim([-2235 -2205])
+xlim([0 80])
 ylabel ('Hz')
 xlabel('Time (sec)')
+
 grid on
 % figure,
 % plot(Skl_history)

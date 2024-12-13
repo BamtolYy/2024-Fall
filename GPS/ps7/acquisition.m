@@ -48,6 +48,8 @@ for mm = prn
     for kk = 1:length(fDRange)
         zk2sum = zeros(Nk, 1);
         zksum  = zeros(Nk,1);
+        zk2sump1 = zeros(Nk, 1);
+        zksump1  = zeros(Nk,1);
         for ii = 1:NC
             jk = (ii-1) * Nk + 1;
             jk_end = ii * Nk;
@@ -59,11 +61,27 @@ for mm = prn
             zk = ifft(Zr);
             zksum = zksum + zk;
             zk2sum = zk2sum + abs(zk.^2);
+
+            %Check for straddle
+            jkp1 = jk_end+1;
+            jkp1_end = (1+ii)*Nk;
+            tkp1 = [jkp1-1:jkp1_end-1]'*T;
+            xkTildep1 = Y(jkp1:jkp1_end).*exp(-1i*2*pi*fi*tkp1);
+            XrTildep1 = fft(xkTildep1);
+            Zrp1 = XrTildep1.*(conj(Cr));
+            zkp1 = ifft(Zrp1);
+            zksump1 = zksump1 + zkp1;
+            zk2sump1 = zk2sump1 + abs(zkp1.^2);
         end
         [maxValue,kmax] = max(zk2sum/NC/(Ta/0.001));
         [maxValueZk,~] = max(zksum/NC/(Ta/0.001));
         a(kk) = maxValue;
         b(kk) = maxValueZk;
+
+        [maxValuep1,kmaxp1] = max(zk2sump1/NC/(Ta/0.001));
+        [maxValueZkp1,~] = max(zksump1/NC/(Ta/0.001));
+        ap1(kk) = maxValuep1;
+        bp1(kk) = maxValueZkp1;
         %---- Calculate sigmaIQ^2 from Sk2
         Cropsize = 2000;
         zk2sumCrop = zk2sum(max(kmax-Cropsize,1):min(kmax+Cropsize,Nk));
@@ -79,11 +97,35 @@ for mm = prn
 
         sigmaIQ2(kk) = mean(NoisyZk2(:)/NC)/2/(Ta/0.001);
         time(kk) = kmax;
+
+        %---- Calculate sigmaIQ^2 from Sk2 for STRADDLE
+        zk2sumCropp1 = zk2sump1(max(kmaxp1-Cropsize,1):min(kmaxp1+Cropsize,Nk));
+        [~,cropMaxp1] = max(zk2sumCropp1);
+        % Define the rows and columns to delete
+        row_minp1 = max(cropMaxp1 - region_size, 1); % Ensure no rows < 1
+        row_maxp1 = min(cropMaxp1 + region_size, length(zk2sumCropp1)); % Ensure no rows > num_rows
+        NoisyZk2p1 = zk2sumCropp1;
+        % Delete the rows and columns
+        NoisyZk2p1(row_minp1:row_maxp1) = []; % Remove specified rows
+
+        sigmaIQ2p1(kk) = mean(NoisyZk2p1(:)/NC)/2/(Ta/0.001);
+        timep1(kk) = kmaxp1;
     end
     [maxZk,maxfd] = max(a);
     [maxZkb,maxfdb] = max(b);
+    [maxZkp1,maxfdp1] = max(ap1);
+    [maxZkbp1,maxfdbp1] = max(bp1);
+    if maxZkp1>maxZk
+        maxZk = maxZkp1;
+        maxZkb = maxZkbp1;
+        maxfd  = maxfdp1;
+        maxfdb = maxfdbp1;
+        sigmaIQ2 = sigmaIQ2p1;
+        kmax = kmaxp1;
+        time = timep1;
+    end
     CN0 = 10*log10((maxZk-2*sigmaIQ2(maxfd))/(2*sigmaIQ2(maxfd)*Ta));
-    
+
     if  CN0 > threshold
         signalStrenghth(mm)=CN0;
         start_time(mm) = tk(time(maxfd));
