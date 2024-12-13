@@ -61,7 +61,7 @@ for mm = prn
             zk2sum = zk2sum + abs(zk.^2);
         end
         [maxValue,kmax] = max(zk2sum/NC/(Ta/0.001));
-        [maxValueZk,kmaxZk] = max(zksum/NC/(Ta/0.001));
+        [maxValueZk,~] = max(zksum/NC/(Ta/0.001));
         a(kk) = maxValue;
         b(kk) = maxValueZk;
         %---- Calculate sigmaIQ^2 from Sk2
@@ -105,6 +105,7 @@ for mm = prn
         fD = NaN;
         peakSk2=NaN;
         sk =NaN;
+        sigmaIQ22 = NaN;
     end
 end
 
