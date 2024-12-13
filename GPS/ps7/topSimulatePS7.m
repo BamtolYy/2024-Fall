@@ -91,8 +91,8 @@ s.Tc = 1e-3/1023;             % Chip interval in seconds
 vTheta=2*pi*-fDFine(g);
 % vTheta=2*pi*2202;
 
-% vTheta=2*pi*2208; % prn 14
-% vTheta=2*pi*2775.9; % prn 30
+% vTheta=2*pi*3341.3;
+
 
 [V,D] = eig(s.Ad);
 q    = vTheta/(s.Cd*V(:,1));
