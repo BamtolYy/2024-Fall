@@ -32,7 +32,7 @@ fprintf('                    Coarse Search\n')
 disp('----------------------------------------------------------')
 
 % Coarse Search Parameter
-fDRange = [-3000:100:3000];
+fDRange = [-5000:100:5000];
 prn = [1:37];
 NC = 10;                    % Noncoherent sum number
 Ta = 0.001;                 % Accumulation time in seconds
@@ -57,7 +57,7 @@ Ta =0.01;
 NC = 1;
 tsFine = zeros(length(prnFine));
 fDFine = zeros(length(prnFine));
-for h = 2
+for h = 7
     fDmaxFine = coarsefD(prnFine(h))+100;
     fDminFine = coarsefD(prnFine(h))-100;
     fDRangeFine = [fDminFine:1 :fDmaxFine];
@@ -102,7 +102,6 @@ s.xk = q*V(:,1);
 teml = 0.5;                 % Chips
 fc = 1575.42*1e6;
 tstart = tsFine(g);
-% tstart = 5.19e-4;
 % s.sigmaIQ = sqrt(1.05e5);
 Nk = floor(Ta/T);
 NumberofAccumulation = floor(length(Y(floor(tsFine(h)/T):end))/Nk);
