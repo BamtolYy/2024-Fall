@@ -186,7 +186,7 @@ fprintf('RMSE (Sample-Level Estimator): %g meters\n', RMSE_ns);
 fprintf('RMSE (Least-Squares Estimator): %g meters\n', RMSE_ls);
 
 fprintf(['The difference between the two is significant. They differ by more\n' ...
-    'than 17 meters.\n'])
+    'than 20 meters.\n'])
 disp(['-----------------------------------------------------------------'])
 %% f) CRLB
 disp(['3f)'])
@@ -196,10 +196,9 @@ CRLB = (2*betams2*Ta*CN0)^(-1);
 RMSE_distance = sqrt(CRLB)*physconst('LightSpeed');
 fprintf('CRLB: %g meters\n', CRLB);
 fprintf('RMSE distance L1: %g meters\n', RMSE_distance);
-fprintf(['The RMSE from the least squares estimator is very close to the RMSE distance.\n' ...
-    'It is only about 0.2 meters greater than RMSE distance.' ...
-    'In contrast, the sample-level \nestimator is much greater than ' ...
-    'the RMSE distance.\n'])
+fprintf(['The RMSE from the least squares estimator is closer to this RMSE distance.\n' ...
+    'However, RMSEs from both estimators are still more than 100 meters greater than \n .' ...
+    'the RMSE lower bound. \n'])
 disp(['-----------------------------------------------------------------'])
 
 %% g) New CRLB

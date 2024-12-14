@@ -148,6 +148,7 @@ t20=0:T(3):1;
 t40=0:T(4):1;
 
 figure
+subplot(3,1,1)
 title(['Step Response of First Order Loop Filter with Varying Discretization'])
 hold on,
 plot(t40,ustep,'--',t1,ystep1(:,1),t10,ystep10(:,1),t20,ystep20(:,1),t40,ystep40(:,1))
@@ -155,7 +156,7 @@ legend('Reference Input','1 ms','10 ms','20 ms', '40 ms')
 xlabel('Time (second)')
 ylabel('y(t)')
 
-figure
+subplot(3,1,2)
 title(['Step Response of 2nd Order Loop Filter with Varying Discretization'])
 hold on,
 plot(t40,ustep,'--',t1,ystep1(:,2),t10,ystep10(:,2),t20,ystep20(:,2),t40,ystep40(:,2))
@@ -163,7 +164,7 @@ legend('Reference Input','1 ms','10 ms','20 ms', '40 ms')
 xlabel('Time (second)')
 ylabel('y(t)')
 
-figure
+subplot(3,1,3)
 title(['Step Response of 3rd Order Loop Filter with Varying Discretization'])
 hold on,
 plot(t40,ustep,'--',t1,ystep1(:,3),t10,ystep10(:,3),t20,ystep20(:,3),t40,ystep40(:,3))
@@ -174,6 +175,7 @@ ylabel('y(t)')
 %% Plot ramp response at different dicretization intervals
 
 figure
+subplot(3,1,1)
 title(['Ramp Response of First Order Loop Filter with Varying Discretization'])
 hold on,
 plot(t40,uramp,'--',t1,yramp1(:,1),t10,yramp10(:,1),t20,yramp20(:,1),t40,yramp40(:,1))
@@ -181,7 +183,7 @@ legend('Reference Input','1 ms','10 ms','20 ms', '40 ms')
 xlabel('Time (second)')
 ylabel('y(t)')
 
-figure
+subplot(3,1,2)
 title(['Ramp Response of 2nd Order Loop Filter with Varying Discretization'])
 hold on,
 plot(t40,uramp,'--',t1,yramp1(:,2),t10,yramp10(:,2),t20,yramp20(:,2),t40,yramp40(:,2))
@@ -189,7 +191,7 @@ legend('Reference Input','1 ms','10 ms','20 ms', '40 ms')
 xlabel('Time (second)')
 ylabel('y(t)')
 
-figure
+subplot(3,1,3)
 title(['Ramp Response of 3rd Order Loop Filter with Varying Discretization'])
 hold on,
 plot(t40,uramp,'--',t1,yramp1(:,3),t10,yramp10(:,3),t20,yramp20(:,3),t40,yramp40(:,3))
