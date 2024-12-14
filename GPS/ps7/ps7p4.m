@@ -75,4 +75,4 @@ x_est = lsqnonlin(cost_function, x0, [], [], options);
 
 x_est(1:3) = round(x_est(1:3),4);
 fprintf(['x: ',num2str(x_est(1)),' y: ', num2str(x_est(2)), ' z: ',num2str(x_est(3))])
-sprintf('%c',948,'t_{R} : ', round(x_est(4)/c,6), 'seconds')
+sprintf('%c',948,'t_{R} : ', round(x_est(4)/c,6), ' seconds')
