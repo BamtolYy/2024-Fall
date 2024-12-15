@@ -62,10 +62,10 @@ parfor j = 1:length(G2tab)
 end
 
 %--------------------------------------------------------------------------
-NC = 1;% Noncoherent sum number
-for prn = 14
+NC = 10;% Noncoherent sum number
+for prn = 22
     % Approximate Doppler (taken from GRID output for PRN 31)
-    fD = [-3000:1/(4*Ta):3000];
+    fD = [-5000:1/(8*Ta):0];
     % The Doppler that acquisition and tracking see is opposite fD due to
     % high-side mixing
     fD_internal = -fD;

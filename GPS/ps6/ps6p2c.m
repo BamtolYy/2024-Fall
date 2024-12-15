@@ -7,7 +7,8 @@ t = (0:N-1)*Ta';
 % True Alpha Parameters
 f     = 200;
 rho   = 4;
-theta = pi/2
+theta = pi/4
+nfft = 50*N;
 
 
 
@@ -24,8 +25,9 @@ Sk = rho*exp(1i*(2*pi*f*k*Ta+theta))+nk;
 % Frequency
 
 % Frequency: 
-Skfft = fft(Sk);
-freq = k*fs/N;      % Cycles per length of the signal in seconds
+Skfft = fft(Sk,nfft)/N;
+% freq = fs/nfft*(0:nfft-1);      % Cycles per length of the signal in seconds
+freq = fs/nfft*(0:nfft-1); 
 % plot(freq,abs(Skfft))
 [~,f_ml]=max(abs(Skfft));
 disp(['Maximum likelihood estimation of frequency: ', num2str(freq(f_ml))])
@@ -33,7 +35,7 @@ disp(['Maximum likelihood estimation of frequency: ', num2str(freq(f_ml))])
 % Magnitude:
 Skamp = abs(fft(Sk))/N;
 % plot(Skamp)
-disp(['Maximum likelihood estimation of rho: ', num2str(round(max(Skamp)))])
+disp(['Maximum likelihood estimation of rho: ', num2str(max(Skamp))])
 
 % Theta:
 

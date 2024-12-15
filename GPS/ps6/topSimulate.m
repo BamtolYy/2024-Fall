@@ -120,7 +120,6 @@ title('Phase Detection with Noise')
 
 %% e)
 
-
 PhaseHist4 = 2*pi*fd*t;         % Raw Phase History
 % Average over subinterval Ta
 Nk    = floor(Ta/T);        % Number of samples in an accumulation

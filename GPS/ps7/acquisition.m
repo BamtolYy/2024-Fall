@@ -75,15 +75,18 @@ for mm = prn
             zksump1 = zksump1 + zkp1;
             zk2sump1 = zk2sump1 + abs(zkp1.^2);
         end
+
         [maxValue,kmax] = max(zk2sum/NC/(Ta/0.001));
         [maxValueZk,~] = max(zksum/NC/(Ta/0.001));
         a(kk) = maxValue;
         b(kk) = maxValueZk;
-
+        
+        %Check for straddle
         [maxValuep1,kmaxp1] = max(zk2sump1/NC/(Ta/0.001));
         [maxValueZkp1,~] = max(zksump1/NC/(Ta/0.001));
         ap1(kk) = maxValuep1;
         bp1(kk) = maxValueZkp1;
+        
         %---- Calculate sigmaIQ^2 from Sk2
         Cropsize = 2000;
         zk2sumCrop = zk2sum(max(kmax-Cropsize,1):min(kmax+Cropsize,Nk));
@@ -96,10 +99,10 @@ for mm = prn
         NoisyZk2 = zk2sumCrop;
         % Delete the rows and columns
         NoisyZk2(row_min:row_max) = []; % Remove specified rows
-
+        % Calculate SigmaIQ^2 and define start time
         sigmaIQ2(kk) = mean(NoisyZk2(:)/NC)/2/(Ta/0.001);
         time(kk) = kmax;
-
+        
         %---- Calculate sigmaIQ^2 from Sk2 for STRADDLE
         zk2sumCropp1 = zk2sump1(max(kmaxp1-Cropsize,1):min(kmaxp1+Cropsize,Nk));
         [~,cropMaxp1] = max(zk2sumCropp1);
@@ -109,21 +112,19 @@ for mm = prn
         NoisyZk2p1 = zk2sumCropp1;
         % Delete the rows and columns
         NoisyZk2p1(row_minp1:row_maxp1) = []; % Remove specified rows
-
+        % Calculate SigmaIQ^2 and define start time
         sigmaIQ2p1(kk) = mean(NoisyZk2p1(:)/NC)/2/(Ta/0.001);
         timep1(kk) = kmaxp1;
     end
     [maxZk,maxfd] = max(a);
-    [maxZkb,maxfdb] = max(b);
+    [maxZkb,~] = max(b);
     [maxZkp1,maxfdp1] = max(ap1);
-    [maxZkbp1,maxfdbp1] = max(bp1);
-    if maxZkp1>maxZk
+    [maxZkbp1,~] = max(bp1);
+    if maxZkp1-maxZk> 100000
         maxZk = maxZkp1;
         maxZkb = maxZkbp1;
         maxfd  = maxfdp1;
-        maxfdb = maxfdbp1;
         sigmaIQ2 = sigmaIQ2p1;
-        kmax = kmaxp1;
         time = timep1;
     end
     CN0 = 10*log10((maxZk-2*sigmaIQ2(maxfd))/(2*sigmaIQ2(maxfd)*Ta));
